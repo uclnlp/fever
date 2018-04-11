@@ -1,6 +1,24 @@
 import json
 import random
+import os
+import sys
+from tqdm import tqdm
 
+
+def load_wikipedia(wikipedia_dir="data/wiki-pages/wiki-pages/", howmany=99999):
+    """
+    Returns a list with in total 5,416,537 wikipedia article texts as elements.
+    If one doesn't want to load all articles, one can use "howmany" to specify howmany files should be
+    read (each containing 50000 articles). For example, to read only 100K articles, pick howmany=2.
+    """
+    all_texts = []
+    print("loading wikipedia...")
+    for filename in tqdm(sorted(os.listdir(wikipedia_dir))[:howmany]):
+        with open(wikipedia_dir+filename, 'r') as openfile:
+            some_texts = [json.loads(line)['text'] for line in openfile.readlines()]
+        all_texts.extend(some_texts)
+    print("Loaded", len(all_texts), "articles. Size (MB):", round(sys.getsizeof(all_texts)/1024/1024, 3))
+    return all_texts
 
 def get_label_set():
     label_set = {"SUPPORTS","REFUTES","NOT ENOUGH INFO"}
