@@ -5,6 +5,31 @@ import sys
 from tqdm import tqdm
 
 
+def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="data/doctitles"):
+    t2jnum=dict()
+    try:
+        with open(doctitles) as f:
+            for line in f:
+                fields=line.rstrip("\n").split("\t")
+                title=fields[0]
+                jnum=fields[1]
+                t2jnum[title]=jnum
+    except:
+        with open(doctitles,"w") as w:
+            for i in tqdm(range(1,110)):
+                jnum="{:03d}".format(i)
+                fname=wikipedia_dir+"wiki-"+jnum+".jsonl".format(i)
+                with open(fname) as f:
+                    for line in f:
+                        data=json.loads(line.rstrip("\n"))
+                        title=data["id"]
+                        lines=data["lines"]
+                        if lines != "":
+                            w.write(title+"\t"+jnum+"\n")
+                        t2jnum[title]=jnum
+    return t2jnum
+
+
 def load_wikipedia(wikipedia_dir="data/wiki-pages/wiki-pages/", howmany=99999):
     """
     Returns a list with in total 5,416,537 wikipedia article texts as elements.
