@@ -4,6 +4,33 @@ import os
 import sys
 from tqdm import tqdm
 
+def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki-pages/"):
+    doclines=dict()
+    jnums=set()
+    titles=set()
+    for cid in docs:
+        for title, score in docs[cid]:
+            doclines[title]=dict()
+            titles.add(title)
+            jnum=t2jnum[title]
+            jnums.add(jnum)
+    for jnum in jnums:
+        fname=wikipedia_dir+"wiki-"+jnum+".jsonl"
+        with open(fname) as f:
+            for line in f:
+                data=json.loads(line.rstrip("\n"))
+                title=data["id"]
+                lines=data["lines"]
+                if title in titles and lines != "":
+                    for l in lines.split("\n"):
+                        fields=l.split("\t")
+                        if fields[0].isnumeric():
+                            l_id=int(fields[0])
+                            l_txt=fields[1]
+                            doclines[title][l_id]=l_txt
+    return doclines
+        
+            
 
 def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="data/doctitles"):
     t2jnum=dict()
