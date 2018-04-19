@@ -4,6 +4,7 @@ from nltk.corpus import gazetteers, names
 from collections import Counter
 from fever_io import titles_to_jsonl_num, load_split_trainset
 import pickle
+from tqdm import tqdm
 
 
 places=set(gazetteers.words())
@@ -89,13 +90,6 @@ def best_titles(claim="",edocs=edict(),best=5):
     tscores=sorted(tscores,key=lambda x:-1*x[1])[:best]
     return tscores
 
-def doc_ir(data=list(),edocs=edict(),best=5):
-    docs=dict()
-    for example in data:
-        tscores=best_titles(example["claim"],edocs,best)
-        docs[example["id"]]=tscores
-    return docs
-
 def title_hits(data=list(),tscores=dict()):
     hits=Counter()
     returned=Counter()
@@ -114,6 +108,18 @@ def title_hits(data=list(),tscores=dict()):
     print()
     for i in range(0,len(hits)):
         print(i,hits[i],returned[i])
+
+
+
+def doc_ir(data=list(),edocs=edict(),best=5):
+    """
+    Returns a dictionary of n best document titles for each claim.
+    """
+    docs=dict()
+    for example in tqdm(data):
+        tscores=best_titles(example["claim"],edocs,best)
+        docs[example["id"]]=tscores
+    return docs
     
 
 

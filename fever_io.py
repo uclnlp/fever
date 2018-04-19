@@ -5,22 +5,33 @@ import sys
 from tqdm import tqdm
 
 def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki-pages/"):
+    """
+    Returns a dictionary from titles to line numbers to line text.
+    Input is a dictionary from claim ids to titles and line numbers, 
+    and a lookup from titles to filenumbers.
+    """
     doclines=dict()
-    jnums=set()
+    jnums=dict()
     titles=set()
     for cid in docs:
         for title, score in docs[cid]:
             doclines[title]=dict()
             titles.add(title)
-            jnum=t2jnum[title]
-            jnums.add(jnum)
-    for jnum in jnums:
+            jnum,point=t2jnum[title]
+            if jnum not in jnums:
+                jnums[jnum]=set()
+            jnums[jnum].add(point)
+    for jnum in tqdm(jnums):
+        points=sorted(list(jnums[jnum]))
         fname=wikipedia_dir+"wiki-"+jnum+".jsonl"
         with open(fname) as f:
-            for line in f:
+            for point in points:
+                f.seek(point,0)
+                line=f.readline()
                 data=json.loads(line.rstrip("\n"))
                 title=data["id"]
                 lines=data["lines"]
+                assert title in titles
                 if title in titles and lines != "":
                     for l in lines.split("\n"):
                         fields=l.split("\t")
@@ -33,6 +44,10 @@ def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki
             
 
 def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="data/doctitles"):
+    """
+    Returns a dictionary lookup from document titles to jsonl filenumbers and pointers.
+    Saves the lookup in data/doctitles to speed up subsequent passes.
+    """
     t2jnum=dict()
     try:
         with open(doctitles) as f:
@@ -40,20 +55,25 @@ def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="
                 fields=line.rstrip("\n").split("\t")
                 title=fields[0]
                 jnum=fields[1]
-                t2jnum[title]=jnum
+                point=int(fields[2])
+                t2jnum[title]=(jnum,point)
     except:
         with open(doctitles,"w") as w:
             for i in tqdm(range(1,110)):
                 jnum="{:03d}".format(i)
-                fname=wikipedia_dir+"wiki-"+jnum+".jsonl".format(i)
+                fname=wikipedia_dir+"wiki-"+jnum+".jsonl"
                 with open(fname) as f:
-                    for line in f:
+                    point=f.tell()
+                    line=f.readline()
+                    while line:
                         data=json.loads(line.rstrip("\n"))
                         title=data["id"]
                         lines=data["lines"]
                         if lines != "":
-                            w.write(title+"\t"+jnum+"\n")
-                        t2jnum[title]=jnum
+                            w.write(title+"\t"+jnum+"\t"+str(point)+"\n")
+                        t2jnum[title]=(jnum,point)
+                        point=f.tell()
+                        line=f.readline()
     return t2jnum
 
 

@@ -4,7 +4,7 @@ from fever_io import load_doc_lines, titles_to_jsonl_num, load_split_trainset
 from collections import Counter
 from nltk import word_tokenize, sent_tokenize
 import pickle
-
+from tqdm import tqdm
 
 stop=load_stoplist()
 
@@ -64,16 +64,6 @@ def best_lines(claim="",tscores=list(),lines=dict(),best=5):
     lscores=sorted(lscores,key=lambda x:-1*x[2])[:best]
     return lscores
 
-def line_ir(data=list(),docs=dict(),lines=dict(),best=5):
-    evidence=dict()
-    for example in data:
-        cid=example["id"]
-        evidence[cid]=list()
-        tscores=docs[cid]
-        claim=example["claim"]
-        evidence[cid]=best_lines(claim,tscores,lines,best)
-    return evidence
-
 
 def line_hits(data=list(),evidence=dict()):
     hits=Counter()
@@ -96,6 +86,22 @@ def line_hits(data=list(),evidence=dict()):
     print()
     for i in range(0,len(hits)):
         print(i,hits[i],returned[i])
+
+
+
+
+def line_ir(data=list(),docs=dict(),lines=dict(),best=5):
+    """
+    Returns a dictionary of n best lines for each claim.
+    """
+    evidence=dict()
+    for example in tqdm(data):
+        cid=example["id"]
+        evidence[cid]=list()
+        tscores=docs[cid]
+        claim=example["claim"]
+        evidence[cid]=best_lines(claim,tscores,lines,best)
+    return evidence
 
 
 
