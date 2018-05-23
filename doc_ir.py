@@ -5,6 +5,7 @@ from collections import Counter
 from fever_io import titles_to_jsonl_num, load_split_trainset
 import pickle
 from tqdm import tqdm
+import numpy as np
 
 
 places=set(gazetteers.words())
@@ -73,20 +74,24 @@ def score_phrase(features=dict()):
     for v in vlist:
         score=score+features[v]*vlist[v]
     return score
+        
 
-def score_title(ps_list=[]):
+def score_title(ps_list=[],model=None):
     maxscore=-1000000
     for phrase,start in ps_list:
-        score=score_phrase(phrase_features(phrase,start))
+        if model is None:
+            score=score_phrase(phrase_features(phrase,start))
+        else:
+            score=model.score_instance(phrase,start)
         maxscore=max(maxscore,score)
     return maxscore
 
 
-def best_titles(claim="",edocs=edict(),best=5):
+def best_titles(claim="",edocs=edict(),best=5,model=None):
     t2phrases=find_titles_in_claim(claim,edocs)
     tscores=list()
     for title in t2phrases:
-        tscores.append((title,score_title(t2phrases[title])))
+        tscores.append((title,score_title(t2phrases[title],model)))
     tscores=sorted(tscores,key=lambda x:-1*x[1])[:best]
     return tscores
 
@@ -96,6 +101,9 @@ def title_hits(data=list(),tscores=dict()):
     for example in data:
         cid=example["id"]
         claim=example["claim"]
+        l=example["label"]
+        if l=='NOT ENOUGH INFO':
+            continue
         all_evidence=example["all_evidence"]
         docs=set()
         for ev in all_evidence:
@@ -111,13 +119,13 @@ def title_hits(data=list(),tscores=dict()):
 
 
 
-def doc_ir(data=list(),edocs=edict(),best=5):
+def doc_ir(data=list(),edocs=edict(),best=5,model=None):
     """
     Returns a dictionary of n best document titles for each claim.
     """
     docs=dict()
     for example in tqdm(data):
-        tscores=best_titles(example["claim"],edocs,best)
+        tscores=best_titles(example["claim"],edocs,best,model)
         docs[example["id"]]=tscores
     return docs
     

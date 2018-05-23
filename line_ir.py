@@ -71,6 +71,9 @@ def line_hits(data=list(),evidence=dict()):
     for example in data:
         cid=example["id"]
         claim=example["claim"]
+        l=example["label"]
+        if l=='NOT ENOUGH INFO':
+            continue
         all_evidence=example["all_evidence"]
         lines=dict()
         for ev in all_evidence:
