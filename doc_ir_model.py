@@ -144,8 +144,14 @@ if __name__ == "__main__":
         model.fit(X,y)
         with open("data/doc_ir_model.bin","wb") as wb:
             pickle.dump(model,wb)
-    with open("data/edocs.bin","rb") as rb:
-        edocs=pickle.load(rb)
+    try:
+        with open("data/edocs.bin","rb") as rb:
+            edocs=pickle.load(rb)
+    except:
+        t2jnum=titles_to_jsonl_num()
+        edocs=title_edict(t2jnum)
+        with open("data/edocs.bin","wb") as wb:
+            pickle.dump(edocs,wb)
     print(len(model.f2v))
     docs=doc_ir(dev,edocs,model=model)
     title_hits(dev,docs)
