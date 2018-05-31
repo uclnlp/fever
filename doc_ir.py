@@ -98,6 +98,7 @@ def best_titles(claim="",edocs=edict(),best=5,model=None):
 def title_hits(data=list(),tscores=dict()):
     hits=Counter()
     returned=Counter()
+    full=Counter()
     for example in data:
         cid=example["id"]
         claim=example["claim"]
@@ -110,12 +111,34 @@ def title_hits(data=list(),tscores=dict()):
             evid  =ev[2]
             if evid != None:
                 docs.add(evid)
+        e2s=dict()
+        evsets=dict()
+        sid=0
+        for s in example["evidence"]:
+            evsets[sid]=set()
+            for e in s:
+                evsets[sid].add(e[2])
+                if e[2] not in e2s:
+                    e2s[e[2]]=set()
+                e2s[e[2]].add(sid)
+            sid=sid+1
         for i,(d,s) in enumerate(tscores[cid]):
             hits[i]=hits[i]+1*(d in docs)
             returned[i]=returned[i]+1
+            flag=0
+            if d in e2s:
+                for sid in e2s[d]:
+                    s=evsets[sid]
+                    if d in s:
+                        if len(s)==1:
+                            flag=1
+                        s.remove(d)
+            full[i]+=flag
     print()
+    denom=returned[0]
     for i in range(0,len(hits)):
-        print(i,hits[i],returned[i])
+        print(i,hits[i],returned[i],full[i]/denom)
+        full[i+1]+=full[i]
 
 
 
