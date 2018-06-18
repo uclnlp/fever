@@ -1,3 +1,6 @@
+# convert FEVER train/dev data for jack
+# this file should be placed at the root of fever directory
+# fever-baselines directory must be in the same directory with fever directory
 mkdir -p data/converted
 mkdir -p data/wiki-pages
 ln -s ../../fever-baselines/data/fever data/fever
