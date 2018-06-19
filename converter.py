@@ -1,9 +1,34 @@
 """
 convert FEVER dataset format to SNLI format for makeing it work on jack
 """
+import os
 import argparse
 import json
 from fever_io import titles_to_jsonl_num, load_doc_lines
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+def get_abs_path(file):
+    return os.path.join(current_dir, file)
+
+def get_evidence_sentence(pointers, t2jnum):
+    """
+    pointers: [(title, linum), ...]
+    """
+    titles = [title for title, _ in pointers]
+    linums = [linum for _, linum in pointers]
+    evidence_instances = {(title, "dummy_linum") for title in titles}
+
+    doclines = load_doc_lines(docs={"dummy_id": evidence_instances}, t2jnum=t2jnum, wikipedia_dir=get_abs_path("data/wiki-pages/wiki-pages/"))
+    evidences = list()
+    for title, linum in zip(titles, linums):
+        # if linum < 0 (which means NEI) then just use linum 0
+        if linum < 0:
+            linum = 0
+        evidences.append(doclines[title][linum])
+
+    return " ".join(evidences)
+
+
 
 def load_evidence(evidences, t2jnum):
     """
@@ -46,7 +71,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     keyerr_count = 0
-    t2jnum = titles_to_jsonl_num()
+    t2jnum = titles_to_jsonl_num(wikipedia_dir=get_abs_path("data/wiki-pages/wiki-pages/"), doctitles=get_abs_path("data/doctitles"))
     with open(args.src) as f:
         for line in f:
             instance = json.loads(line.strip())
