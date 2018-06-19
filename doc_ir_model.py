@@ -21,7 +21,7 @@ class doc_ir_model:
     def prob(self,x):
         return self.model.predict_proba(x)[0,1]
     def score_instance(self,phrase="dummy",start=0):
-        x=np.zeros(shape=(1,len(model.f2v)),dtype=np.float32)
+        x=np.zeros(shape=(1,len(self.f2v)),dtype=np.float32)
         self.process_instance(phrase,start,0,x)
         return self.prob(x)
     def process_instance(self,phrase="dummy",start=0,obsnum=0,array=np.zeros(shape=(1,1)),dtype=np.float32):

@@ -14,7 +14,7 @@ def div(x,y):
     else:
         return x/y
 
-def line_features(c_toks=[], title="", t_toks=[], line="", l_toks=[], lid=0, score=0):
+def line_features(c_toks=set(), title="", t_toks=set(), line="", l_toks=set(), lid=0, score=0):
     features=dict()
     features["lenl"]=len(l_toks)
     features["tinl"]=(title in line)
@@ -49,7 +49,7 @@ def score_line(features=dict()):
     return score
 
 
-def best_lines(claim="",tscores=list(),lines=dict(),best=5):
+def best_lines(claim="",tscores=list(),lines=dict(),best=5,model=None):
     lscores=list()
     c_toks=set(word_tokenize(claim))
     for title,tscore in tscores:
@@ -60,7 +60,10 @@ def best_lines(claim="",tscores=list(),lines=dict(),best=5):
             line=lines[title][lid]
             l_toks=set(word_tokenize(line))
             if len(l_toks) > 0:
-                lscores.append((title,lid,score_line(line_features(c_toks,t,t_toks,line,l_toks,lid,tscore))))
+                if model==None:
+                    lscores.append((title,lid,score_line(line_features(c_toks,t,t_toks,line,l_toks,lid,tscore))))
+                else:
+                    lscores.append((title,lid,model.score_instance(c_toks,t,t_toks,line,l_toks,lid,tscore)))
     lscores=sorted(lscores,key=lambda x:-1*x[2])[:best]
     return lscores
 
@@ -68,6 +71,7 @@ def best_lines(claim="",tscores=list(),lines=dict(),best=5):
 def line_hits(data=list(),evidence=dict()):
     hits=Counter()
     returned=Counter()
+    full=Counter()
     for example in data:
         cid=example["id"]
         claim=example["claim"]
@@ -83,17 +87,39 @@ def line_hits(data=list(),evidence=dict()):
                 if evid not in lines:
                     lines[evid]=set()
                 lines[evid].add(evline)
+        e2s=dict()
+        evsets=dict()
+        sid=0
+        for s in example["evidence"]:
+            evsets[sid]=set()
+            for e in s:
+                evsets[sid].add((e[2],e[3]))
+                if (e[2],e[3]) not in e2s:
+                    e2s[(e[2],e[3])]=set()
+                e2s[(e[2],e[3])].add(sid)
+            sid=sid+1
         for i,(d,l,s) in enumerate(evidence[cid]):
             hits[i]=hits[i]+1*(d in lines and l in lines[d])
             returned[i]=returned[i]+1
+            flag=0
+            if (d,l) in e2s:
+                for sid in e2s[(d,l)]:
+                    s=evsets[sid]
+                    if (d,l) in s:
+                        if len(s)==1:
+                            flag=1
+                        s.remove((d,l))
+            full[i]+=flag
     print()
+    denom=returned[0]
     for i in range(0,len(hits)):
-        print(i,hits[i],returned[i])
+        print(i,hits[i],returned[i],full[i]/denom)
+        full[i+1]+=full[i]
 
 
 
 
-def line_ir(data=list(),docs=dict(),lines=dict(),best=5):
+def line_ir(data=list(),docs=dict(),lines=dict(),best=5,model=None):
     """
     Returns a dictionary of n best lines for each claim.
     """
@@ -103,7 +129,7 @@ def line_ir(data=list(),docs=dict(),lines=dict(),best=5):
         evidence[cid]=list()
         tscores=docs[cid]
         claim=example["claim"]
-        evidence[cid]=best_lines(claim,tscores,lines,best)
+        evidence[cid]=best_lines(claim,tscores,lines,best,model)
     return evidence
 
 
