@@ -62,7 +62,9 @@ def count_labels(train):
         else:
             refutes += 1
 
-    return {"SUPPORTS": supports, "REFUTES": refutes}
+    counts = {"SUPPORTS": supports, "REFUTES": refutes}
+    print("result:", counts)
+    return counts
 
 def select_docs(train):
     samp_size=25000
