@@ -1,3 +1,4 @@
+import os
 from nltk import word_tokenize, sent_tokenize
 
 
@@ -24,6 +25,9 @@ def normalize_title(title):
 
 
 
+def abs_path(relative_path_to_file):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(current_dir, relative_path_to_file)
 
 
 class edict():

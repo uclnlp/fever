@@ -2,6 +2,7 @@ import json
 import random
 import os
 import sys
+from util import abs_path
 from tqdm import tqdm
 
 def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki-pages/"):
@@ -157,13 +158,16 @@ def load_fever_train(path="data/train.jsonl", howmany=999999):
                 break
     return data
 
-
-
+def load_paper_dataset():
+    """Reads the Fever train/dev set used on the paper.
+    """
+    train_ds = load_fever_train(path=abs_path("data/train.jsonl"), howmany=9999999999)
+    dev_ds = load_fever_train(path=abs_path("data/dev.jsonl"), howmany=9999999999)
+    return train_ds, dev_ds
 
 
 
 if __name__ == "__main__":
-
     # load fever training data
     fever_data = load_fever_train(howmany=20)
     print(len(fever_data))
