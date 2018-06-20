@@ -49,11 +49,25 @@ class doc_ir_model:
     
         
 
+def count_labels(train):
+    """count labels for select_docs"""
+    supports = 0
+    refutes = 0
+    print("counting labels...")
+    for instnace in tqdm(train):
+        if instance["label"] == "NOT ENOUGH INFO":
+            continue
+        if instance["label"] == "SUPPORTS":
+            supports += 1
+        else:
+            refutes += 1
 
+    return {"SUPPORTS": supports, "REFUTES": refutes}
 
 def select_docs(train):
     samp_size=25000
-    tots={"SUPPORTS": 74355, "REFUTES": 25706}
+    # tots={"SUPPORTS": 74355, "REFUTES": 25706}
+    tots = count_labels(train)
     sofar={"SUPPORTS": 0, "REFUTES": 0}
     try:
         with open("data/edocs.bin","rb") as rb:
