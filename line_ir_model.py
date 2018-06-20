@@ -90,8 +90,8 @@ def select_lines(docs,t2jnum,train):
         all_evidence=example["evidence"]
         lines=dict()
         for ev in all_evidence:
-            evid  =ev[2]
-            evline=ev[3]
+            evid  =ev[0][2]
+            evline=ev[0][3]
             if evid != None:
                 if evid not in lines:
                     lines[evid]=set()
