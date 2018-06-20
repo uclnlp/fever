@@ -86,7 +86,7 @@ def select_docs(train):
         l=example["label"]
         if l=='NOT ENOUGH INFO':
             continue
-        all_evidence=example["all_evidence"]
+        all_evidence=example["evidence"]
         docs=set()
         for ev in all_evidence:
             evid  =ev[2]
