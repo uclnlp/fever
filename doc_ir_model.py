@@ -5,7 +5,7 @@ from doc_ir import *
 from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import gazetteers, names
 from collections import Counter
-from fever_io import titles_to_jsonl_num, load_split_trainset
+from fever_io import titles_to_jsonl_num, load_split_trainset, load_paper_dataset
 import pickle
 from tqdm import tqdm
 from random import random, shuffle
@@ -130,7 +130,8 @@ def load_selected(fname="data/doc_ir_docs"):
     return selected
         
 if __name__ == "__main__":
-    train, dev = load_split_trainset(9999)
+    train, dev = load_paper_dataset()
+    # train, dev = load_split_trainset(9999)
     try:
         with open("data/doc_ir_model.bin","rb") as rb:
             model=pickle.load(rb)
