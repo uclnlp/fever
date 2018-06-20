@@ -54,7 +54,7 @@ def count_labels(train):
     supports = 0
     refutes = 0
     print("counting labels...")
-    for instnace in tqdm(train):
+    for instance in tqdm(train):
         if instance["label"] == "NOT ENOUGH INFO":
             continue
         if instance["label"] == "SUPPORTS":
