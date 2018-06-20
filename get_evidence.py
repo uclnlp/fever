@@ -3,7 +3,7 @@ from doc_ir import doc_ir
 from doc_ir_model import doc_ir_model
 from line_ir_model import line_ir_model
 from util import edict, pdict, normalize_title, load_stoplist
-from fever_io import load_doc_lines, titles_to_jsonl_num, load_split_trainset
+from fever_io import load_doc_lines, titles_to_jsonl_num, load_split_trainset, load_paper_dataset
 import pickle
 import json
 
@@ -55,7 +55,8 @@ def feverscore():
     print(strict_score, acc_score, pr, rec, f1)
 
 if __name__=="__main__":
-    train, dev = load_split_trainset(9999)
+    train, dev = load_paper_dataset()
+    # train, dev = load_split_trainset(9999)
     for split,data in [("train",train), ("dev",dev)]:
         docs, evidence=get_evidence(data)
         pred=tofeverformat(data,docs,evidence)
