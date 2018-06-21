@@ -104,6 +104,20 @@ def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="
     return t2jnum
 
 
+def get_evidence_sentence(evidences, t2l2s):
+    """lookup corresponding sentences and return concatenated text
+    Args
+    evidences: [(title, linum), ...]
+    t2l2s: title2line2sentence <- output of load_doc_lines
+
+    Returns
+    evidence sentence (str)
+    """
+    titles = [title for title, _ in evidences]
+    linums = [linum for _, linum in evidences]
+    return " ".join([t2l2s[title][linum] for title, linum in zip(titles, linums)])
+
+
 def load_wikipedia(wikipedia_dir="data/wiki-pages/wiki-pages/", howmany=99999):
     """
     Returns a list with in total 5,416,537 wikipedia article texts as elements.

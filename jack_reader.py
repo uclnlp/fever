@@ -1,18 +1,9 @@
 import argparse
 from util import abs_path
 from converter import titles_to_jsonl_num, convert_label
-from fever_io import load_doclines, read_jsonl, save_jsonl
+from fever_io import load_doclines, read_jsonl, save_jsonl, get_evidence_sentence
 from jack import readers
 from jack.core import QASetting
-
-
-def get_evidence_sentence(evidences, t2l2s):
-    """lookup corresponding sentences and concatenate them
-    evidences: [(title, linum), ...]
-    """
-    titles = [title for title, _ in evidences]
-    linums = [linum for _, linum in evidences]
-    return " ".join(t2l2s[title][linum] for title, linum in zip(titles, linums))
 
 
 def read_ir_result(path):
