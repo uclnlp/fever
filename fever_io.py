@@ -68,7 +68,7 @@ def load_doclines(titles, t2jnum):
     Args
     titles: list of titles
     """
-    return load_doc_lines({"dummy_id" : [(title, "dummy_linum") for title in titles]}, t2jnum)
+    return load_doc_lines({"dummy_id" : [(title, "dummy_linum") for title in titles]}, t2jnum, wikipedia_dir=abs_path("data/wiki-pages/wiki-pages/"))
 
 def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="data/doctitles"):
     """
