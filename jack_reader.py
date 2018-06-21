@@ -2,7 +2,7 @@ import os
 import argparse
 import json
 from util import abs_path, save_jsonl
-from converter import get_evidence_sentence, titles_to_jsonl_num
+from converter import get_evidence_sentence, titles_to_jsonl_num, convert_label
 from jack import readers
 from jack.core import QASetting
 from jack.io.load import load_jack
