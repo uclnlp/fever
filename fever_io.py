@@ -5,9 +5,29 @@ import sys
 from util import abs_path
 from tqdm import tqdm
 
-def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki-pages/"):
+def save_jsonl(dictionaries, path, print_message=True):
+    """save jsonl file from list of dictionaries
     """
-    Returns a dictionary from titles to line numbers to line text.
+    if os.path.exists(path):
+        raise OSError("file {} already exists".format(path))
+
+    if print_message:
+        print("saving at {}".format(path))
+    with open(path, "a") as out_file:
+        for instance in dictionaries:
+            out_file.write(json.dumps(instance) + "\n")
+
+def read_jsonl(path):
+    with open(path, "r") as in_file:
+        out = [json.loads(line) for line in in_file]
+
+    return out
+
+def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki-pages/"):
+    """Returns a dictionary from titles to line numbers to line text.
+    Args
+    docs: {cid: [(title, score),  ...], ...}
+
     Input is a dictionary from claim ids to titles and line numbers, 
     and a lookup from titles to filenumbers.
     """
@@ -43,6 +63,12 @@ def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki
     return doclines
         
             
+def load_doclines(titles, t2jnum):
+    """load all lines for provided titles
+    Args
+    titles: list of titles
+    """
+    return load_doc_lines({"dummy_id" : [(title, "dummy_linum") for title in titles]}, t2jnum)
 
 def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="data/doctitles"):
     """

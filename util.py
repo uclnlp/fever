@@ -31,26 +31,6 @@ def abs_path(relative_path_to_file):
     return os.path.join(current_dir, relative_path_to_file)
 
 
-
-def save_jsonl(dictionaries, path, print_message=True):
-    """save jsonl file from list of dictionaries
-    """
-    if os.path.exists(path):
-        raise OSError("file {} already exists".format(path))
-
-    if print_message:
-        print("saving at {}".format(path))
-    with open(path, "a") as out_file:
-        for instance in dictionaries:
-            out_file.write(json.dumps(instance) + "\n")
-
-def read_jsonl(path):
-    with open(path, "r") as in_file:
-        out = [json.loads(line) for line in in_file]
-
-    return out
-
-
 class edict():
     def __init__(self):
         self.d=dict()
