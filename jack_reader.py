@@ -51,5 +51,5 @@ if __name__ == "__main__":
         # question: hypothesis, support: [premise]
         nli_setting = QASetting(question=claim, support=[evidence])
         prediction = dam_reader([nli_setting])
-        pred.append({"actual": instance["label"], "predicted": convert_label(prediction[0][0].text)})
+        pred.append({"actual": instance["label"], "predicted": convert_label(prediction[0][0].text, inverse=True)})
     save_jsonl(pred, abs_path(args.out_file))
