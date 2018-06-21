@@ -1,26 +1,36 @@
-import os
 import argparse
-import json
-from util import abs_path, save_jsonl
-from converter import get_evidence_sentence, titles_to_jsonl_num, convert_label
+from util import abs_path
+from converter import titles_to_jsonl_num, convert_label
+from fever_io import load_doclines, read_jsonl, save_jsonl
 from jack import readers
 from jack.core import QASetting
-from jack.io.load import load_jack
 
-def read_retrieval_output(path):
+
+def get_evidence_sentence(evidences, t2l2s):
+    """lookup corresponding sentences and concatenate them
+    evidences: [(title, linum), ...]
+    """
+    titles = [title for title, _ in evidences]
+    linums = [linum for _, linum in evidences]
+    return " ".join(t2l2s[title][linum] for title, linum in zip(titles, linums))
+
+
+def read_ir_result(path):
+    instances = read_jsonl(path)
     t2jnum = titles_to_jsonl_num(wikipedia_dir=abs_path("data/wiki-pages/wiki-pages/"), doctitles=abs_path("data/doctitles"))
-    out = list()
-    with open(abs_path(path), "r") as f:
-        for line in f:
-            instance = json.loads(line.strip())
-            out.append({
-                "cid": instance["id"],
-                "claim": instance["claim"],
-                "evidence": get_evidence_sentence(instance["predicted_sentences"], t2jnum),
-                "label": instance["label"]
-            })
+    titles = list()
 
-    return out
+    # make list of titles
+    for instance in instances:
+        titles.extend([title for title, _ in instance["predicted_sentences"]])
+
+    # load title2line2sentences
+    t2l2s = load_doclines(titles, t2jnum)
+
+    for instance in instances:
+        instance["evidence"] = get_evidence_sentence(instance["predicted_sentences"], t2l2s)
+
+    return instances
 
 
 def predict(instances, t2jnum):
@@ -44,8 +54,7 @@ if __name__ == "__main__":
 
     pred = list()
     dam_reader = readers.reader_from_file(args.saved_reader)
-    for instance in read_retrieval_output(args.in_file):
-        cid = instance["cid"]
+    for instance in read_ir_result(args.in_file):
         claim = instance["claim"]
         evidence = instance["evidence"]
         # question: hypothesis, support: [premise]
