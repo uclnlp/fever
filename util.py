@@ -44,6 +44,15 @@ def save_jsonl(dictionaries, path, print_message=True):
         for instance in dictionaries:
             out_file.write(json.dumps(instance) + "\n")
 
+def read_jsonl(path):
+    out = list()
+    with open(path, "r") as in_file:
+        for line in in_file:
+            out.append(line.strip())
+
+    return out
+
+
 class edict():
     def __init__(self):
         self.d=dict()
