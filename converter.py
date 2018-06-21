@@ -63,6 +63,33 @@ def load_evidence(evidences, t2jnum):
 
     return " ".join(evidences)
 
+
+def convert_label(label):
+    fever2snli = {"SUPPORTS": "entailment", "REFUTES": "contradiction", "NOT ENOUGH INFO": "neutral"}
+    assert label in fever2snli
+    return fever2snli[label]
+
+
+def convert_to_snli_format(instances, wikipedia_dir, doctitles):
+    t2jnum = titles_to_jsonl_num(wikipedia_dir, doctitles)
+    keyerr_count = 0
+    out = list()
+
+    for instance in instances:
+        cid = instance["id"]
+        pair_id = cid
+        label = convert_label(instance["label"])
+        claim = instance["claim"]
+        try:
+            evidence = load_evidence(instance["evidence"], t2jnum)
+        except KeyError:
+            keyerr_count += 1
+            continue
+        snli_instance = {"captionID": id, "pairID": pair_id, "gold_label": label, "sentence1": evidence, "sentence2": claim}
+        out.append(snli_instance)
+    return out
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("src")
