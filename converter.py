@@ -64,10 +64,15 @@ def load_evidence(evidences, t2jnum):
     return " ".join(evidences)
 
 
-def convert_label(label):
+def convert_label(label, inverse=False):
     fever2snli = {"SUPPORTS": "entailment", "REFUTES": "contradiction", "NOT ENOUGH INFO": "neutral"}
-    assert label in fever2snli
-    return fever2snli[label]
+    snli2fever = {snli: fever for fever, snli in fever2snli.items()}
+    if not inverse:
+        assert label in fever2snli
+        return fever2snli[label]
+    else:
+        assert label in snli2fever
+        return snli2fever[label]
 
 
 def convert_to_snli_format(instances, wikipedia_dir, doctitles):
