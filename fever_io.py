@@ -109,7 +109,7 @@ def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="
     return t2jnum
 
 
-def get_evidence_sentence(evidences, t2l2s):
+def get_evidence_sentence(evidences, t2l2s, cutoff=None):
     """lookup corresponding sentences and return concatenated text
     Args
     evidences: [(title, linum), ...]
@@ -118,8 +118,8 @@ def get_evidence_sentence(evidences, t2l2s):
     Returns
     evidence sentence (str)
     """
-    titles = [title for title, _ in evidences]
-    linums = [linum for _, linum in evidences]
+    titles = [title for title, _ in evidences][:cutoff]
+    linums = [linum for _, linum in evidences][:cutoff]
     return " ".join([t2l2s[title][linum] for title, linum in zip(titles, linums)])
 
 
