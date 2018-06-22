@@ -6,47 +6,8 @@ import argparse
 import json
 from tqdm import tqdm
 from util import abs_path
-from fever_io import titles_to_jsonl_num, load_doc_lines, load_doclines, read_jsonl, save_jsonl, get_evidence_sentence
+from fever_io import titles_to_jsonl_num, load_doclines, read_jsonl, save_jsonl, get_evidence_sentence
 current_dir = os.path.dirname(os.path.abspath(__file__))
-
-
-def get_abs_path(file):
-    return os.path.join(current_dir, file)
-
-
-def load_evidence(evidences, t2jnum):
-    """
-    Args:
-    evidences: (evidence part of wiki-data)
-    [
-        [
-            [<annotation_id>, <evidence_id>, "wiki-title", <line number>]
-        ],
-        [
-            [<annotation_id>, <evidence_id>, "wiki-title", <line number>]
-        ]
-    ]
-    Return:
-    evidence sentences jointed with space
-    """
-    titles = list()
-    linums = list()
-    for evidence in evidences[0]:
-        _, _, title, linum = evidence
-        titles.append(title)
-        linums.append(linum)
-    evidence_instances = {(title, "dummy_linum") for title in titles}
-
-    doclines = load_doc_lines(
-        docs={"dummy_id": evidence_instances}, t2jnum=t2jnum)
-    evidences = list()
-    for title, linum in zip(titles, linums):
-        # if linum < 0 (which means NEI) then just use linum 0
-        if linum < 0:
-            linum = 0
-        evidences.append(doclines[title][linum])
-
-    return " ".join(evidences)
 
 
 def convert_label(label, inverse=False):
@@ -62,32 +23,6 @@ def convert_label(label, inverse=False):
     else:
         assert label in snli2fever
         return snli2fever[label]
-
-
-def convert_to_snli_format(instances, wikipedia_dir, doctitles):
-    t2jnum = titles_to_jsonl_num(wikipedia_dir, doctitles)
-    keyerr_count = 0
-    out = list()
-
-    for instance in instances:
-        cid = instance["id"]
-        pair_id = cid
-        label = convert_label(instance["label"])
-        claim = instance["claim"]
-        try:
-            evidence = load_evidence(instance["evidence"], t2jnum)
-        except KeyError:
-            keyerr_count += 1
-            continue
-        snli_instance = {
-            "captionID": id,
-            "pairID": pair_id,
-            "gold_label": label,
-            "sentence1": evidence,
-            "sentence2": claim
-        }
-        out.append(snli_instance)
-    return out
 
 
 def snli_format(id, pair_id, label, evidence, claim):
