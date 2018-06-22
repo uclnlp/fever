@@ -6,7 +6,7 @@ from jack import readers
 from jack.core import QASetting
 
 
-def read_ir_result(path):
+def read_ir_result(path, cutoff):
     instances = read_jsonl(path)
     t2jnum = titles_to_jsonl_num(
         wikipedia_dir=abs_path("data/wiki-pages/wiki-pages/"),
@@ -22,7 +22,7 @@ def read_ir_result(path):
 
     for instance in instances:
         instance["evidence"] = get_evidence_sentence(
-            instance["predicted_sentences"], t2l2s)
+            instance["predicted_sentences"], t2l2s, cutoff)
 
     return instances
 
@@ -35,11 +35,18 @@ if __name__ == "__main__":
     parser.add_argument("out_file", help="output prediction file")
     parser.add_argument(
         "--saved_reader", help="path to saved reader directory")
+    parser.add_argument("--cutoff", default=None, help="if not None, model only reads specified number of evidences")
     args = parser.parse_args()
 
     pred = list()
     dam_reader = readers.reader_from_file(args.saved_reader)
-    for instance in read_ir_result(args.in_file):
+
+    if args.cutoff:
+        cutoff = int(args.cutoff)
+    else:
+        cutoff = None
+
+    for instance in read_ir_result(args.in_file, cutoff):
         claim = instance["claim"]
         evidence = instance["evidence"]
         # question: hypothesis, support: [premise]
