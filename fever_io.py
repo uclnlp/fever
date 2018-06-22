@@ -63,11 +63,16 @@ def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki
     return doclines
         
             
-def load_doclines(titles, t2jnum):
+def load_doclines(titles, t2jnum, filtering=True):
     """load all lines for provided titles
     Args
     titles: list of titles
     """
+    if filtering:
+        filtered_titles = [title for title in titles if title in t2jnum]
+        print("mismatch: {} / {}".format(len(titles) - len(filtered_titles), len(titles)))
+        titles = filtered_titles
+
     return load_doc_lines({"dummy_id" : [(title, "dummy_linum") for title in titles]}, t2jnum, wikipedia_dir=abs_path("data/wiki-pages/wiki-pages/"))
 
 def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="data/doctitles"):
