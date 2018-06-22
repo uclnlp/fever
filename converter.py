@@ -100,6 +100,35 @@ def snli_format(id, pair_id, label, evidence, claim):
     }
 
 
+def _convert_instance(instance, t2l2s):
+    """convert single instance to either one or multiple instances
+    Args
+    instance: instance of FEVER dataset.
+    t2l2s: output of titles_to_jsonl_num
+
+    Returns
+    list of converted instances
+    """
+
+    converted_instances = list()
+    # assert instance["evidence"] == [[[hoge, hoge, title, linum], [hoge, hoge, title, linum]], [[..],[..],..], ...]
+    for eidx, evidence_set in enumerate(instance["evidence"]):
+        evidence_linum = [(title, linum) for _, _, title, linum in evidence_set
+                          if title in t2l2s]
+
+        # continue if evidence_linum is empty
+        if not evidence_linum:
+            continue
+        converted_instances.append(
+            snli_format(
+                id="{}-{}".format(instance["id"], str(eidx)),
+                pair_id="{}-{}".format(instance["id"], str(eidx)),
+                label=convert_label(instance["label"]),
+                evidence=get_evidence_sentence(evidence_linum, t2l2s),
+                claim=instance["claim"]))
+    return converted_instances
+
+
 def convert(instances, nei_sampling=True):
     """convert FEVER format to jack SNLI format
     Arg
@@ -136,21 +165,7 @@ def convert(instances, nei_sampling=True):
 
     converted_instances = list()
     for instance in tqdm(instances, desc="conversion"):
-        # assert instance["evidence"] == [[[hoge, hoge, title, linum], [hoge, hoge, title, linum]], [[..],[..],..], ...]
-        for eidx, evidence_set in enumerate(instance["evidence"]):
-            evidence_linum = [(title, linum)
-                              for _, _, title, linum in evidence_set if title in t2l2s]
-
-            # continue if evidence_linum is empty
-            if not evidence_linum:
-                continue
-            converted_instances.append(
-                snli_format(
-                    id="{}-{}".format(instance["id"], str(eidx)),
-                    pair_id="{}-{}".format(instance["id"], str(eidx)),
-                    label=convert_label(instance["label"]),
-                    evidence=get_evidence_sentence(evidence_linum, t2l2s),
-                    claim=instance["claim"]))
+        converted_instances.extend(_convert_instance(instance, t2l2s))
 
     return converted_instances
 
@@ -167,11 +182,12 @@ if __name__ == "__main__":
         fever_format = json.loads('''
         [{"id": 15812, "verifiable": "VERIFIABLE", "label": "REFUTES", "claim": "Peggy Sue Got Married is a Egyptian film released in 1986.", "evidence": [[[31205, 37902, "Peggy_Sue_Got_Married", 0], [31205, 37902, "Francis_Ford_Coppola", 0]], [[31211, 37908, "Peggy_Sue_Got_Married", 0]]], "predicted_pages": ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", "Peggy_Sue_Got_Married_-LRB-song-RRB-", "Peggy_Sue_Got_Married", "Peggy_Sue", "Peggy_Sue_-LRB-band-RRB-"], "predicted_sentences": [["Peggy_Sue_Got_Married", 0], ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", 0], ["Peggy_Sue_Got_Married_-LRB-song-RRB-", 0], ["Peggy_Sue", 0], ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", 2]]}, {"id": 229289, "verifiable": "NOT VERIFIABLE", "label": "NOT ENOUGH INFO", "claim": "Neal Schon was named in 1954.", "evidence": [[[273626, null, null, null]]], "predicted_pages": ["Neal_Schon", "Neal", "Named", "Was_-LRB-Not_Was-RRB-", "Was"], "predicted_sentences": [["Neal_Schon", 0], ["Neal_Schon", 6], ["Neal_Schon", 5], ["Neal_Schon", 1], ["Neal_Schon", 2]]}]
         ''')
-        snli_format = convert(fever_format)
-        print(snli_format)
+        snli_format_instances = convert(fever_format)
+        print(snli_format_instances)
 
     else:
-        assert not os.path.exists(args.tar), "file {} alreadly exists".format(args.tar)
+        assert not os.path.exists(args.tar), "file {} alreadly exists".format(
+            args.tar)
         keyerr_count = 0
 
         instances = read_jsonl(args.src)
