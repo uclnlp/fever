@@ -33,9 +33,9 @@ def aggregate_preds(prediction):
     vote = dict()
     for rank, pred in enumerate(prediction[0]):
         if pred.text not in vote:
-            vote[pred.text] = 1/rank
+            vote[pred.text] = 1/(rank+1)
         else:
-            vote[pred.text] += 1/rank
+            vote[pred.text] += 1/(rank+1)
 
     popular_verdict = max(vote, key=vote.get)
     pred_from_top_evidence = prediction[0][0].text
