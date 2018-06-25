@@ -6,7 +6,7 @@ import argparse
 import json
 from tqdm import tqdm
 from util import abs_path
-from fever_io import titles_to_jsonl_num, load_doclines, read_jsonl, save_jsonl, get_evidence_sentence
+from fever_io import titles_to_jsonl_num, load_doclines, read_jsonl, save_jsonl, get_evidence_sentence_list
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -45,6 +45,10 @@ def _convert_instance(instance, t2l2s):
     list of converted instances
     """
 
+    def _evidence_format(evidences):
+        """return evidence sentence from (possibly) multiple evidence sentences"""
+        return " ".join(evidences)
+
     converted_instances = list()
     # assert instance["evidence"] == [[[hoge, hoge, title, linum], [hoge, hoge, title, linum]], [[..],[..],..], ...]
     for eidx, evidence_set in enumerate(instance["evidence"]):
@@ -59,7 +63,7 @@ def _convert_instance(instance, t2l2s):
                 id="{}-{}".format(instance["id"], str(eidx)),
                 pair_id="{}-{}".format(instance["id"], str(eidx)),
                 label=convert_label(instance["label"]),
-                evidence=get_evidence_sentence(evidence_linum, t2l2s),
+                evidence=_evidence_format(get_evidence_sentence_list(evidence_linum, t2l2s, withlinum=True)),
                 claim=instance["claim"]))
     return converted_instances
 
