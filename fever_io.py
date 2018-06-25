@@ -120,10 +120,10 @@ def get_evidence_sentence(evidences, t2l2s, cutoff=None):
     """
     titles = [title for title, _ in evidences][:cutoff]
     linums = [linum for _, linum in evidences][:cutoff]
-    return " ".join([t2l2s[title][linum] for title, linum in zip(titles, linums)])
+    return " ".join([str(linum) + " " + t2l2s[title][linum] for title, linum in zip(titles, linums)])
 
 
-def get_evidence_sentence_list(evidences, t2l2s):
+def get_evidence_sentence_list(evidences, t2l2s, prependlinum=False):
     """lookup corresponding sentences and return list of sentences
     Args
     evidences: [(title, linum), ...]
@@ -134,7 +134,10 @@ def get_evidence_sentence_list(evidences, t2l2s):
     """
     titles = [title for title, _ in evidences]
     linums = [linum for _, linum in evidences]
-    return [t2l2s[title][linum] for title, linum in zip(titles, linums)]
+    if not prependlinum:
+        return [t2l2s[title][linum] for title, linum in zip(titles, linums)]
+    else:
+        return [str(linum) + " " + t2l2s[title][linum] for title, linum in zip(titles, linums)]
 
 
 def load_wikipedia(wikipedia_dir="data/wiki-pages/wiki-pages/", howmany=99999):
