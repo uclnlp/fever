@@ -1,12 +1,12 @@
 import argparse
 from util import abs_path
 from converter import titles_to_jsonl_num, convert_label
-from fever_io import load_doclines, read_jsonl, save_jsonl, get_evidence_sentence
+from fever_io import load_doclines, read_jsonl, save_jsonl, get_evidence_sentence, get_evidence_sentence_list
 from jack import readers
 from jack.core import QASetting
 
 
-def read_ir_result(path, cutoff):
+def read_ir_result(path):
     instances = read_jsonl(path)
     t2jnum = titles_to_jsonl_num(
         wikipedia_dir=abs_path("data/wiki-pages/wiki-pages/"),
@@ -21,10 +21,26 @@ def read_ir_result(path, cutoff):
     t2l2s = load_doclines(titles, t2jnum)
 
     for instance in instances:
-        instance["evidence"] = get_evidence_sentence(
-            instance["predicted_sentences"], t2l2s, cutoff)
+        instance["evidence"] = get_evidence_sentence_list(
+            instance["predicted_sentences"], t2l2s)
 
     return instances
+
+
+def aggregate_preds(prediction):
+    """return the most popular verdict
+    """
+    vote = dict()
+    for rank, pred in enumerate(prediction[0]):
+        if pred.text not in vote:
+            vote[pred.text] = 1/rank
+        else:
+            vote[pred.text] += 1/rank
+
+    popular_verdict = max(vote, key=vote.get)
+    pred_from_top_evidence = prediction[0][0].text
+
+    return popular_verdict, score, pred_from_top_evidence
 
 
 if __name__ == "__main__":
@@ -38,7 +54,7 @@ if __name__ == "__main__":
     parser.add_argument("--cutoff", default=None, help="if not None, model only reads specified number of evidences")
     args = parser.parse_args()
 
-    pred = list()
+    results = list()
     dam_reader = readers.reader_from_file(args.saved_reader)
 
     if args.cutoff:
@@ -50,12 +66,17 @@ if __name__ == "__main__":
         claim = instance["claim"]
         evidence = instance["evidence"]
         # question: hypothesis, support: [premise]
-        nli_setting = QASetting(question=claim, support=[evidence])
-        prediction = dam_reader([nli_setting])
-        pred.append({
+        nli_setting = QASetting(question=claim, support=evidence)
+        prediction, score, pred_from_top_evidence = aggregate_preds(dam_reader[nli_setting])
+
+        results.append({
             "actual":
             instance["label"],
             "predicted":
-            convert_label(prediction[0][0].text, inverse=True)
+            convert_label(prediction, inverse=True),
+            "score":
+            score,
+            "pred_from_top_evidence":
+            convert_label(pred_from_top_evidence, inverse=True)
         })
-    save_jsonl(pred, abs_path(args.out_file))
+    save_jsonl(results, abs_path(args.out_file))
