@@ -114,11 +114,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.convert_test:
-        fever_format = json.loads('''
-        [{"id": 15812, "verifiable": "VERIFIABLE", "label": "REFUTES", "claim": "Peggy Sue Got Married is a Egyptian film released in 1986.", "evidence": [[[31205, 37902, "Peggy_Sue_Got_Married", 0], [31205, 37902, "Francis_Ford_Coppola", 0]], [[31211, 37908, "Peggy_Sue_Got_Married", 0]]], "predicted_pages": ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", "Peggy_Sue_Got_Married_-LRB-song-RRB-", "Peggy_Sue_Got_Married", "Peggy_Sue", "Peggy_Sue_-LRB-band-RRB-"], "predicted_sentences": [["Peggy_Sue_Got_Married", 0], ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", 0], ["Peggy_Sue_Got_Married_-LRB-song-RRB-", 0], ["Peggy_Sue", 0], ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", 2]]}, {"id": 229289, "verifiable": "NOT VERIFIABLE", "label": "NOT ENOUGH INFO", "claim": "Neal Schon was named in 1954.", "evidence": [[[273626, null, null, null]]], "predicted_pages": ["Neal_Schon", "Neal", "Named", "Was_-LRB-Not_Was-RRB-", "Was"], "predicted_sentences": [["Neal_Schon", 0], ["Neal_Schon", 6], ["Neal_Schon", 5], ["Neal_Schon", 1], ["Neal_Schon", 2]]}]
-        ''')
+        test_in = '''[{"id": 15812, "verifiable": "VERIFIABLE", "label": "REFUTES", "claim": "Peggy Sue Got Married is a Egyptian film released in 1986.", "evidence": [[[31205, 37902, "Peggy_Sue_Got_Married", 0], [31205, 37902, "Francis_Ford_Coppola", 0]], [[31211, 37908, "Peggy_Sue_Got_Married", 0]]], "predicted_pages": ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", "Peggy_Sue_Got_Married_-LRB-song-RRB-", "Peggy_Sue_Got_Married", "Peggy_Sue", "Peggy_Sue_-LRB-band-RRB-"], "predicted_sentences": [["Peggy_Sue_Got_Married", 0], ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", 0], ["Peggy_Sue_Got_Married_-LRB-song-RRB-", 0], ["Peggy_Sue", 0], ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", 2]]}, {"id": 229289, "verifiable": "NOT VERIFIABLE", "label": "NOT ENOUGH INFO", "claim": "Neal Schon was named in 1954.", "evidence": [[[273626, null, null, null]]], "predicted_pages": ["Neal_Schon", "Neal", "Named", "Was_-LRB-Not_Was-RRB-", "Was"], "predicted_sentences": [["Neal_Schon", 0], ["Neal_Schon", 6], ["Neal_Schon", 5], ["Neal_Schon", 1], ["Neal_Schon", 2]]}]'''
+
+        print("input:\n", test_in)
+        fever_format = json.loads(test_in)
         snli_format_instances = convert(fever_format)
-        print(snli_format_instances)
+        print("\noutput:\n", snli_format_instances)
 
     else:
         assert not os.path.exists(args.tar), "file {} alreadly exists".format(
@@ -128,29 +129,3 @@ if __name__ == "__main__":
         instances = read_jsonl(args.src)
         snli_format_instances = convert(instances)
         save_jsonl(snli_format_instances, args.tar)
-
-    # with open(args.src) as f:
-    #     for line in f:
-    #         instance = json.loads(line.strip())
-
-    #         id = instance["id"]
-    #         pair_id = id
-    #         original_label = instance["label"]
-    #         if original_label == "SUPPORTS":
-    #             label = "entailment"
-    #         elif original_label == "REFUTES":
-    #             label = "contradiction"
-    #         elif original_label == "NOT ENOUGH INFO":
-    #             label = "neutral"
-    #         claim = instance["claim"]
-    #         try:
-    #             evidence = load_evidence(instance["evidence"], t2jnum)
-    #         except KeyError:
-    #             keyerr_count += 1
-    #             continue
-
-    #         with open(args.tar, "a") as outfile:
-    #             snli_format = {"captionID": id, "pairID": pair_id, "gold_label": label, "sentence1": evidence, "sentence2": claim}
-    #             outfile.write(json.dumps(snli_format) + "\n")
-
-    # print("keyerror count:", keyerr_count)
