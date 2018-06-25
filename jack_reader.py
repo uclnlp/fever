@@ -62,7 +62,7 @@ if __name__ == "__main__":
     else:
         cutoff = None
 
-    for instance in read_ir_result(args.in_file, cutoff):
+    for instance in read_ir_result(args.in_file):
         claim = instance["claim"]
         evidence = instance["evidence"]
         # question: hypothesis, support: [premise]
