@@ -33,11 +33,12 @@ def aggregate_preds(prediction):
     vote = dict()
     for rank, pred in enumerate(prediction[0]):
         if pred.text not in vote:
-            vote[pred.text] = 1/(rank+1)
+            vote[pred.text] = 1
         else:
-            vote[pred.text] += 1/(rank+1)
+            vote[pred.text] += 1
 
     popular_verdict = max(vote, key=vote.get)
+    score = vote[popular_verdict]
     pred_from_top_evidence = prediction[0][0].text
 
     return (popular_verdict, score, pred_from_top_evidence)
@@ -54,7 +55,6 @@ if __name__ == "__main__":
     parser.add_argument("--cutoff", default=None, help="if not None, model only reads specified number of evidences")
     args = parser.parse_args()
 
-    results = list()
     dam_reader = readers.reader_from_file(args.saved_reader)
 
     if args.cutoff:
@@ -62,16 +62,19 @@ if __name__ == "__main__":
     else:
         cutoff = None
 
-    for instance in read_ir_result(args.in_file):
-        claim = instance["claim"]
-        evidence = instance["evidence"]
-        # question: hypothesis, support: [premise]
-        nli_setting = QASetting(question=claim, support=evidence)
-        prediction, score, pred_from_top_evidence = aggregate_preds(dam_reader([nli_setting]))
+    nli_settings = list()
+    results = list()
+    instances = read_ir_result(args.in_file)
+    claims = [claim for claim in instances["claim"]]
+    evidences = [evidence_list for evidence_list in instances["evidence"]]
+    actual = [actual for actual in instances["label"]]
+    for claim, evidence_list in zip(claims, evidences):
+        nli_settings_for_a_claim = [QASetting(question=claim, support=evidence) for evidence in evidence_list]
+
+        prediction, score, pred_from_top_evidence = aggregate_preds(dam_reader(nli_settings_for_a_claim))
 
         results.append({
-            "actual":
-            instance["label"],
+            "actual": actual,
             "predicted":
             convert_label(prediction, inverse=True),
             "score":
