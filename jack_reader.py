@@ -31,7 +31,8 @@ def aggregate_preds(prediction):
     """return the most popular verdict
     """
     vote = dict()
-    for rank, pred in enumerate(prediction[0]):
+    for rank, pred in enumerate(prediction):
+        pred = pred[0]
         if pred.text not in vote:
             vote[pred.text] = 1
         else:
@@ -65,9 +66,9 @@ if __name__ == "__main__":
     nli_settings = list()
     results = list()
     instances = read_ir_result(args.in_file)
-    claims = [claim for claim in instances["claim"]]
-    evidences = [evidence_list for evidence_list in instances["evidence"]]
-    actual = [actual for actual in instances["label"]]
+    claims = [instance["claim"] for instance in instances]
+    evidences = [instance["evidence"] for instance in instances]
+    actual = [instance["actual"]for instance in instances]
     for claim, evidence_list in zip(claims, evidences):
         nli_settings_for_a_claim = [QASetting(question=claim, support=evidence) for evidence in evidence_list]
 

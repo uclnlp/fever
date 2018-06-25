@@ -63,7 +63,7 @@ def _convert_instance(instance, t2l2s):
                 id="{}-{}".format(instance["id"], str(eidx)),
                 pair_id="{}-{}".format(instance["id"], str(eidx)),
                 label=convert_label(instance["label"]),
-                evidence=_evidence_format(get_evidence_sentence_list(evidence_linum, t2l2s, withlinum=True)),
+                evidence=_evidence_format(get_evidence_sentence_list(evidence_linum, t2l2s, prependlinum=True)),
                 claim=instance["claim"]))
     return converted_instances
 

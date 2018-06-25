@@ -137,7 +137,7 @@ def get_evidence_sentence_list(evidences, t2l2s, prependlinum=False):
     if not prependlinum:
         return [t2l2s[title][linum] for title, linum in zip(titles, linums)]
     else:
-        return [str(linum) + " " + t2l2s[title][linum] for title, linum in zip(titles, linums)]
+        return ["LINUM" + str(linum) + " " + t2l2s[title][linum] for title, linum in zip(titles, linums)]
 
 
 def load_wikipedia(wikipedia_dir="data/wiki-pages/wiki-pages/", howmany=99999):
