@@ -40,7 +40,7 @@ def aggregate_preds(prediction):
     popular_verdict = max(vote, key=vote.get)
     pred_from_top_evidence = prediction[0][0].text
 
-    return popular_verdict, score, pred_from_top_evidence
+    return (popular_verdict, score, pred_from_top_evidence)
 
 
 if __name__ == "__main__":
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         evidence = instance["evidence"]
         # question: hypothesis, support: [premise]
         nli_setting = QASetting(question=claim, support=evidence)
-        prediction, score, pred_from_top_evidence = aggregate_preds(dam_reader[nli_setting])
+        prediction, score, pred_from_top_evidence = aggregate_preds(dam_reader([nli_setting]))
 
         results.append({
             "actual":
