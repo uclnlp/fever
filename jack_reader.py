@@ -2,7 +2,7 @@ import argparse
 from util import abs_path
 from converter import titles_to_jsonl_num, convert_label
 from fever_io import load_doclines, read_jsonl, save_jsonl, get_evidence_sentence, get_evidence_sentence_list
-import tqdm
+from tqdm import tqdm
 from jack import readers
 from jack.core import QASetting
 
@@ -57,6 +57,7 @@ if __name__ == "__main__":
     parser.add_argument("--cutoff", default=None, help="if not None, model only reads specified number of evidences")
     args = parser.parse_args()
 
+    print("loading reader from file:", args.saved_reader)
     dam_reader = readers.reader_from_file(args.saved_reader)
 
     if args.cutoff:
