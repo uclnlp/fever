@@ -102,6 +102,6 @@ if __name__ == "__main__":
             "score":
             score,
             "prediction_list":
-            convert_label(prediction_list, inverse=True)
+            [convert_label(pred, inverse=True) for pred in prediction_list]
         })
     save_jsonl(results, abs_path(args.out_file))
