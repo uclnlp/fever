@@ -27,11 +27,11 @@ def read_ir_result(path):
     return instances
 
 
-def aggregate_preds(prediction):
+def aggregate_preds(pred):
     """return the most popular verdict
     """
     vote = dict()
-    for rank, pred in enumerate(prediction):
+    for rank, pred in enumerate(pred):
         pred = pred[0]
         if pred.text not in vote:
             vote[pred.text] = 1
@@ -40,7 +40,7 @@ def aggregate_preds(prediction):
 
     popular_verdict = max(vote, key=vote.get)
     score = vote[popular_verdict]
-    pred_from_top_evidence = prediction[0][0].text
+    pred_from_top_evidence = pred[0][0].text
 
     return (popular_verdict, score, pred_from_top_evidence)
 
@@ -70,10 +70,11 @@ if __name__ == "__main__":
     evidences = [instance["evidence"] for instance in instances]
     actual = [instance["actual"]for instance in instances]
     for claim, evidence_list in zip(claims, evidences):
-        nli_settings_for_a_claim = [QASetting(question=claim, support=evidence) for evidence in evidence_list]
-
-        prediction, score, pred_from_top_evidence = aggregate_preds(dam_reader(nli_settings_for_a_claim))
-
+        preds = list()
+        for evidence in evidence_list:
+            preds.append(dam_reader([QASetting(question=claim, support=evidence)]))
+            
+        prediction, score, pred_from_top_ev = aggregate_preds(preds)
         results.append({
             "actual": actual,
             "predicted":
@@ -81,6 +82,6 @@ if __name__ == "__main__":
             "score":
             score,
             "pred_from_top_evidence":
-            convert_label(pred_from_top_evidence, inverse=True)
+            convert_label(pred_from_top_ev, inverse=True)
         })
     save_jsonl(results, abs_path(args.out_file))
