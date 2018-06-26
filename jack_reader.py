@@ -39,11 +39,22 @@ def aggregate_preds(prediction):
         else:
             vote[pred.text] += 1
 
-    popular_verdict = max(vote, key=vote.get)
-    score = vote[popular_verdict]
+    supports = convert_label("SUPPORTS")
+    refutes = convert_label("REFUTES")
+    nei = convert_label("NOT ENOUGH INFO")
+    if supports in vote and refutes in vote:
+        final_verdict = max(vote, key=vote.get)
+    elif supports in vote:
+        final_verdict = supports
+    elif refutes in vote:
+        final_verdict = refutes
+    else:
+        final_verdict = nei
+
+    score = vote[final_verdict]
     pred_from_top_evidence = prediction[0][0][0].text
 
-    return (popular_verdict, score, pred_from_top_evidence)
+    return (final_verdict, score, pred_from_top_evidence)
 
 
 if __name__ == "__main__":
