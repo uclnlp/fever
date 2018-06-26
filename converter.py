@@ -35,7 +35,7 @@ def snli_format(id, pair_id, label, evidence, claim):
     }
 
 
-def _convert_instance(instance, t2l2s, use_ir_prediction=False):
+def _convert_instance(instance, t2l2s, prependlinum=False, use_ir_prediction=False):
     """convert single instance to either one or multiple instances
     Args
     instance: instance of FEVER dataset.
@@ -52,22 +52,18 @@ def _convert_instance(instance, t2l2s, use_ir_prediction=False):
     converted_instances = list()
     # assert instance["evidence"] == [[[hoge, hoge, title, linum], [hoge, hoge, title, linum]], [[..],[..],..], ...]
     if use_ir_prediction:
-        for eidx, evidence in enumerate(instance["predicted_sentences"]):
-            evidence_linum = [(title, linum) for title, linum in evidence
-                              if title in t2l2s]
+        evidence_linum = [(title, linum) for title, linum in instance["predicted_sentences"]
+                          if title in t2l2s]
 
-            # continue if evidence_linum is empty
-            if not evidence_linum:
-                continue
-            converted_instances.append(
-                snli_format(
-                    id="{}-{}".format(instance["id"], str(eidx)),
-                    pair_id="{}-{}".format(instance["id"], str(eidx)),
-                    label=convert_label(instance["label"]),
-                    evidence=_evidence_format(
-                        get_evidence_sentence_list(
-                            evidence_linum, t2l2s, prependlinum=True)),
-                    claim=instance["claim"]))
+        converted_instances.append(
+            snli_format(
+                id="{}-{}".format(instance["id"], str(0)),
+                pair_id="{}-{}".format(instance["id"], str(0)),
+                label=convert_label(instance["label"]),
+                evidence=_evidence_format(
+                    get_evidence_sentence_list(
+                        evidence_linum, t2l2s, prependlinum=prependlinum)),
+                claim=instance["claim"]))
 
     else:
         for eidx, evidence_set in enumerate(instance["evidence"]):
@@ -85,12 +81,12 @@ def _convert_instance(instance, t2l2s, use_ir_prediction=False):
                     label=convert_label(instance["label"]),
                     evidence=_evidence_format(
                         get_evidence_sentence_list(
-                            evidence_linum, t2l2s, prependlinum=True)),
+                            evidence_linum, t2l2s, prependlinum=prependlinum)),
                     claim=instance["claim"]))
     return converted_instances
 
 
-def convert(instances, use_ir_prediction=False):
+def convert(instances, prependlinum=False, use_ir_prediction=False):
     """convert FEVER format to jack SNLI format
     Arg
     instances: list of dictionary of FEVER format
@@ -112,10 +108,13 @@ def convert(instances, use_ir_prediction=False):
                          for title, linum in evidences]
             instance["evidence"] = evidences
 
-        titles = [
-            title for evidence_set in instance["evidence"]
+        if use_ir_prediction:
+            titles = [title for title, _ in instance["predicted_sentences"]]
+        else:
+            titles = [
+                title for evidence_set in instance["evidence"]
             for _, _, title, _ in evidence_set
-        ]
+            ]
         all_titles.extend(titles)
 
     print("loading wiki data...")
@@ -128,7 +127,7 @@ def convert(instances, use_ir_prediction=False):
     for instance in tqdm(instances, desc="conversion"):
         converted_instances.extend(
             _convert_instance(
-                instance, t2l2s, use_ir_prediction=use_ir_prediction))
+                instance, t2l2s, prependlinum=prependlinum, use_ir_prediction=use_ir_prediction))
 
     return converted_instances
 
@@ -137,17 +136,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("src")
     parser.add_argument("tar")
+    parser.add_argument("--use_ir_pred", action="store_true")
+    parser.add_argument("--prependlinum", action="store_true")
     parser.add_argument("--convert_test", action="store_true")
     # parser.add_argument("--testset", help="turn on when you convert test data", action="store_true")
     args = parser.parse_args()
+    print(args)
 
     if args.convert_test:
         test_in = '''[{"id": 15812, "verifiable": "VERIFIABLE", "label": "REFUTES", "claim": "Peggy Sue Got Married is a Egyptian film released in 1986.", "evidence": [[[31205, 37902, "Peggy_Sue_Got_Married", 0], [31205, 37902, "Francis_Ford_Coppola", 0]], [[31211, 37908, "Peggy_Sue_Got_Married", 0]]], "predicted_pages": ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", "Peggy_Sue_Got_Married_-LRB-song-RRB-", "Peggy_Sue_Got_Married", "Peggy_Sue", "Peggy_Sue_-LRB-band-RRB-"], "predicted_sentences": [["Peggy_Sue_Got_Married", 0], ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", 0], ["Peggy_Sue_Got_Married_-LRB-song-RRB-", 0], ["Peggy_Sue", 0], ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", 2]]}, {"id": 229289, "verifiable": "NOT VERIFIABLE", "label": "NOT ENOUGH INFO", "claim": "Neal Schon was named in 1954.", "evidence": [[[273626, null, null, null]]], "predicted_pages": ["Neal_Schon", "Neal", "Named", "Was_-LRB-Not_Was-RRB-", "Was"], "predicted_sentences": [["Neal_Schon", 0], ["Neal_Schon", 6], ["Neal_Schon", 5], ["Neal_Schon", 1], ["Neal_Schon", 2]]}]'''
 
         print("input:\n", test_in)
         fever_format = json.loads(test_in)
-        snli_format_instances = convert(fever_format, use_ir_prediction=True)
-        print("\noutput:\n", snli_format_instances)
+        snli_format_instances = convert(fever_format, prependlinum=args.prependlinum, use_ir_prediction=args.use_ir_pred)
+        print("\noutput:\n", json.dumps(snli_format_instances))
 
     else:
         assert not os.path.exists(args.tar), "file {} alreadly exists".format(
@@ -155,5 +157,5 @@ if __name__ == "__main__":
         keyerr_count = 0
 
         instances = read_jsonl(args.src)
-        snli_format_instances = convert(instances)
+        snli_format_instances = convert(instances, prependlinum=args.prependlinum, use_ir_prediction=args.use_ir_pred)
         save_jsonl(snli_format_instances, args.tar)
