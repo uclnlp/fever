@@ -82,7 +82,7 @@ def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="
     """
     t2jnum=dict()
     try:
-        with open(doctitles) as f:
+        with open(doctitles, "r") as f:
             for line in f:
                 fields=line.rstrip("\n").split("\t")
                 title=fields[0]
