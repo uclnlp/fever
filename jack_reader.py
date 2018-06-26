@@ -68,7 +68,7 @@ if __name__ == "__main__":
     instances = read_ir_result(args.in_file)
     claims = [instance["claim"] for instance in instances]
     evidences = [instance["evidence"] for instance in instances]
-    actual = [instance["actual"]for instance in instances]
+    actual = [instance["label"]for instance in instances]
     for claim, evidence_list in zip(claims, evidences):
         preds = list()
         for evidence in evidence_list:
