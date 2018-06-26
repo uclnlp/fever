@@ -51,14 +51,14 @@ def score_line(features=dict()):
 
 def best_lines(claim="",tscores=list(),lines=dict(),best=5,model=None):
     lscores=list()
-    c_toks=set(word_tokenize(claim))
+    c_toks=set(word_tokenize(claim.lower()))
     for title,tscore in tscores:
         t_toks=normalize_title(title)
         t=" ".join(t_toks)
         t_toks=set(t_toks)
         for lid in lines[title]:
             line=lines[title][lid]
-            l_toks=set(word_tokenize(line))
+            l_toks=set(word_tokenize(line.lower()))
             if len(l_toks) > 0:
                 if model==None:
                     lscores.append((title,lid,score_line(line_features(c_toks,t,t_toks,line,l_toks,lid,tscore))))

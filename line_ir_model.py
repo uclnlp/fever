@@ -39,13 +39,13 @@ class line_ir_model:
             cid=example["id"]
             if cid in selected:
                 claim=example["claim"]
-                c_toks=set(word_tokenize(claim))
+                c_toks=set(word_tokenize(claim.lower()))
                 for yn in selected[cid]:
                     [title,lid,line,tscore]=selected[cid][yn]
                     t_toks=normalize_title(title)
                     t=" ".join(t_toks)
                     t_toks=set(t_toks)
-                    l_toks=set(word_tokenize(line))
+                    l_toks=set(word_tokenize(line.lower()))
                     self.process_instance(c_toks,t,t_toks,line,l_toks,lid,tscore,obsnum,X)
                     y[obsnum]=float(yn)
                     obsnum+=1
