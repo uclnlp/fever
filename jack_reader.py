@@ -27,12 +27,12 @@ def read_ir_result(path):
     return instances
 
 
-def aggregate_preds(pred):
+def aggregate_preds(prediction):
     """return the most popular verdict
     """
     vote = dict()
-    for rank, pred in enumerate(pred):
-        pred = pred[0]
+    for rank, pred in enumerate(prediction):
+        pred = pred[0][0]
         if pred.text not in vote:
             vote[pred.text] = 1
         else:
@@ -40,7 +40,7 @@ def aggregate_preds(pred):
 
     popular_verdict = max(vote, key=vote.get)
     score = vote[popular_verdict]
-    pred_from_top_evidence = pred[0][0].text
+    pred_from_top_evidence = prediction[0][0][0].text
 
     return (popular_verdict, score, pred_from_top_evidence)
 
