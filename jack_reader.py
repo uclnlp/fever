@@ -2,6 +2,7 @@ import argparse
 from util import abs_path
 from converter import titles_to_jsonl_num, convert_label
 from fever_io import load_doclines, read_jsonl, save_jsonl, get_evidence_sentence, get_evidence_sentence_list
+import tqdm
 from jack import readers
 from jack.core import QASetting
 
@@ -63,20 +64,17 @@ if __name__ == "__main__":
     else:
         cutoff = None
 
-    nli_settings = list()
     results = list()
-    instances = read_ir_result(args.in_file)
-    claims = [instance["claim"] for instance in instances]
-    evidences = [instance["evidence"] for instance in instances]
-    actual = [instance["label"]for instance in instances]
-    for claim, evidence_list in zip(claims, evidences):
+    for instance in tqdm(read_ir_result(args.in_file)):
+        evidence_list = instance["evidence"]
+        claim = instance["claim"]
         preds = list()
         for evidence in evidence_list:
-            preds.append(dam_reader([QASetting(question=claim, support=evidence)]))
-            
+            preds.append(dam_reader([QASetting(question=claim, support=[evidence])]))
+
         prediction, score, pred_from_top_ev = aggregate_preds(preds)
         results.append({
-            "actual": actual,
+            "actual": instance["label"],
             "predicted":
             convert_label(prediction, inverse=True),
             "score":
