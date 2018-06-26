@@ -1,7 +1,7 @@
 import argparse
 from util import abs_path
 from converter import titles_to_jsonl_num, convert_label
-from fever_io import load_doclines, read_jsonl, save_jsonl, get_evidence_sentence, get_evidence_sentence_list
+from fever_io import load_doclines, read_jsonl, save_jsonl, get_evidence_sentence_list
 from tqdm import tqdm
 from jack import readers
 from jack.core import QASetting
