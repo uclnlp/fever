@@ -43,7 +43,6 @@ def aggregate_preds(prediction, only_use_topev=False):
     vote = dict()
     pred_list = [pred[0][0].text for pred in prediction]
     for rank, pred in enumerate(pred_list):
-        pred = pred[0][0]
         if pred not in vote:
             vote[pred] = 1
         else:
