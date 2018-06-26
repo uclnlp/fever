@@ -7,7 +7,12 @@ from jack import readers
 from jack.core import QASetting
 
 
-def read_ir_result(path):
+def read_ir_result(path, prependlinum=False, concatev=False):
+    """
+    Returns
+    instances: list of dictionary
+    update instance['predicted_sentences'] with list of evidences (list of str)
+    """
     instances = read_jsonl(path)
     t2jnum = titles_to_jsonl_num(
         wikipedia_dir=abs_path("data/wiki-pages/wiki-pages/"),
@@ -22,8 +27,12 @@ def read_ir_result(path):
     t2l2s = load_doclines(titles, t2jnum)
 
     for instance in instances:
-        instance["evidence"] = get_evidence_sentence_list(
-            instance["predicted_sentences"], t2l2s)
+        if concatev:
+            instance["evidence"] = [" ".join(get_evidence_sentence_list(
+                instance["predicted_sentences"], t2l2s, prependlinum=prependlinum))]
+        else:
+            instance["evidence"] = get_evidence_sentence_list(
+                instance["predicted_sentences"], t2l2s, prependlinum=prependlinum)
 
     return instances
 
@@ -51,8 +60,11 @@ def aggregate_preds(prediction):
     else:
         final_verdict = nei
 
-    score = vote[final_verdict]
     pred_from_top_evidence = prediction[0][0][0].text
+
+    if cutoff:
+        final_verdict = pred_from_top_evidence
+    score = vote[final_verdict]
 
     return (final_verdict, score, pred_from_top_evidence)
 
@@ -65,6 +77,10 @@ if __name__ == "__main__":
     parser.add_argument("out_file", help="output prediction file")
     parser.add_argument(
         "--saved_reader", help="path to saved reader directory")
+    parser.add_argument(
+        "--concatev", action="store_true", help="concat evidences")
+    parser.add_argument(
+        "--prependlinum", action="store_true", help="prepend linum when perform get_evidence_sentence_list")
     parser.add_argument("--cutoff", default=None, help="if not None, model only reads specified number of evidences")
     args = parser.parse_args()
 
@@ -77,7 +93,7 @@ if __name__ == "__main__":
         cutoff = None
 
     results = list()
-    for instance in tqdm(read_ir_result(args.in_file)):
+    for instance in tqdm(read_ir_result(args.in_file, prependlinum=args.prependlinum, concatev=args.concatev)):
         evidence_list = instance["evidence"]
         claim = instance["claim"]
         preds = list()
