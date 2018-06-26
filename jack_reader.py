@@ -44,10 +44,10 @@ def aggregate_preds(prediction, only_use_topev=False):
     pred_list = [pred[0][0].text for pred in prediction]
     for rank, pred in enumerate(pred_list):
         pred = pred[0][0]
-        if pred.text not in vote:
-            vote[pred.text] = 1
+        if pred not in vote:
+            vote[pred] = 1
         else:
-            vote[pred.text] += 1
+            vote[pred] += 1
 
     supports = convert_label("SUPPORTS")
     refutes = convert_label("REFUTES")
@@ -61,10 +61,8 @@ def aggregate_preds(prediction, only_use_topev=False):
     else:
         final_verdict = nei
 
-    pred_from_top_evidence = prediction[0][0][0].text
-
     if only_use_topev:
-        final_verdict = pred_from_top_evidence
+        final_verdict = pred_list[0]
 
     score = vote[final_verdict]
 
