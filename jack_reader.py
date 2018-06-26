@@ -37,11 +37,12 @@ def read_ir_result(path, prependlinum=False, concatev=False):
     return instances
 
 
-def aggregate_preds(prediction):
+def aggregate_preds(prediction, only_use_topev=False):
     """return the most popular verdict
     """
     vote = dict()
-    for rank, pred in enumerate(prediction):
+    pred_list = [pred[0][0].text for pred in prediction]
+    for rank, pred in enumerate(pred_list):
         pred = pred[0][0]
         if pred.text not in vote:
             vote[pred.text] = 1
@@ -62,11 +63,12 @@ def aggregate_preds(prediction):
 
     pred_from_top_evidence = prediction[0][0][0].text
 
-    if cutoff:
+    if only_use_topev:
         final_verdict = pred_from_top_evidence
+
     score = vote[final_verdict]
 
-    return (final_verdict, score, pred_from_top_evidence)
+    return (final_verdict, score, pred_list)
 
 
 if __name__ == "__main__":
@@ -81,16 +83,11 @@ if __name__ == "__main__":
         "--concatev", action="store_true", help="concat evidences")
     parser.add_argument(
         "--prependlinum", action="store_true", help="prepend linum when perform get_evidence_sentence_list")
-    parser.add_argument("--cutoff", default=None, help="if not None, model only reads specified number of evidences")
+    parser.add_argument("--only_use_topev", action="store_true", help="only use top evidence for prediction")
     args = parser.parse_args()
 
     print("loading reader from file:", args.saved_reader)
     dam_reader = readers.reader_from_file(args.saved_reader)
-
-    if args.cutoff:
-        cutoff = int(args.cutoff)
-    else:
-        cutoff = None
 
     results = list()
     for instance in tqdm(read_ir_result(args.in_file, prependlinum=args.prependlinum, concatev=args.concatev)):
@@ -100,14 +97,14 @@ if __name__ == "__main__":
         for evidence in evidence_list:
             preds.append(dam_reader([QASetting(question=claim, support=[evidence])]))
 
-        prediction, score, pred_from_top_ev = aggregate_preds(preds)
+        prediction, score, prediction_list = aggregate_preds(preds, args.only_use_topev)
         results.append({
             "actual": instance["label"],
             "predicted":
             convert_label(prediction, inverse=True),
             "score":
             score,
-            "pred_from_top_evidence":
-            convert_label(pred_from_top_ev, inverse=True)
+            "prediction_list":
+            convert_label(prediction_list, inverse=True)
         })
     save_jsonl(results, abs_path(args.out_file))
