@@ -105,10 +105,10 @@ def title_hits(data=list(),tscores=dict()):
         l=example["label"]
         if l=='NOT ENOUGH INFO':
             continue
-        all_evidence=example["all_evidence"]
+        all_evidence=example["evidence"]
         docs=set()
         for ev in all_evidence:
-            evid  =ev[2]
+            evid  =ev[0][2]
             if evid != None:
                 docs.add(evid)
         e2s=dict()

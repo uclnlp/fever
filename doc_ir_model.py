@@ -5,7 +5,7 @@ from doc_ir import *
 from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import gazetteers, names
 from collections import Counter
-from fever_io import titles_to_jsonl_num, load_split_trainset
+from fever_io import titles_to_jsonl_num, load_split_trainset, load_paper_dataset
 import pickle
 from tqdm import tqdm
 from random import random, shuffle
@@ -49,11 +49,27 @@ class doc_ir_model:
     
         
 
+def count_labels(train):
+    """count labels for select_docs"""
+    supports = 0
+    refutes = 0
+    print("counting labels...")
+    for instance in tqdm(train):
+        if instance["label"] == "NOT ENOUGH INFO":
+            continue
+        if instance["label"] == "SUPPORTS":
+            supports += 1
+        else:
+            refutes += 1
 
+    counts = {"SUPPORTS": supports, "REFUTES": refutes}
+    print("result:", counts)
+    return counts
 
 def select_docs(train):
     samp_size=25000
-    tots={"SUPPORTS": 74355, "REFUTES": 25706}
+    # tots={"SUPPORTS": 74355, "REFUTES": 25706}
+    tots = count_labels(train)
     sofar={"SUPPORTS": 0, "REFUTES": 0}
     try:
         with open("data/edocs.bin","rb") as rb:
@@ -70,7 +86,7 @@ def select_docs(train):
         l=example["label"]
         if l=='NOT ENOUGH INFO':
             continue
-        all_evidence=example["all_evidence"]
+        all_evidence=example["evidence"]
         docs=set()
         for ev in all_evidence:
             evid  =ev[2]
@@ -130,7 +146,8 @@ def load_selected(fname="data/doc_ir_docs"):
     return selected
         
 if __name__ == "__main__":
-    train, dev = load_split_trainset(9999)
+    train, dev = load_paper_dataset()
+    # train, dev = load_split_trainset(9999)
     try:
         with open("data/doc_ir_model.bin","rb") as rb:
             model=pickle.load(rb)

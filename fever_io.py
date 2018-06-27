@@ -2,11 +2,32 @@ import json
 import random
 import os
 import sys
+from util import abs_path
 from tqdm import tqdm
 
-def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki-pages/"):
+def save_jsonl(dictionaries, path, print_message=True):
+    """save jsonl file from list of dictionaries
     """
-    Returns a dictionary from titles to line numbers to line text.
+    if os.path.exists(path):
+        raise OSError("file {} already exists".format(path))
+
+    if print_message:
+        print("saving at {}".format(path))
+    with open(path, "a") as out_file:
+        for instance in dictionaries:
+            out_file.write(json.dumps(instance) + "\n")
+
+def read_jsonl(path):
+    with open(path, "r") as in_file:
+        out = [json.loads(line) for line in in_file]
+
+    return out
+
+def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki-pages/"):
+    """Returns a dictionary from titles to line numbers to line text.
+    Args
+    docs: {cid: [(title, score),  ...], ...}
+
     Input is a dictionary from claim ids to titles and line numbers, 
     and a lookup from titles to filenumbers.
     """
@@ -42,6 +63,17 @@ def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki
     return doclines
         
             
+def load_doclines(titles, t2jnum, filtering=True):
+    """load all lines for provided titles
+    Args
+    titles: list of titles
+    """
+    if filtering:
+        filtered_titles = [title for title in titles if title in t2jnum]
+        print("mismatch: {} / {}".format(len(titles) - len(filtered_titles), len(titles)))
+        titles = filtered_titles
+
+    return load_doc_lines({"dummy_id" : [(title, "dummy_linum") for title in titles]}, t2jnum, wikipedia_dir=abs_path("data/wiki-pages/wiki-pages/"))
 
 def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="data/doctitles"):
     """
@@ -75,6 +107,20 @@ def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="
                         point=f.tell()
                         line=f.readline()
     return t2jnum
+
+
+def get_evidence_sentence(evidences, t2l2s, cutoff=None):
+    """lookup corresponding sentences and return concatenated text
+    Args
+    evidences: [(title, linum), ...]
+    t2l2s: title2line2sentence <- output of load_doc_lines
+
+    Returns
+    evidence sentence (str)
+    """
+    titles = [title for title, _ in evidences][:cutoff]
+    linums = [linum for _, linum in evidences][:cutoff]
+    return " ".join([t2l2s[title][linum] for title, linum in zip(titles, linums)])
 
 
 def load_wikipedia(wikipedia_dir="data/wiki-pages/wiki-pages/", howmany=99999):
@@ -157,13 +203,16 @@ def load_fever_train(path="data/train.jsonl", howmany=999999):
                 break
     return data
 
-
-
+def load_paper_dataset():
+    """Reads the Fever train/dev set used on the paper.
+    """
+    train_ds = load_fever_train(path=abs_path("data/train.jsonl"), howmany=9999999999)
+    dev_ds = load_fever_train(path=abs_path("data/dev.jsonl"), howmany=9999999999)
+    return train_ds, dev_ds
 
 
 
 if __name__ == "__main__":
-
     # load fever training data
     fever_data = load_fever_train(howmany=20)
     print(len(fever_data))

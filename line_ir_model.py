@@ -7,7 +7,7 @@ from line_ir import *
 from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import gazetteers, names
 from collections import Counter
-from fever_io import load_doc_lines, titles_to_jsonl_num, load_split_trainset
+from fever_io import load_doc_lines, titles_to_jsonl_num, load_split_trainset, load_paper_dataset
 import pickle
 from tqdm import tqdm
 from random import random, shuffle
@@ -66,10 +66,10 @@ def select_lines(docs,t2jnum,train):
         l=example["label"]
         if l=='NOT ENOUGH INFO':
             continue
-        all_evidence=example["all_evidence"]
+        all_evidence=example["evidence"]
         evset=set()
         for ev in all_evidence:
-            evid  =ev[2]
+            evid  =ev[0][2]
             if evid != None:
                 evset.add(evid)
         flag=False
@@ -87,11 +87,11 @@ def select_lines(docs,t2jnum,train):
         l=example["label"]
         if l=='NOT ENOUGH INFO':
             continue
-        all_evidence=example["all_evidence"]
+        all_evidence=example["evidence"]
         lines=dict()
         for ev in all_evidence:
-            evid  =ev[2]
-            evline=ev[3]
+            evid  =ev[0][2]
+            evline=ev[0][3]
             if evid != None:
                 if evid not in lines:
                     lines[evid]=set()
@@ -149,7 +149,8 @@ def load_selected(fname="data/line_ir_lines"):
 
 
 if __name__ == "__main__":
-    train, dev = load_split_trainset(9999)
+    train, dev = load_paper_dataset()
+    # train, dev = load_split_trainset(9999)
     with open("data/edocs.bin","rb") as rb:
         edocs=pickle.load(rb)
     with open("data/doc_ir_model.bin","rb") as rb:

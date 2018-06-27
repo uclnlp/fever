@@ -78,11 +78,11 @@ def line_hits(data=list(),evidence=dict()):
         l=example["label"]
         if l=='NOT ENOUGH INFO':
             continue
-        all_evidence=example["all_evidence"]
+        all_evidence=example["evidence"]
         lines=dict()
         for ev in all_evidence:
-            evid  =ev[2]
-            evline=ev[3]
+            evid  =ev[0][2]
+            evline=ev[0][3]
             if evid != None:
                 if evid not in lines:
                     lines[evid]=set()
