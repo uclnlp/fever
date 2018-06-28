@@ -6,6 +6,14 @@ from tqdm import tqdm
 from jack import readers
 from jack.core import QASetting
 
+# make everything deterministic
+import random
+import numpy as np
+import tensorflow as tf
+tf.set_random_seed(1)
+np.random.seed(1)
+random.seed(1)
+
 
 def read_ir_result(path, prependlinum=False, concatev=False):
     """
@@ -89,7 +97,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("loading reader from file:", args.saved_reader)
-    dam_reader = readers.reader_from_file(args.saved_reader)
+    dam_reader = readers.reader_from_file(args.saved_reader, dropout=0.0)
 
     results = list()
     for instance in tqdm(read_ir_result(args.in_file, prependlinum=args.prependlinum, concatev=args.concatev)):
