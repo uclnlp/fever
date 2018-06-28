@@ -51,8 +51,13 @@ def aggregate_preds(prediction, only_use_topev=False):
     supports = convert_label("SUPPORTS")
     refutes = convert_label("REFUTES")
     nei = convert_label("NOT ENOUGH INFO")
+
+    # believe more-likely evidence if both supports and refutes appears in the pred_list
     if supports in vote and refutes in vote:
-        final_verdict = max(vote, key=vote.get)
+        for pred in pred_list:
+            if pred in [supports, refutes]:
+                final_verdict = pred
+                break
     elif supports in vote:
         final_verdict = supports
     elif refutes in vote:
