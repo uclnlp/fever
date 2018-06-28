@@ -49,7 +49,9 @@ def aggregate_preds(prediction, only_use_topev=False):
     """return the most popular verdict
     """
     vote = dict()
-    pred_list = [pred[0][0].text for pred in prediction]
+    pred_list = [pred[0].text for pred in prediction]
+    scores = [pred[0].score for pred in prediction]
+
     for rank, pred in enumerate(pred_list):
         if pred not in vote:
             vote[pred] = 1
@@ -76,9 +78,7 @@ def aggregate_preds(prediction, only_use_topev=False):
     if only_use_topev:
         final_verdict = pred_list[0]
 
-    score = vote[final_verdict]
-
-    return (final_verdict, score, pred_list)
+    return (final_verdict, scores, pred_list)
 
 
 if __name__ == "__main__":
@@ -103,17 +103,17 @@ if __name__ == "__main__":
     for instance in tqdm(read_ir_result(args.in_file, prependlinum=args.prependlinum, concatev=args.concatev)):
         evidence_list = instance["evidence"]
         claim = instance["claim"]
-        preds = list()
-        for evidence in evidence_list:
-            preds.append(dam_reader([QASetting(question=claim, support=[evidence])]))
 
-        prediction, score, prediction_list = aggregate_preds(preds, args.only_use_topev)
+        settings = [QASetting(question=claim, support=[evidence]) for evidence in evidence_list]
+        preds = dam_reader(settings)
+
+        prediction, scores, prediction_list = aggregate_preds(preds, args.only_use_topev)
         results.append({
             "actual": instance["label"],
             "predicted":
             convert_label(prediction, inverse=True),
-            "score":
-            score,
+            "scores":
+            scores,
             "prediction_list":
             [convert_label(pred, inverse=True) for pred in prediction_list]
         })
