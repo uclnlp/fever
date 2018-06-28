@@ -13,6 +13,8 @@ def div(x,y):
         return 1.0
     else:
         return x/y
+#def div(x,y):
+#    return x
 
 def line_features(c_toks=set(), title="", t_toks=set(), line="", l_toks=set(), lid=0, score=0):
     features=dict()
@@ -78,11 +80,11 @@ def line_hits(data=list(),evidence=dict()):
         l=example["label"]
         if l=='NOT ENOUGH INFO':
             continue
-        all_evidence=example["evidence"]
+        all_evidence=[e for eset in example["evidence"] for e in eset]
         lines=dict()
         for ev in all_evidence:
-            evid  =ev[0][2]
-            evline=ev[0][3]
+            evid  =ev[2]
+            evline=ev[3]
             if evid != None:
                 if evid not in lines:
                     lines[evid]=set()
@@ -110,6 +112,8 @@ def line_hits(data=list(),evidence=dict()):
                             flag=1
                         s.remove((d,l))
             full[i]+=flag
+            if flag==1:
+                break
     print()
     denom=returned[0]
     for i in range(0,len(hits)):

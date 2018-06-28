@@ -105,10 +105,10 @@ def title_hits(data=list(),tscores=dict()):
         l=example["label"]
         if l=='NOT ENOUGH INFO':
             continue
-        all_evidence=example["evidence"]
+        all_evidence=[e for eset in example["evidence"] for e in eset]
         docs=set()
         for ev in all_evidence:
-            evid  =ev[0][2]
+            evid  =ev[2]
             if evid != None:
                 docs.add(evid)
         e2s=dict()
@@ -134,6 +134,8 @@ def title_hits(data=list(),tscores=dict()):
                             flag=1
                         s.remove(d)
             full[i]+=flag
+            if flag==1:
+                break
     print()
     denom=returned[0]
     for i in range(0,len(hits)):

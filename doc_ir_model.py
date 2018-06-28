@@ -68,8 +68,7 @@ def count_labels(train):
 
 def select_docs(train):
     samp_size=25000
-    # tots={"SUPPORTS": 74355, "REFUTES": 25706}
-    tots = count_labels(train)
+    tots={"SUPPORTS": 0, "REFUTES": 0}
     sofar={"SUPPORTS": 0, "REFUTES": 0}
     try:
         with open("data/edocs.bin","rb") as rb:
@@ -79,6 +78,28 @@ def select_docs(train):
         edocs=title_edict(t2jnum)
         with open("data/edocs.bin","wb") as wb:
             pickle.dump(edocs,wb)
+    examples=Counter()
+    id2titles=dict()
+    for example in train:
+        cid=example["id"]
+        claim=example["claim"]
+        l=example["label"]
+        if l=='NOT ENOUGH INFO':
+            continue
+        all_evidence=[e for eset in example["evidence"] for e in eset]
+        docs=set()
+        for ev in all_evidence:
+            evid  =ev[2]
+            if evid != None:
+                docs.add(evid)
+        t2phrases=find_titles_in_claim(example["claim"],edocs)
+        id2titles[cid]=t2phrases
+        flag=False
+        for title in t2phrases:
+            if title in docs:
+                flag=True
+        if flag:
+            tots[l]+=1
     selected=dict()
     for example in tqdm(train):
         yn=0
@@ -86,13 +107,14 @@ def select_docs(train):
         l=example["label"]
         if l=='NOT ENOUGH INFO':
             continue
-        all_evidence=example["evidence"]
+        all_evidence=[e for eset in example["evidence"] for e in eset]
         docs=set()
         for ev in all_evidence:
             evid  =ev[2]
             if evid != None:
                 docs.add(evid)
-        t2phrases=find_titles_in_claim(example["claim"],edocs)
+        #t2phrases=find_titles_in_claim(example["claim"],edocs)
+        t2phrases=id2titles[cid]
         for title in t2phrases:
             if title in docs:
                 yn=1

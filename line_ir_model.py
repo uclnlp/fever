@@ -66,10 +66,10 @@ def select_lines(docs,t2jnum,train):
         l=example["label"]
         if l=='NOT ENOUGH INFO':
             continue
-        all_evidence=example["evidence"]
+        all_evidence=[e for eset in example["evidence"] for e in eset]
         evset=set()
         for ev in all_evidence:
-            evid  =ev[0][2]
+            evid  =ev[2]
             if evid != None:
                 evset.add(evid)
         flag=False
@@ -87,11 +87,11 @@ def select_lines(docs,t2jnum,train):
         l=example["label"]
         if l=='NOT ENOUGH INFO':
             continue
-        all_evidence=example["evidence"]
+        all_evidence=[e for eset in example["evidence"] for e in eset]
         lines=dict()
         for ev in all_evidence:
-            evid  =ev[0][2]
-            evline=ev[0][3]
+            evid  =ev[2]
+            evline=ev[3]
             if evid != None:
                 if evid not in lines:
                     lines[evid]=set()
