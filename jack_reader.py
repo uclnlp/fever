@@ -91,7 +91,7 @@ def reshape(preds_list, preds_length):
     reshaped = list()
     pointer = 0
     for i, length in enumerate(preds_length):
-        preds = preds_list[pointer:pointer+length]
+        preds = preds_list[pointer: pointer + length]
         pointer += length
         reshaped.append(preds)
     return reshaped
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--prependlinum", action="store_true", help="prepend linum when perform get_evidence_sentence_list")
     parser.add_argument("--only_use_topev", action="store_true", help="only use top evidence for prediction")
-    parser.add_argument("--batch_size", default=16, help="batch size for inference")
+    parser.add_argument("--batch_size", type=int, default=16, help="batch size for inference")
     args = parser.parse_args()
 
     print("loading reader from file:", args.saved_reader)
@@ -130,19 +130,17 @@ if __name__ == "__main__":
     for instance in instances:
         evidence_list = instance["evidence"]
         claim = instance["claim"]
-
         settings = [QASetting(question=claim, support=[evidence]) for evidence in evidence_list]
-        preds_length.append(len(settings))
         all_settings.append(settings)
 
+    # pointer loops from 0 to less than (or equal to) len(all_settings) with step args.batch_size
     preds_list = list()
-    results = list()
-    pointer = 0
-    for batch_settings in all_settings[pointer: pointer + args.batch_size]:
-        pointer += args.batch_size
+    for pointer in tqdm(range(0, len(all_settings), args.batch_size)):
+        batch_settings = all_settings[pointer: pointer + args.batch_size]
         n_settings = [len(settings_) for settings_ in batch_settings]
         preds_list.extend(reshape(dam_reader(flatten(batch_settings)), n_settings))
 
+    results = list()
     for instance, preds in zip(instances, preds_list):
         prediction, scores, prediction_list = aggregate_preds(preds, args.only_use_topev)
         results.append({
