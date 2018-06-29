@@ -97,6 +97,13 @@ def reshape(preds_list, preds_length):
     return reshaped
 
 
+def flatten(bumpy_2d_list):
+    flattened = list()
+    for list_ in bumpy_2d_list:
+        flattened.extend(list_)
+    return flattened
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("read claim/evidence and output verdict")
     parser.add_argument(
@@ -110,6 +117,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--prependlinum", action="store_true", help="prepend linum when perform get_evidence_sentence_list")
     parser.add_argument("--only_use_topev", action="store_true", help="only use top evidence for prediction")
+    parser.add_argument("--batch_size", default=16, help="batch size for inference")
     args = parser.parse_args()
 
     print("loading reader from file:", args.saved_reader)
@@ -125,10 +133,16 @@ if __name__ == "__main__":
 
         settings = [QASetting(question=claim, support=[evidence]) for evidence in evidence_list]
         preds_length.append(len(settings))
-        all_settings.extend(settings)
+        all_settings.append(settings)
 
+    preds_list = list()
     results = list()
-    preds_list = reshape(dam_reader(all_settings), preds_length)
+    pointer = 0
+    for batch_settings in all_settings[pointer: pointer + args.batch_size]:
+        pointer += args.batch_size
+        n_settings = [len(settings_) for settings_ in batch_settings]
+        preds_list.extend(reshape(dam_reader(flatten(batch_settings)), n_settings))
+
     for instance, preds in zip(instances, preds_list):
         prediction, scores, prediction_list = aggregate_preds(preds, args.only_use_topev)
         results.append({
