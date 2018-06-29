@@ -17,12 +17,18 @@ def load_stoplist(stopfile="stoplist"):
 
 
 
-def normalize_title(title):
+def normalize_title(title,rflag=False):
+    rmndr=""
     l_txt=title.replace("_"," ").replace("-COLON-",":")
     if l_txt.find("-LRB-") > -1:
+        rmndr=l_txt[l_txt.find("-LRB-"):]
+        rmndr=rmndr.replace("-LRB-","(").replace("-RRB-",")")
         l_txt=l_txt[:l_txt.find("-LRB-")].rstrip(" ")
     l_txt=word_tokenize(l_txt.lower())
-    return l_txt
+    if rflag:
+        return l_txt, rmndr
+    else:
+        return l_txt
 
 
 

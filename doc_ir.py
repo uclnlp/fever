@@ -36,9 +36,12 @@ def find_titles_in_claim(claim="",edocs=edict()):
                 docset[d].append((phrase,start))
     return docset
 
-def phrase_features(phrase="",start=0):
+def phrase_features(phrase="",start=0,title="",claim=""):
     features=dict()
     stoks=phrase.split()
+    t_toks,rmndr = normalize_title(title,rflag=True)
+    features["rmndr"]=(rmndr=="")
+    features["rinc"]=((rmndr!="") and (rmndr in claim))
     features["start"]=start
     features["start0"]=(start==0)
     features["lend"]=len(stoks)
@@ -76,13 +79,13 @@ def score_phrase(features=dict()):
     return score
         
 
-def score_title(ps_list=[],model=None):
+def score_title(ps_list=[],title="dummy",claim="dummy",model=None):
     maxscore=-1000000
     for phrase,start in ps_list:
         if model is None:
-            score=score_phrase(phrase_features(phrase,start))
+            score=score_phrase(phrase_features(phrase,start,title,claim))
         else:
-            score=model.score_instance(phrase,start)
+            score=model.score_instance(phrase,start,title,claim)
         maxscore=max(maxscore,score)
     return maxscore
 
@@ -91,7 +94,7 @@ def best_titles(claim="",edocs=edict(),best=5,model=None):
     t2phrases=find_titles_in_claim(claim,edocs)
     tscores=list()
     for title in t2phrases:
-        tscores.append((title,score_title(t2phrases[title],model)))
+        tscores.append((title,score_title(t2phrases[title],title,claim,model)))
     tscores=sorted(tscores,key=lambda x:-1*x[1])[:best]
     return tscores
 

@@ -14,18 +14,18 @@ from random import random, shuffle
 class doc_ir_model:
     def __init__(self,phrase_features=phrase_features):
         self.model=LogisticRegression(C=100000000,solver="sag",max_iter=100000)
-        featurelist=sorted(list(phrase_features("dummy",0).keys()))
+        featurelist=sorted(list(phrase_features("dummy",0,"dummy","dummy").keys()))
         self.f2v={f:i for i,f in enumerate(featurelist)}
     def fit(self,X,y):
         self.model.fit(X,y)
     def prob(self,x):
         return self.model.predict_proba(x)[0,1]
-    def score_instance(self,phrase="dummy",start=0):
+    def score_instance(self,phrase="dummy",start=0,title="dummy",claim="dummy"):
         x=np.zeros(shape=(1,len(self.f2v)),dtype=np.float32)
-        self.process_instance(phrase,start,0,x)
+        self.process_instance(phrase,start,title,claim,0,x)
         return self.prob(x)
-    def process_instance(self,phrase="dummy",start=0,obsnum=0,array=np.zeros(shape=(1,1)),dtype=np.float32):
-        features=phrase_features(phrase,start)
+    def process_instance(self,phrase="dummy",start=0,title="dummy",claim="dummy",obsnum=0,array=np.zeros(shape=(1,1)),dtype=np.float32):
+        features=phrase_features(phrase,start,title,claim)
         for f in features:
             array[obsnum,self.f2v[f]]=float(features[f])        
     def process_train(self,selected,train):
@@ -40,7 +40,7 @@ class doc_ir_model:
                 claim=example["claim"]
                 for yn in selected[cid]:
                     [title,phrase,start]=selected[cid][yn]
-                    self.process_instance(phrase,start,obsnum,X)
+                    self.process_instance(phrase,start,title,claim,obsnum,X)
                     y[obsnum]=float(yn)
                     obsnum+=1
         assert obsnum==obs
