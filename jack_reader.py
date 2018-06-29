@@ -117,7 +117,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--prependlinum", action="store_true", help="prepend linum when perform get_evidence_sentence_list")
     parser.add_argument("--only_use_topev", action="store_true", help="only use top evidence for prediction")
-    parser.add_argument("--batch_size", type=int, default=16, help="batch size for inference")
+    parser.add_argument("--batch_size", type=int, default=32, help="batch size for inference")
     args = parser.parse_args()
 
     print("loading reader from file:", args.saved_reader)
