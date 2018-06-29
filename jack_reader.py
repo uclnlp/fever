@@ -81,6 +81,22 @@ def aggregate_preds(prediction, only_use_topev=False):
     return (final_verdict, scores, pred_list)
 
 
+def reshape(preds_list, preds_length):
+    """reshape prediction instances
+    >> preds_list = [obj, obj, obj, obj, obj, obj]
+    >> preds_length = [3, 1, 2]
+    >> reshape(preds_list, preds_length)
+    [[obj, obj, obj], [obj], [obj, obj]]
+    """
+    reshaped = list()
+    pointer = 0
+    for i, length in enumerate(preds_length):
+        preds = preds_list[pointer:pointer+length]
+        pointer += length
+        reshaped.append(preds)
+    return reshaped
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("read claim/evidence and output verdict")
     parser.add_argument(
@@ -100,13 +116,20 @@ if __name__ == "__main__":
     dam_reader = readers.reader_from_file(args.saved_reader, dropout=0.0)
 
     results = list()
-    for instance in tqdm(read_ir_result(args.in_file, prependlinum=args.prependlinum, concatev=args.concatev)):
+    preds_length = list()
+    all_settings = list()
+    instances = read_ir_result(args.in_file, prependlinum=args.prependlinum, concatev=args.concatev)
+    for instance in instances:
         evidence_list = instance["evidence"]
         claim = instance["claim"]
 
         settings = [QASetting(question=claim, support=[evidence]) for evidence in evidence_list]
-        preds = dam_reader(settings)
+        preds_length.append(len(settings))
+        all_settings.extend(settings)
 
+    results = list()
+    preds_list = reshape(dam_reader(all_settings), preds_length)
+    for instance, preds in zip(instances, preds_list):
         prediction, scores, prediction_list = aggregate_preds(preds, args.only_use_topev)
         results.append({
             "actual": instance["label"],
