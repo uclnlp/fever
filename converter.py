@@ -54,16 +54,17 @@ def _convert_instance(instance, t2l2s, prependlinum=False, use_ir_prediction=Fal
     if use_ir_prediction:
         evidence_linum = [(title, linum) for title, linum in instance["predicted_sentences"]
                           if title in t2l2s]
+        for eidx, (title, linum) in enumerate(evidence_linum):
 
-        converted_instances.append(
-            snli_format(
-                id="{}-{}".format(instance["id"], str(0)),
-                pair_id="{}-{}".format(instance["id"], str(0)),
-                label=convert_label(instance["label"]),
-                evidence=_evidence_format(
-                    get_evidence_sentence_list(
-                        evidence_linum, t2l2s, prependlinum=prependlinum)),
-                claim=instance["claim"]))
+            converted_instances.append(
+                snli_format(
+                    id="{}-{}".format(instance["id"], str(eidx)),
+                    pair_id="{}-{}".format(instance["id"], str(eidx)),
+                    label=convert_label(instance["label"]),
+                    evidence=_evidence_format(
+                        get_evidence_sentence_list(
+                            [(title, linum)], t2l2s, prependlinum=prependlinum)),
+                    claim=instance["claim"]))
 
     else:
         for eidx, evidence_set in enumerate(instance["evidence"]):
