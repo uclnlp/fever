@@ -2,6 +2,7 @@
 convert FEVER dataset format to SNLI format for makeing it work on jack
 """
 import os
+import re
 import argparse
 import json
 from tqdm import tqdm
@@ -35,7 +36,7 @@ def snli_format(id, pair_id, label, evidence, claim):
     }
 
 
-def _convert_instance(instance, t2l2s, prependlinum=False, use_ir_prediction=False):
+def _convert_instance(instance, t2l2s, prependlinum=False, prependtitle=False, use_ir_prediction=False):
     """convert single instance to either one or multiple instances
     Args
     instance: instance of FEVER dataset.
@@ -63,7 +64,7 @@ def _convert_instance(instance, t2l2s, prependlinum=False, use_ir_prediction=Fal
                     label=convert_label(instance["label"]),
                     evidence=_evidence_format(
                         get_evidence_sentence_list(
-                            [(title, linum)], t2l2s, prependlinum=prependlinum)),
+                            [(title, linum)], t2l2s, prependlinum=prependlinum, prependtitle=prependtitle)),
                     claim=instance["claim"]))
 
     else:
@@ -82,7 +83,7 @@ def _convert_instance(instance, t2l2s, prependlinum=False, use_ir_prediction=Fal
                     label=convert_label(instance["label"]),
                     evidence=_evidence_format(
                         get_evidence_sentence_list(
-                            evidence_linum, t2l2s, prependlinum=prependlinum)),
+                            evidence_linum, t2l2s, prependlinum=prependlinum, prependtitle=prependtitle)),
                     claim=instance["claim"]))
     return converted_instances
 
@@ -139,6 +140,7 @@ if __name__ == "__main__":
     parser.add_argument("tar")
     parser.add_argument("--use_ir_pred", action="store_true")
     parser.add_argument("--prependlinum", action="store_true")
+    parser.add_argument("--prependtitle", action="store_true")
     parser.add_argument("--convert_test", action="store_true")
     # parser.add_argument("--testset", help="turn on when you convert test data", action="store_true")
     args = parser.parse_args()
@@ -149,7 +151,7 @@ if __name__ == "__main__":
 
         print("input:\n", test_in)
         fever_format = json.loads(test_in)
-        snli_format_instances = convert(fever_format, prependlinum=args.prependlinum, use_ir_prediction=args.use_ir_pred)
+        snli_format_instances = convert(fever_format, prependlinum=args.prependlinum, prependtitle=args.prependtitle, use_ir_prediction=args.use_ir_pred)
         print("\noutput:\n", json.dumps(snli_format_instances))
 
     else:

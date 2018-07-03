@@ -109,7 +109,7 @@ def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="
     return t2jnum
 
 
-def get_evidence_sentence_list(evidences, t2l2s, prependlinum=False):
+def get_evidence_sentence_list(evidences, t2l2s, prependlinum=False, prependtitle=False):
     """lookup corresponding sentences and return list of sentences
     Args
     evidences: [(title, linum), ...]
@@ -118,12 +118,23 @@ def get_evidence_sentence_list(evidences, t2l2s, prependlinum=False):
     Returns
     list of evidence sentences
     """
+
+    def process_title(title):
+        """ 'hoge_fuga_hoo' -> 'hoge fuga hoo' """
+        return re.sub("_", " ", title)
+
+    def maybe_prepend(title, linum):
+        prep = ""
+        if prependtitle:
+            prep += title
+        if prependlinum:
+            prep += " " + linum
+        return prep
+
     titles = [title for title, _ in evidences]
     linums = [linum for _, linum in evidences]
-    if not prependlinum:
-        return [t2l2s[title][linum] for title, linum in zip(titles, linums)]
-    else:
-        return [ str(linum) + " " + t2l2s[title][linum] for title, linum in zip(titles, linums)]
+
+    return [ maybe_prepend(process_title(title), linum) + " " + t2l2s[title][linum] for title, linum in zip(titles, linums)]
 
 
 def load_wikipedia(wikipedia_dir="data/wiki-pages/wiki-pages/", howmany=99999):
