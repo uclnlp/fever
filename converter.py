@@ -36,7 +36,7 @@ def snli_format(id, pair_id, label, evidence, claim):
     }
 
 
-def _convert_instance(instance, t2l2s, prependlinum=False, prependtitle=False, use_ir_prediction=False):
+def _convert_instance(instance, t2l2s, prependlinum, prependtitle, use_ir_prediction):
     """convert single instance to either one or multiple instances
     Args
     instance: instance of FEVER dataset.
@@ -88,7 +88,7 @@ def _convert_instance(instance, t2l2s, prependlinum=False, prependtitle=False, u
     return converted_instances
 
 
-def convert(instances, prependlinum=False, use_ir_prediction=False):
+def convert(instances, prependlinum=False, prependtitle=False, use_ir_prediction=False):
     """convert FEVER format to jack SNLI format
     Arg
     instances: list of dictionary of FEVER format
@@ -129,7 +129,7 @@ def convert(instances, prependlinum=False, use_ir_prediction=False):
     for instance in tqdm(instances, desc="conversion"):
         converted_instances.extend(
             _convert_instance(
-                instance, t2l2s, prependlinum=prependlinum, use_ir_prediction=use_ir_prediction))
+                instance, t2l2s, prependlinum=prependlinum, prependtitle=prependtitle, use_ir_prediction=use_ir_prediction))
 
     return converted_instances
 
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         print("input:\n", test_in)
         fever_format = json.loads(test_in)
         snli_format_instances = convert(fever_format, prependlinum=args.prependlinum, prependtitle=args.prependtitle, use_ir_prediction=args.use_ir_pred)
-        print("\noutput:\n", json.dumps(snli_format_instances))
+        print("\noutput:\n", json.dumps(snli_format_instances, indent=4))
 
     else:
         assert not os.path.exists(args.tar), "file {} alreadly exists".format(
@@ -160,5 +160,5 @@ if __name__ == "__main__":
         keyerr_count = 0
 
         instances = read_jsonl(args.src)
-        snli_format_instances = convert(instances, prependlinum=args.prependlinum, use_ir_prediction=args.use_ir_pred)
+        snli_format_instances = convert(instances, prependlinum=args.prependlinum, prependtitle=args.prependtitle, use_ir_prediction=args.use_ir_pred)
         save_jsonl(snli_format_instances, args.tar)

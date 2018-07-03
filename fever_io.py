@@ -1,5 +1,6 @@
 import json
 import random
+import re
 import os
 import sys
 from util import abs_path
@@ -118,23 +119,28 @@ def get_evidence_sentence_list(evidences, t2l2s, prependlinum=False, prependtitl
     Returns
     list of evidence sentences
     """
-
+    SEP = "#"
     def process_title(title):
         """ 'hoge_fuga_hoo' -> 'hoge fuga hoo' """
         return re.sub("_", " ", title)
 
     def maybe_prepend(title, linum):
-        prep = ""
+        prep = list()
         if prependtitle:
-            prep += title
+            prep.append(title)
         if prependlinum:
-            prep += " " + linum
-        return prep
+            prep.append(str(linum))
+
+        content = " {} ".format(SEP).join(prep)
+        if prep:
+            return "{0} {1} {0}".format(SEP, content)
+        else:
+            return content
 
     titles = [title for title, _ in evidences]
     linums = [linum for _, linum in evidences]
 
-    return [ maybe_prepend(process_title(title), linum) + " " + t2l2s[title][linum] for title, linum in zip(titles, linums)]
+    return [ (maybe_prepend(process_title(title), linum) + " " + t2l2s[title][linum]).strip() for title, linum in zip(titles, linums)]
 
 
 def load_wikipedia(wikipedia_dir="data/wiki-pages/wiki-pages/", howmany=99999):
