@@ -46,7 +46,7 @@ def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki
     for jnum in tqdm(jnums):
         points=sorted(list(jnums[jnum]))
         fname=wikipedia_dir+"wiki-"+jnum+".jsonl"
-        with open(fname) as f:
+        with open(fname, "r") as f:
             for point in points:
                 f.seek(point,0)
                 line=f.readline()
