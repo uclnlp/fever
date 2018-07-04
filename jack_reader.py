@@ -15,7 +15,7 @@ np.random.seed(1)
 random.seed(1)
 
 
-def read_ir_result(path, prependlinum=False, concatev=False):
+def read_ir_result(path, prependlinum=False, prependtitle=False, concatev=False):
     """
     Returns
     instances: list of dictionary
@@ -37,10 +37,10 @@ def read_ir_result(path, prependlinum=False, concatev=False):
     for instance in instances:
         if concatev:
             instance["evidence"] = [" ".join(get_evidence_sentence_list(
-                instance["predicted_sentences"], t2l2s, prependlinum=prependlinum))]
+                instance["predicted_sentences"], t2l2s, prependlinum=prependlinum, prependtitle=prependtitle))]
         else:
             instance["evidence"] = get_evidence_sentence_list(
-                instance["predicted_sentences"], t2l2s, prependlinum=prependlinum)
+                instance["predicted_sentences"], t2l2s, prependlinum=prependlinum, prependtitle=prependtitle)
 
     return instances
 
@@ -116,6 +116,8 @@ if __name__ == "__main__":
         "--concatev", action="store_true", help="concat evidences")
     parser.add_argument(
         "--prependlinum", action="store_true", help="prepend linum when perform get_evidence_sentence_list")
+    parser.add_argument(
+        "--prependtitle", action="store_true", help="prepend title when perform get_evidence_sentence_list")
     parser.add_argument("--only_use_topev", action="store_true", help="only use top evidence for prediction")
     parser.add_argument("--batch_size", type=int, default=32, help="batch size for inference")
     args = parser.parse_args()
@@ -126,7 +128,7 @@ if __name__ == "__main__":
     results = list()
     preds_length = list()
     all_settings = list()
-    instances = read_ir_result(args.in_file, prependlinum=args.prependlinum, concatev=args.concatev)
+    instances = read_ir_result(args.in_file, prependlinum=args.prependlinum, prependtitle=args.prependtitle, concatev=args.concatev)
     for instance in instances:
         evidence_list = instance["evidence"]
         claim = instance["claim"]
