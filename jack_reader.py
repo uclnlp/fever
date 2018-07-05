@@ -124,7 +124,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--prependtitle", action="store_true", help="prepend title when perform get_evidence_sentence_list")
     parser.add_argument("--only_use_topev", action="store_true", help="only use top evidence for prediction")
-    parser.add_argument("--n_setnences", type=int, help="how many sentences to read for prediction")
+    parser.add_argument("--n_setnences", type=int, default=5, help="how many sentences to read for prediction")
     parser.add_argument("--batch_size", type=int, default=32, help="batch size for inference")
     args = parser.parse_args()
 
