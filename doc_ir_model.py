@@ -192,5 +192,5 @@ if __name__ == "__main__":
         with open("data/edocs.bin","wb") as wb:
             pickle.dump(edocs,wb)
     print(len(model.f2v))
-    docs=doc_ir(dev,edocs,model=model)
+    docs=doc_ir(dev,edocs,best=30,model=model)
     title_hits(dev,docs)

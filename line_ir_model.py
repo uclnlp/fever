@@ -172,6 +172,6 @@ if __name__ == "__main__":
             pickle.dump(model,wb)
     docs=doc_ir(dev,edocs,model=dmodel)
     lines=load_doc_lines(docs,t2jnum)
-    evidence=line_ir(dev,docs,lines,model=model)
+    evidence=line_ir(dev,docs,lines,best=30,model=model)
     line_hits(dev,evidence)
     
