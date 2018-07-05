@@ -15,13 +15,18 @@ np.random.seed(1)
 random.seed(1)
 
 
-def read_ir_result(path, prependlinum=False, prependtitle=False, concatev=False):
+def read_ir_result(path, n_sentences=5, prependlinum=False, prependtitle=False, concatev=False):
     """
     Returns
     instances: list of dictionary
     update instance['predicted_sentences'] with list of evidences (list of str)
     """
     instances = read_jsonl(path)
+    # only read n_sentences
+    for instance in instances:
+        assert len(instance["predicted_sentences"]) > n_sentences
+        instance["predicted_sentences"] = instance["predicted_sentences"][:n_sentences]
+
     t2jnum = titles_to_jsonl_num(
         wikipedia_dir=abs_path("data/wiki-pages/wiki-pages/"),
         doctitles=abs_path("data/doctitles"))
@@ -119,6 +124,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--prependtitle", action="store_true", help="prepend title when perform get_evidence_sentence_list")
     parser.add_argument("--only_use_topev", action="store_true", help="only use top evidence for prediction")
+    parser.add_argument("--n_setnences", type=int, help="how many sentences to read for prediction")
     parser.add_argument("--batch_size", type=int, default=32, help="batch size for inference")
     args = parser.parse_args()
 
@@ -128,7 +134,7 @@ if __name__ == "__main__":
     results = list()
     preds_length = list()
     all_settings = list()
-    instances = read_ir_result(args.in_file, prependlinum=args.prependlinum, prependtitle=args.prependtitle, concatev=args.concatev)
+    instances = read_ir_result(args.in_file, n_sentences=args.n_setnences, prependlinum=args.prependlinum, prependtitle=args.prependtitle, concatev=args.concatev)
     for instance in instances:
         evidence_list = instance["evidence"]
         claim = instance["claim"]
