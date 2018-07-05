@@ -15,65 +15,41 @@ def cartesian_product(dicts):
 
 
 def summary(configuration):
-    kvs = sorted([(k, v) for k, v in configuration.items()], key=lambda e: e[0])
-    return '_'.join([('%s=%s' % (k, v)) for (k, v) in kvs if k not in {'c', 'd'}])
+    kvs = sorted(
+        [(k, v) for k, v in configuration.items()], key=lambda e: e[0])
+    return '_'.join(
+        [('%s=%s' % (k, v)) for (k, v) in kvs if k not in {'c', 'd'}])
 
 
 def to_cmd(c, _path=None):
-    command = 'PYTHONPATH=. anaconda-python3-gpu ./bin/ntp2-cli.py ' \
-              '--train data/ntp2/fb-ntn/train.tsv ' \
-              '--dev data/ntp2/fb-ntn/dev.tsv ' \
-              '--test data/ntp2/fb-ntn/test.tsv ' \
-              '-c data/ntp2/fb-ntn/clauses.pl ' \
-              '-E ntn -e 100 --max-depth 1 -b {} ' \
-              '--corrupted-pairs {} --l2 {} --k-max 10 --all ' \
-              '-F {} -R {} -I {} --learning-rate {} ' \
-              '--nms-m {} --nms-efc {} --nms-efs {} ' \
-              '--seed {} --decode' \
-              ''.format(c['b'],
-                        c['corrupted_pairs'],
-                        c['l2'],
-
-                        c['F'],
-                        c['R'],
-                        c['I'],
-                        c['lr'],
-
-                        c['nms_m'],
-                        c['nms_efc'],
-                        c['nms_efs'],
-
-                        c['seed'])
+    command = 'predicted_evidence=../fever/data/indexed_data/dev.sentences.p5.s5.ver20180629.jsonl '\
+        'label_pred=../fever/logs-deterministic/$(date +%Y%m%d%H%M%S) ' \
+        'reader=esim_ir_pred_filtered_label_ver20180629 '\
+        'bias1={bias1} '\
+        'bias2={bias2} '\
+        'PYTHONPATH=".:../fever"'\
+        'bash jack_reader.sh'\
+              .format(bias1=c['bias1'],
+                        bias2=c['bias2'])
     return command
 
 
 def to_logfile(c, path):
-    outfile = "%s/uclcs_fb-ntn_v2.%s.log" % (path, summary(c).replace("/", "_"))
+    outfile = "%s/uclcs_fb-ntn_v2.%s.log" % (path, summary(c).replace(
+        "/", "_"))
     return outfile
 
 
 def main(argv):
     hyperparameters_space = dict(
-        seed=[0],
-        corrupted_pairs=[1],
-        l2=[0.001],
-        b=[1000, 5000, 10000, 50000],
-
-        F=[1, 2, 5, 10],
-        R=[1, 2, 5, 10],
-        I=[100],
-        lr=[0.001, 0.005, 0.01, 0.05, 0.1],
-
-        nms_m=[15],
-        nms_efc=[100],
-        nms_efs=[100]
-    )
+        bias1=[x * 0.1 for x in range(-20, 20, 10)],
+        bias2=[x * 0.1 for x in range(-20, 20, 10)])
     configurations = list(cartesian_product(hyperparameters_space))
 
     path = './logs/fb-ntn/uclcs_v2'
 
     # Check that we are on the UCLCS cluster first
-    if os.path.exists('/home/pminervi/'):
+    if os.path.exists('/home/tyoneda/'):
         # If the folder that will contain logs does not exist, create it
         if not os.path.exists(path):
             os.makedirs(path)
@@ -111,14 +87,15 @@ def main(argv):
 export LANG="en_US.utf8"
 export LANGUAGE="en_US:en"
 
-cd $HOME/workspace/ntp
+cd $HOME/jack
 
 """.format(nb_jobs)
 
     print(header)
 
     for job_id, command_line in enumerate(sorted_command_lines, 1):
-        print('test $SGE_TASK_ID -eq {} && sleep 60 && {}'.format(job_id, command_line))
+        print('test $SGE_TASK_ID -eq {} && sleep 60 && {}'.format(
+            job_id, command_line))
 
 
 if __name__ == '__main__':
