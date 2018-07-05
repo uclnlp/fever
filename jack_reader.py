@@ -5,6 +5,7 @@ from fever_io import load_doclines, read_jsonl, save_jsonl, get_evidence_sentenc
 from tqdm import tqdm
 from jack import readers
 from jack.core import QASetting
+from jack.core import HyperParams
 
 # make everything deterministic
 import random
@@ -103,6 +104,9 @@ def flatten(bumpy_2d_list):
         flattened.extend(list_)
     return flattened
 
+def set_hyperparams(**kwargs):
+    HyperParams.OutputLayer.bias = np.array([kwargs["bias1"], kwargs["bias2"], 0])
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("read claim/evidence and output verdict")
@@ -120,7 +124,11 @@ if __name__ == "__main__":
         "--prependtitle", action="store_true", help="prepend title when perform get_evidence_sentence_list")
     parser.add_argument("--only_use_topev", action="store_true", help="only use top evidence for prediction")
     parser.add_argument("--batch_size", type=int, default=32, help="batch size for inference")
+    parser.add_argument("--bias1", type=float, default=0., help="bias of output layer (corresponds to entailment)")
+    parser.add_argument("--bias2", type=float, default=0., help="bias of output layer (corresponds to neutral)")
     args = parser.parse_args()
+
+    set_hyperparams(bias1=args.bias1, bias2=args.bias2)
 
     print("loading reader from file:", args.saved_reader)
     dam_reader = readers.reader_from_file(args.saved_reader, dropout=0.0)
