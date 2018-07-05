@@ -60,7 +60,7 @@ if __name__=="__main__":
     for split,data in [("train",train), ("dev",dev)]:
         docs, evidence=get_evidence(data)
         pred=tofeverformat(data,docs,evidence)
-        with open(split+".sentences.p5.s5.jsonl","w") as w:
+        with open(split+".sentences.p30.s30.jsonl","w") as w:
             for example in pred:
                 w.write(json.dumps(example)+"\n")
 
