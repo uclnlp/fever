@@ -60,6 +60,7 @@ if __name__=="__main__":
     parser.add_argument("--n_docs", type=int, default=5, help="how many documents to retrieve")
     parser.add_argument("--n_sents", type=int, default=5, help="how many setences to retrieve")
     args = parser.parse_args
+    print(args)
 
     train, dev = load_paper_dataset()
     # train, dev = load_split_trainset(9999)
