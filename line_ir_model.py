@@ -152,7 +152,7 @@ def load_selected(fname="data/line_ir_lines"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("perform ir for sentences")
     parser.add_argument("--best", type=int, default=5, help="how many setences to retrieve")
-    args = parser.parse_args
+    args = parser.parse_args()
     print(args)
 
     train, dev = load_paper_dataset()

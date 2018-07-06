@@ -171,7 +171,7 @@ def load_selected(fname="data/doc_ir_docs"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("perform ir for document")
     parser.add_argument("--best", type=int, default=5, help="how many documents to retrieve")
-    args = parser.parse_args
+    args = parser.parse_args()
     print(args)
 
     train, dev = load_paper_dataset()
