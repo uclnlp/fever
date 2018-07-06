@@ -1,3 +1,4 @@
+import argparse
 from line_ir import line_ir
 from doc_ir import doc_ir
 from doc_ir_model import doc_ir_model
@@ -9,7 +10,7 @@ import json
 
 
 
-def get_evidence(data=dict()):
+def get_evidence(data=dict(), n_docs=5, n_sents=5):
     with open("data/edocs.bin","rb") as rb:
         edocs=pickle.load(rb)
     with open("data/doc_ir_model.bin","rb") as rb:
@@ -17,9 +18,9 @@ def get_evidence(data=dict()):
     t2jnum=titles_to_jsonl_num()
     with open("data/line_ir_model.bin","rb") as rb:
         lmodel=pickle.load(rb)
-    docs=doc_ir(data,edocs,model=dmodel)
+    docs=doc_ir(data,edocs,model=dmodel,best=n_docs)
     lines=load_doc_lines(docs,t2jnum)
-    evidence=line_ir(data,docs,lines,model=lmodel)
+    evidence=line_ir(data,docs,lines,model=lmodel,best=n_sents)
     return docs, evidence
 
 def feverpredictions(data,evidence):
@@ -55,10 +56,15 @@ def feverscore():
     print(strict_score, acc_score, pr, rec, f1)
 
 if __name__=="__main__":
+    parser = argparse.ArgumentParser("save ir results")
+    parser.add_argument("--n_docs", type=int, default=5, help="how many documents to retrieve")
+    parser.add_argument("--n_sents", type=int, default=5, help="how many setences to retrieve")
+    args = parser.parse_args
+
     train, dev = load_paper_dataset()
     # train, dev = load_split_trainset(9999)
     for split,data in [("train",train), ("dev",dev)]:
-        docs, evidence=get_evidence(data)
+        docs, evidence=get_evidence(data, n_docs=args.n_docs, n_sents=args.n_sents)
         pred=tofeverformat(data,docs,evidence)
         with open(split+".sentences.p30.s30.jsonl","w") as w:
             for example in pred:

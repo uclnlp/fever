@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from util import edict, pdict, normalize_title, load_stoplist
@@ -168,6 +169,10 @@ def load_selected(fname="data/doc_ir_docs"):
     return selected
         
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser("perform ir for document")
+    parser.add_argument("--best", type=int, default=5, help="how many documents to retrieve")
+    args = parser.parse_args
+
     train, dev = load_paper_dataset()
     # train, dev = load_split_trainset(9999)
     try:
@@ -192,5 +197,5 @@ if __name__ == "__main__":
         with open("data/edocs.bin","wb") as wb:
             pickle.dump(edocs,wb)
     print(len(model.f2v))
-    docs=doc_ir(dev,edocs,best=30,model=model)
+    docs=doc_ir(dev,edocs,best=args.best,model=model)
     title_hits(dev,docs)

@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from util import edict, pdict, normalize_title, load_stoplist
@@ -149,6 +150,10 @@ def load_selected(fname="data/line_ir_lines"):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser("perform ir for sentences")
+    parser.add_argument("--best", type=int, default=5, help="how many setences to retrieve")
+    args = parser.parse_args
+
     train, dev = load_paper_dataset()
     # train, dev = load_split_trainset(9999)
     with open("data/edocs.bin","rb") as rb:
@@ -172,6 +177,6 @@ if __name__ == "__main__":
             pickle.dump(model,wb)
     docs=doc_ir(dev,edocs,model=dmodel)
     lines=load_doc_lines(docs,t2jnum)
-    evidence=line_ir(dev,docs,lines,best=30,model=model)
+    evidence=line_ir(dev,docs,lines,best=args.best,model=model)
     line_hits(dev,evidence)
     
