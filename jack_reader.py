@@ -21,11 +21,14 @@ def read_ir_result(path, n_sentences=5, prependlinum=False, prependtitle=False, 
     instances: list of dictionary
     update instance['predicted_sentences'] with list of evidences (list of str)
     """
+    short_evidences_counter = 0
     instances = read_jsonl(path)
     # only read n_sentences
     for instance in instances:
-        assert len(instance["predicted_sentences"]) > n_sentences
+        if len(instance["predicted_sentences"]) < n_sentences:
+            short_evidences_counter += 1
         instance["predicted_sentences"] = instance["predicted_sentences"][:n_sentences]
+    print("short_evidences: {} / {}".format(short_evidences_counter, len(instances)))
 
     t2jnum = titles_to_jsonl_num(
         wikipedia_dir=abs_path("data/wiki-pages/wiki-pages/"),
@@ -109,6 +112,15 @@ def flatten(bumpy_2d_list):
     return flattened
 
 
+def predict(reader, all_settings, batch_size):
+    # pointer loops from 0 to less than (or equal to) len(all_settings) with step batch_size
+    preds_list = list()
+    for pointer in tqdm(range(0, len(all_settings), batch_size)):
+        batch_settings = all_settings[pointer: pointer + batch_size]
+        n_settings = [len(settings_) for settings_ in batch_settings]
+        preds_list.extend(reshape(reader(flatten(batch_settings)), n_settings))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("read claim/evidence and output verdict")
     parser.add_argument(
@@ -141,13 +153,9 @@ if __name__ == "__main__":
         settings = [QASetting(question=claim, support=[evidence]) for evidence in evidence_list]
         all_settings.append(settings)
 
-    # pointer loops from 0 to less than (or equal to) len(all_settings) with step args.batch_size
-    preds_list = list()
-    for pointer in tqdm(range(0, len(all_settings), args.batch_size)):
-        batch_settings = all_settings[pointer: pointer + args.batch_size]
-        n_settings = [len(settings_) for settings_ in batch_settings]
-        preds_list.extend(reshape(dam_reader(flatten(batch_settings)), n_settings))
+    preds_list = predict(dam_reader, all_settings, args.batch_size)
 
+    assert len(instances) == len(preds_list)
     results = list()
     for instance, preds in zip(instances, preds_list):
         prediction, scores, prediction_list = aggregate_preds(preds, args.only_use_topev)
