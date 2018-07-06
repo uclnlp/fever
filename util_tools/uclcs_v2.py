@@ -27,7 +27,6 @@ def to_cmd(c, _path=None):
         'reader=esim_ir_pred_filtered_label_ver20180629 '\
         'bias1={bias1} '\
         'bias2={bias2} '\
-        'PYTHONPATH=".:../fever"'\
         'bash jack_reader.sh'\
               .format(bias1=c['bias1'],
                         bias2=c['bias2'])
@@ -42,11 +41,11 @@ def to_logfile(c, path):
 
 def main(argv):
     hyperparameters_space = dict(
-        bias1=[x * 0.1 for x in range(-20, 20, 10)],
-        bias2=[x * 0.1 for x in range(-20, 20, 10)])
+        bias1=[round(x * 0.10, 2) for x in range(-20, 20, 1)],
+        bias2=[round(x * 0.10, 2) for x in range(-20, 20, 1)])
     configurations = list(cartesian_product(hyperparameters_space))
 
-    path = './logs/fb-ntn/uclcs_v2'
+    path = './qsub_logs/fb-ntn/uclcs_v2'
 
     # Check that we are on the UCLCS cluster first
     if os.path.exists('/home/tyoneda/'):
