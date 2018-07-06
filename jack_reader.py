@@ -119,6 +119,7 @@ def predict(reader, all_settings, batch_size):
         batch_settings = all_settings[pointer: pointer + batch_size]
         n_settings = [len(settings_) for settings_ in batch_settings]
         preds_list.extend(reshape(reader(flatten(batch_settings)), n_settings))
+    return preds_list
 
 
 if __name__ == "__main__":
