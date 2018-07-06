@@ -122,6 +122,27 @@ def predict(reader, all_settings, batch_size):
     return preds_list
 
 
+def save_predictions(instances, preds_list, path):
+    store = list()
+    for instance, preds in zip(instances, preds_list):
+        id = instance["id"]
+        label = instance["label"]
+        claim = instance["claim"]
+        pred_sents = instance["evidence"] # refer to read_ir_result
+        pred_labels = [pred[0].text for pred in preds]
+        scores = [float(pred[0].score) for pred in preds]
+        store.append({
+            "id": id,
+            "label": label,
+            "scores": scores,
+            "predicted_labels": [convert_label(pred_label, inverse=True) for pred_label in pred_labels],
+            "claim": claim,
+            "predicted_sentences": pred_sents
+        })
+
+    save_jsonl(store, path)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("read claim/evidence and output verdict")
     parser.add_argument(
@@ -139,6 +160,7 @@ if __name__ == "__main__":
     parser.add_argument("--only_use_topev", action="store_true", help="only use top evidence for prediction")
     parser.add_argument("--n_setnences", type=int, default=5, help="how many sentences to read for prediction")
     parser.add_argument("--batch_size", type=int, default=32, help="batch size for inference")
+    parser.add_argument("--save_preds", help="specify file name to save prediction")
     args = parser.parse_args()
 
     print("loading reader from file:", args.saved_reader)
@@ -155,6 +177,9 @@ if __name__ == "__main__":
         all_settings.append(settings)
 
     preds_list = predict(dam_reader, all_settings, args.batch_size)
+
+    if args.save_preds:
+        save_predictions(instances, preds_list, path=args.save_preds)
 
     assert len(instances) == len(preds_list)
     results = list()
