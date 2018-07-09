@@ -23,7 +23,7 @@ def summary(configuration):
 
 def to_cmd(c, _path=None):
     command = 'predicted_evidence=../fever/data/indexed_data/dev.sentences.p5.s5.ver20180629.jsonl '\
-        'label_pred=../fever/logs-deterministic/$(date +%Y%m%d%H%M%S) ' \
+        'label_pred=/tmp/$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20) '\
         'reader=esim_ir_pred_filtered_label_ver20180629 '\
         'bias1={bias1} '\
         'bias2={bias2} '\
