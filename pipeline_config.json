@@ -1,0 +1,59 @@
+{
+    "__variables":
+    {
+        "___root_dir___":"/home/tyoneda/fever/pipeline",
+        "___model_name___": "model_name"
+    },
+    "config":{
+        "save_dir":"___root_dir___/fever/data/results/___model_name___/config.json"
+    },
+    "ir":
+    {
+        "train_target_file": "___root_dir___/fever/data/indexed/data/train.sentences.p5.s5.ver20180629.jsonl",
+        "dev_target_file": "___root_dir___/fever/data/indexed/data/dev.sentences.p5.s5.ver20180629.jsonl"
+    },
+    "convert":
+    {
+        "prependtitle": false,
+        "prependlinum": false,
+        "use_ir_pred": false,
+        "n_sentences": 5,
+        "train_converted_file": "",
+        "dev_converted_file": ""
+    },
+    "train_rte":
+    {
+        "save_dir": "",
+        "train_file": {"__overwrite": "convert train_converted_file"},
+        "dev_file": {"__overwrite": "convert dev_converted_file"}
+    },
+    "inference_rte":
+    {
+        "train_input_file": {"__overwrite": "ir train_target_file"},
+        "dev_input_file": {"__overwrite": "ir dev_target_file"},
+        "saved_reader_file": "___root_dir___/jack/tmp_saved_reader",
+        "prependtitle": {"__overwrite": "convert prependtitle"},
+        "prependlinum": {"__overwrite": "convert prependlinum"},
+        "n_sentences": {"__overwrite": "convert n_sentences"},
+        "train_preds_file": "___root_dir___/fever/data/results/___model_name___/train.predictions.jsonl",
+        "dev_preds_file": "___root_dir___/fever/data/results/___model_name___/dev.predictions.jsonl"
+    },
+    "neural_aggregator":
+    {
+        "train_file": {"__overwrite": "inference_rte train_preds_file"},
+        "dev_file": {"__overwrite": "inference_rte dev_preds_file"},
+        "epochs": 5,
+        "predicted_labels_file": "___root_dir___/fever/results/___model_name___/aggregated_labels.jsonl"
+    },
+    "score":
+    {
+        "predicted_labels_file": {"__overwrite": "neural_aggregator predicted_labels_file"},
+        "predicted_evidence_file": {"__overwrite": "ir dev_target_file"},
+        "actual_file": "___root_dir___/fever/data/dev.jsonl",
+        "out_file": "___root_dir___/fever/results/___model_name___/out.jsonl"
+    },
+    "additional_comment":
+    {
+    }
+}
+
