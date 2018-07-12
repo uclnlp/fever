@@ -1,16 +1,17 @@
 {
     "__variables":
     {
-        "___root_dir___":"/home/tyoneda/fever/pipeline",
-        "___model_name___": "model_name"
+        "___root_dir___":"/home/tyoneda/pipeline",
+        "___model_name___": "model_name",
+	"___reader___": "pairwise_esim_reader"
     },
     "config":{
         "save_dir":"___root_dir___/fever/data/results/___model_name___/config.json"
     },
     "ir":
     {
-        "train_target_file": "___root_dir___/fever/data/indexed/data/train.sentences.p5.s5.ver20180629.jsonl",
-        "dev_target_file": "___root_dir___/fever/data/indexed/data/dev.sentences.p5.s5.ver20180629.jsonl"
+        "train_target_file": "___root_dir___/fever/data/indexed_data/train.sentences.p5.s5.ver20180629.jsonl",
+        "dev_target_file": "___root_dir___/fever/data/indexed_data/dev.sentences.p5.s5.ver20180629.jsonl"
     },
     "convert":
     {
@@ -18,12 +19,12 @@
         "prependlinum": false,
         "use_ir_pred": false,
         "n_sentences": 5,
-        "train_converted_file": "",
-        "dev_converted_file": ""
+        "train_converted_file": "___root_dir___/fever/data/converted/train.sentences.use_ir_pred_filtered.p5.s5.jsonl",
+        "dev_converted_file": "___root_dir___/fever/data/converted/dev.sentences.use_ir_pred_filtered.p5.s5.jsonl"
     },
     "train_rte":
     {
-        "save_dir": "",
+        "save_dir": "___root_dir___/jack/___reader___",
         "train_file": {"__overwrite": "convert train_converted_file"},
         "dev_file": {"__overwrite": "convert dev_converted_file"}
     },
@@ -31,17 +32,17 @@
     {
         "train_input_file": {"__overwrite": "ir train_target_file"},
         "dev_input_file": {"__overwrite": "ir dev_target_file"},
-        "saved_reader_file": "___root_dir___/jack/tmp_saved_reader",
+        "saved_reader": {"__overwrite": "train_rte save_dir"},
         "prependtitle": {"__overwrite": "convert prependtitle"},
         "prependlinum": {"__overwrite": "convert prependlinum"},
         "n_sentences": {"__overwrite": "convert n_sentences"},
-        "train_preds_file": "___root_dir___/fever/data/results/___model_name___/train.predictions.jsonl",
-        "dev_preds_file": "___root_dir___/fever/data/results/___model_name___/dev.predictions.jsonl"
+        "train_predicted_labels_and_scores_file": "___root_dir___/fever/data/results/___model_name___/train.predictions.jsonl",
+        "dev_predicted_labels_and_scores_file": "___root_dir___/fever/data/results/___model_name___/dev.predictions.jsonl"
     },
     "neural_aggregator":
     {
-        "train_file": {"__overwrite": "inference_rte train_preds_file"},
-        "dev_file": {"__overwrite": "inference_rte dev_preds_file"},
+        "train_file": {"__overwrite": "inference_rte train_predicted_labels_and_scores_file"},
+        "dev_file": {"__overwrite": "inference_rte dev_predicted_labels_and_scores_file"},
         "epochs": 5,
         "predicted_labels_file": "___root_dir___/fever/results/___model_name___/aggregated_labels.jsonl"
     },
@@ -49,10 +50,10 @@
     {
         "predicted_labels_file": {"__overwrite": "neural_aggregator predicted_labels_file"},
         "predicted_evidence_file": {"__overwrite": "ir dev_target_file"},
-        "actual_file": "___root_dir___/fever/data/dev.jsonl",
+        "actual_file": "___root_dir___/fever/fever/dev.jsonl",
         "out_file": "___root_dir___/fever/results/___model_name___/out.jsonl"
     },
-    "additional_comment":
+    "_additional_comment":
     {
     }
 }

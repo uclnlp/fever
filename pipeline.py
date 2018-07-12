@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     # load config
     config = parse(config)
-    import ipdb; ipdb.set_trace()
+    save_config(config, path="result/")
 
     # perform IR if file doesn't exist
     if not (os.path.exists(config["ir"]["train_target_file"])
@@ -110,19 +110,19 @@ if __name__ == '__main__':
         print("skipping ir...")
 
     # convert format if file does not exist
-    if not os.path.exists(config["convert"]["train_converted_file"]) and os.path.exists(config["convert"]["dev_target_file"]):
+    if not os.path.exists(config["convert"]["train_converted_file"]) and os.path.exists(config["convert"]["dev_converted_file"]):
         convert(config["convert"])
     else:
         print("skipping conversion...")
 
     # train rte model if file does not exist
-    if not os.path.exists(config["rte"]["saved_reader"]):
+    if not os.path.isdir(config["train_rte"]["save_dir"]):
         train_rte(config["train_rte"])
     else:
         print("skipping train rte...")
 
     # rte inference if file does not exist
-    if not os.path.exists(config["rte"]["predicted_labels_and_scores_file"]):
+    if not os.path.exists(config["inference_rte"]["train_predicted_labels_and_scores_file"]):
         inference_rte(config["inference_rte"])
     else:
         print("skipping inference rte...")
