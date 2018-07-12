@@ -1,0 +1,23 @@
+{
+    "key0":
+    {
+        "key0_0" : "item0_0",
+        "key0_1_0" : {"key0_1_0": "hogee"},
+        "key0_2" : "item0_2",
+        "key0_3" : false,
+        "key0_4" : 15,
+        "key0_5" : 1.345
+    },
+    "key1":
+    {
+        "key1_0" : "item1_0",
+        "key1_1" : "item1_1",
+        "key1_2" : "foo/hoge/bar",
+        "key1_3" : "foo/hoge/bar/fuga/bar"
+    },
+    "key2":
+    {
+        "key2_0" : "item0_0",
+        "key3_0" : "foo/hoge/bar/fuga/bar"
+    }
+}
