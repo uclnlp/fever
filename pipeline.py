@@ -1,3 +1,4 @@
+import datetime
 import argparse
 import json
 import os
@@ -10,6 +11,11 @@ def load_config(config_path):
     with open(config_path, "r") as f:
         config = json.load(f)
     return config
+
+
+def save_config(config, save_path):
+    with open(save_path, "w") as f:
+        json.dump(config, f)
 
 
 def ir(ir_config):
@@ -49,7 +55,7 @@ def train_rte(config):
 
 
 def inference_rte(config):
-    raise RuntimeError("this func is under construction!")
+    os.chdir("/home/tyoneda/pipeline/jack")
     options = list()
     options.append("--saved_reader {}".format(config["saved_reader"]))
     if config["prependlinum"]:
@@ -58,27 +64,35 @@ def inference_rte(config):
         options.append("--prependtitle")
     if config["n_sentences"]:
         options.append("--n_sentences")
-    if config["save_preds_file"]:
-        options.append("--save_preds {}".format(config["save_preds"]))
 
+    # train data
+    options.append("--save_preds {}".format(config["train_predicted_labels_and_scores_file"]))
+    script = ["anaconda-python3-gpu", "jack_reader.py"] + options
+    print(script)
+    subprocess.run(script)
+
+    # dev data
+    options[-1] = "--save_preds {}".format(config["dev_predicted_labels_and_scores_file"])
+    print(script)
     script = ["anaconda-python3-gpu", "jack_reader.py"] + options
     subprocess.run(script)
 
 
 def neural_aggregator(config):
-    raise RuntimeError("this func is under construction!")
+    os.chdir("/home/tyoneda/pipeline/fever")
     options = list()
-    options.append("--train_file {}".format(config["train"]))
-    options.append("--dev_file {}".format(config["dev"]))
+    options.append("--train_file {}".format(config["train_file"]))
+    options.append("--dev_file {}".format(config["dev_file"]))
     options.append("--epochs {}".format(config["epochs"]))
     options.append("--predicted_labels {}".format(
         config["predicted_labels_file"]))
     script = ["python3", "neural_aggregator.py"] + options
+    print(script)
     subprocess.run(script)
 
 
 def score(config):
-    raise RuntimeError("this func is under construction!")
+    os.chdir("/home/tyoneda/pipeline/fever-baslines")
     options = list()
     options.append("--predicted_labels {}".format(
         config["predicted_labels_file"]))
@@ -87,6 +101,7 @@ def score(config):
     options.append("--actual {}".format(config["actual_file"]))
     options.append("--out_file {}".format(config["out_file"]))
     script = ["python3", "src/script/score.py"] + options
+    print(script)
     subprocess.run(script)
 
 
@@ -98,9 +113,15 @@ if __name__ == '__main__':
     with open(args.config) as f:
         config = json.load(f)
 
+    now = datetime.datetime.now()
     # load config
+    config["__variables"]["___model_name___"] = "{0:model_%Y%m%d%H%M%S}".format(now)
     config = parse(config)
-    save_config(config, path="result/")
+    model_dir = "results/{}".format(config["__variables"]["___model_name___"])
+    if not os.path.exits(model_dir):
+        os.mkdir(model_dir)
+
+    save_config(config, path="result/{}/config.json".format(config["__variables"]["___model_name___"]))
 
     # perform IR if file doesn't exist
     if not (os.path.exists(config["ir"]["train_target_file"])
