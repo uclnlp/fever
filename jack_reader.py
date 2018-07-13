@@ -169,7 +169,7 @@ if __name__ == "__main__":
     results = list()
     preds_length = list()
     all_settings = list()
-    instances = read_ir_result(args.in_file, n_sentences=args.n_setnences, prependlinum=args.prependlinum, prependtitle=args.prependtitle, concatev=args.concatev)
+    instances = read_ir_result(args.in_file, n_sentences=args.n_sentences, prependlinum=args.prependlinum, prependtitle=args.prependtitle, concatev=args.concatev)
     for instance in instances:
         evidence_list = instance["evidence"]
         claim = instance["claim"]
