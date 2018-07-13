@@ -148,7 +148,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "in_file",
         help="input file path for rte (e.g., dev.sentences.p5.s5.jsonl)")
-    parser.add_argument("out_file", help="output prediction file")
+    parser.add_argument("save_preds", help="specify file name to save prediction")
     parser.add_argument(
         "--saved_reader", help="path to saved reader directory")
     parser.add_argument(
@@ -160,7 +160,6 @@ if __name__ == "__main__":
     parser.add_argument("--only_use_topev", action="store_true", help="only use top evidence for prediction")
     parser.add_argument("--n_sentences", type=int, default=5, help="how many sentences to read for prediction")
     parser.add_argument("--batch_size", type=int, default=32, help="batch size for inference")
-    parser.add_argument("--save_preds", help="specify file name to save prediction")
     args = parser.parse_args()
 
     print("loading reader from file:", args.saved_reader)
@@ -177,21 +176,4 @@ if __name__ == "__main__":
         all_settings.append(settings)
 
     preds_list = predict(dam_reader, all_settings, args.batch_size)
-
-    if args.save_preds:
-        save_predictions(instances, preds_list, path=args.save_preds)
-
-    assert len(instances) == len(preds_list)
-    results = list()
-    for instance, preds in zip(instances, preds_list):
-        prediction, scores, prediction_list = aggregate_preds(preds, args.only_use_topev)
-        results.append({
-            "actual": instance["label"],
-            "predicted":
-            convert_label(prediction, inverse=True),
-            "scores":
-            scores,
-            "prediction_list":
-            [convert_label(pred, inverse=True) for pred in prediction_list]
-        })
-    save_jsonl(results, abs_path(args.out_file))
+    save_predictions(instances, preds_list, path=args.save_preds)
