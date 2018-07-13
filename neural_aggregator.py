@@ -29,16 +29,17 @@ class Net(nn.Module):
 class PredictedLabelsDataset(Dataset):
     """Predicted Labels dataset."""
 
-    def __init__(self, jsonl_file):
+    def __init__(self, jsonl_file, n_sentences=5):
         """
         """
         self.instances = read_jsonl(jsonl_file)
+        self.n_sentences = n_sentences
 
     def __len__(self):
         return len(self.instances)
 
     def __getitem__(self, idx):
-        if len(self.instances[idx]["predicted_labels"]) < 5:
+        if len(self.instances[idx]["predicted_labels"]) < self.n_sentences:
             idx = 0
         return (create_target(self.instances[idx]["label"]),
                 create_input(self.instances[idx]["predicted_labels"],
@@ -135,14 +136,16 @@ if __name__ == "__main__":
     parser.add_argument("--dev", required=True)
     parser.add_argument("--batch_size", default=64, type=int)
     parser.add_argument("--epochs", default=5, type=int)
+    parser.add_argument("--n_sentences", default=5, type=int)
     parser.add_argument("--predicted_labels", required=True)
     parser.add_argument("--layers", nargs="+", required=True, help="<required> specify each width of layers (currently, should be 3 layers)")
     args = parser.parse_args()
 
     eye = np.eye(3)
     # data: prepend_title_linum
-    train_set = PredictedLabelsDataset(args.train)
-    dev_set = PredictedLabelsDataset(args.dev)
+    print(args)
+    train_set = PredictedLabelsDataset(args.train, args.n_sentences)
+    dev_set = PredictedLabelsDataset(args.dev, args.n_sentences)
     train_dataloader = DataLoader(
         train_set, batch_size=64, shuffle=True, num_workers=4)
     dev_dataloader = DataLoader(
