@@ -11,12 +11,13 @@ from fever_io import read_jsonl, save_jsonl
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self, layers=[15,10,5]):
         super(Net, self).__init__()
+        assert len(layers) == 3, "currently, only supports 3 layer MLP"
         # an affine operation: y = Wx + b
-        self.fc1 = nn.Linear(15, 10)
-        self.fc2 = nn.Linear(10, 5)
-        self.fc3 = nn.Linear(5, 3)
+        self.fc1 = nn.Linear(layers[0], layers[1])
+        self.fc2 = nn.Linear(layers[1], layers[2])
+        self.fc3 = nn.Linear(layers[2], 3)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -135,6 +136,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", default=64, type=int)
     parser.add_argument("--epochs", default=5, type=int)
     parser.add_argument("--predicted_labels", required=True)
+    parser.add_argument("--layers", nargs="+", required=True, help="<required> specify each width of layers (currently, should be 3 layers)")
     args = parser.parse_args()
 
     eye = np.eye(3)
@@ -146,7 +148,7 @@ if __name__ == "__main__":
     dev_dataloader = DataLoader(
         dev_set, batch_size=64, shuffle=False, num_workers=4)
 
-    net = Net()
+    net = Net(layers=[int(width) for width in args.layers])
     print("----Neural Aggregator Architecture----")
     print(net)
 
