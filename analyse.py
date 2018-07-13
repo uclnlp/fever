@@ -18,6 +18,13 @@ def analyse(predictions, actual, out_file):
     print_confusion_mat(predictions, actual)
     save_wrong_instances(predictions, actual, out_file)
 
+def save_simple_result(path, score, acc, precision, recall):
+    save = {"FEVER score": round(score, 4),
+     "Accuracy": round(acc, 4),
+     "Precision": round(precision, 4),
+     "Recall": round(recall, 4)}
+    with open(path, "w") as f:
+        json.dump(save, f)
 
 def print_confusion_mat(predictions, actual):
     # table = {"actual_label": { "pred_label": count, "pred_label": "count"}, ...}
