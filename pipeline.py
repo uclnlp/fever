@@ -113,8 +113,8 @@ def score(config):
     options.extend(["--actual", config["actual_file"]])
     options.extend(["--score_file", config["score_file"]])
 
-    script = ["src/script/score.py"] + options
-    __run_python(script, gpu=False, env={"PYTHONPATH": "src"})
+    script = ["src/scripts/score.py"] + options
+    __run_python(script, gpu=False, env={"PYTHONPATH": "src:../fever"})
 
 
 def __run_python(script, gpu=False, env=dict()):
