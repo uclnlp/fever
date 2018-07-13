@@ -10,10 +10,11 @@ from fever_io import read_jsonl, save_jsonl
 
 @contextmanager
 def environ(env):
-    original_environ = os.environ.copy()
+    original_environ_dict = os.environ.copy()
     os.environ.update(env)
     yield
-    os.environ = original_environ
+    os.environ.clear()
+    os.environ.update(original_environ_dict)
 
 
 def load_config(config_path):
