@@ -145,6 +145,9 @@ if __name__ == '__main__':
     # load config
     config["__variables"]["___model_name___"] = args.model
     model_dir = "results/{}".format(config["__variables"]["___model_name___"])
+
+    save_config(config, path=os.path.join(model_dir, "org_config.json")
+
     config = parse(config)
     if not os.path.exists(model_dir):
         os.mkdir(model_dir)
