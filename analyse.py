@@ -18,13 +18,17 @@ def analyse(predictions, actual, out_file):
     print_confusion_mat(predictions, actual)
     save_wrong_instances(predictions, actual, out_file)
 
+
 def save_simple_result(path, score, acc, precision, recall):
-    save = {"FEVER score": round(score, 4),
-     "Accuracy": round(acc, 4),
-     "Precision": round(precision, 4),
-     "Recall": round(recall, 4)}
+    save = {
+        "FEVER score": round(score, 4),
+        "Accuracy": round(acc, 4),
+        "Precision": round(precision, 4),
+        "Recall": round(recall, 4)
+    }
     with open(path, "w") as f:
         json.dump(save, f)
+
 
 def print_confusion_mat(predictions, actual):
     # table = {"actual_label": { "pred_label": count, "pred_label": "count"}, ...}
@@ -127,8 +131,11 @@ def resolve_evidences(evidences, t2l2s, actual=True):
 
     return evidence_sentences
 
+
 import re
 __pattern = re.compile('\w+|[^\w\s]')
+
+
 def tokenize(text, pattern=__pattern):
     return __pattern.findall(text)
 
@@ -172,8 +179,8 @@ def save_wrong_instances(actual_file, predicted_labels_file,
     pos_counter = 0
     neg_counter = 0
     print("processing predictions...")
-    for label_pred, ev_pred, act in tqdm(zip(label_predictions, ev_predictions,
-                                        actual)):
+    for label_pred, ev_pred, act in tqdm(
+            zip(label_predictions, ev_predictions, actual)):
         actual_label = act["label"]
         assert actual_label == label_pred["actual"]
 
@@ -190,10 +197,13 @@ def save_wrong_instances(actual_file, predicted_labels_file,
         claim = act["claim"]
         ev_contained = convert(compare_evidences(actual_ev, pred_ev))
         actual_ev_sent = resolve_evidences(actual_ev, t2l2s)
-        assert not (actual_label != "NOT ENOUGH INFO" and len(actual_ev_sent) != len(actual_ev))
+        assert not (actual_label != "NOT ENOUGH INFO"
+                    and len(actual_ev_sent) != len(actual_ev))
 
         pred_sentence = " ".join(pred_ev_sent)
-        ac_sentence = " ".join(sent for sentences in actual_ev_sent for sent in sentences if sent != "**Not Found**")
+        ac_sentence = " ".join(sent for sentences in actual_ev_sent
+                               for sent in sentences
+                               if sent != "**Not Found**")
         unk_words = find_unk(pred_sentence + " " + ac_sentence, vocab)
 
         if pred_label == actual_label:
@@ -225,7 +235,7 @@ def save_wrong_instances(actual_file, predicted_labels_file,
             "actual_evidence": actual_ev,
             "actual_sentences": actual_ev_sent,
             "actual_label": actual_label,
-            "unk_words" : unk_words
+            "unk_words": unk_words
         })
 
     random.shuffle(observations)
@@ -233,6 +243,7 @@ def save_wrong_instances(actual_file, predicted_labels_file,
     print("pos_counter", pos_counter)
     print("neg_counter", neg_counter)
     print("wrong labels:", counter)
+
 
 def save_jsonl(dictionaries, path, print_message=True):
     """save jsonl file from list of dictionaries
@@ -246,16 +257,17 @@ def save_jsonl(dictionaries, path, print_message=True):
         for instance in dictionaries:
             out_file.write(str(json.dumps(instance, indent=4)) + "\n")
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--predicted_labels",type=str)
-    parser.add_argument("--predicted_evidence",type=str)
-    parser.add_argument("--actual",type=str)
-    parser.add_argument("--out_file",type=str)
+    parser.add_argument("--predicted_labels", type=str)
+    parser.add_argument("--predicted_evidence", type=str)
+    parser.add_argument("--actual", type=str)
+    parser.add_argument("--out_file", type=str)
 
     args = parser.parse_args()
 
-    predicted_labels =[]
+    predicted_labels = []
     predicted_evidence = []
     actual = []
 
@@ -263,7 +275,7 @@ if __name__ == "__main__":
         for line in predictions_file:
             predicted_labels.append(json.loads(line)["predicted"])
 
-    with open(args.predicted_evidence,"r") as predictions_file:
+    with open(args.predicted_evidence, "r") as predictions_file:
         for line in predictions_file:
             predicted_evidence.append(json.loads(line)["predicted_sentences"])
 
@@ -272,9 +284,12 @@ if __name__ == "__main__":
             actual.append(json.loads(line))
 
     predictions = []
-    for ev,label in zip(predicted_evidence,predicted_labels):
-        predictions.append({"predicted_evidence":ev,"predicted_label":label})
+    for ev, label in zip(predicted_evidence, predicted_labels):
+        predictions.append({
+            "predicted_evidence": ev,
+            "predicted_label": label
+        })
 
     print_confusion_mat(predictions, actual)
-    save_wrong_instances(args.actual, args.predicted_labels, args.predicted_evidence, args.out_file)
-
+    save_wrong_instances(args.actual, args.predicted_labels,
+                         args.predicted_evidence, args.out_file)
