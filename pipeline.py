@@ -68,7 +68,7 @@ def inference_rte(config):
     os.chdir("/home/tyoneda/pipeline/jack")
     options = list()
     options.append(config["train_input_file"])  # input file
-    options.append(config["dev_input_file"])  # input file
+    options.append(config["train_predicted_labels_and_scores_file"])
     options.extend(["--saved_reader", config["saved_reader"]])
     if config["prependlinum"]:
         options.append("--prependlinum")
@@ -82,13 +82,12 @@ def inference_rte(config):
     # quit()
 
     # train data
-    options.extend(
-        ["--save_preds", config["train_predicted_labels_and_scores_file"]])
     script = ["../fever/jack_reader.py"] + options
     __run_python(script, gpu=True, env={"PYTHONPATH": "."})
 
     # dev data
-    options[-1] = config["dev_predicted_labels_and_scores_file"]
+    options[0] = config["dev_input_file"]
+    options[1] = config["dev_predicted_labels_and_scores_file"]
     script = ["../fever/jack_reader.py"] + options
     __run_python(script, gpu=True, env={"PYTHONPATH": "."})
 
