@@ -147,6 +147,8 @@ if __name__ == '__main__':
     parser.add_argument(
         "--model", default="{0:model_%Y%m%d%H%M%S}".format(now))
     args = parser.parse_args()
+    if os.path.exists(os.path.join("results", args.model, "org_config.json")):
+        raise RuntimeError("you cannot overwrite the config. use different model name.")
 
     with open(args.config) as f:
         config = json.load(f)
