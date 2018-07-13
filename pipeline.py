@@ -100,8 +100,9 @@ def neural_aggregator(config):
     options.extend(["--dev", config["dev_file"]])
     options.extend(["--epochs", str(config["epochs"])])
     options.extend(["--predicted_labels", config["predicted_labels_file"]])
-    layers = " ".join(config["layers"])
-    options.extend(["--layers", layers])
+    options.extend(["--n_sentences", str(config["n_sentences"])])
+    layers = [str(num) for num in config["layers"]]
+    options.extend(["--layers"] + layers)
 
     script = ["neural_aggregator.py"] + options
     __run_python(script, gpu=False)
