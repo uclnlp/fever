@@ -59,15 +59,16 @@ def train_rte(config):
     options.append("--train {}".format(config["train"]))
     options.append("--dev {}".format(config["dev"]))
 
-    script = " ".join(["anaconda-python3-gpu", "bin/jack_train.py", "with"] + options)
+    script = " ".join(["anaconda-python3-gpu", "bin/jack_train.py", "with"] +
+                      options)
     subprocess.run(script)
 
 
 def inference_rte(config):
     os.chdir("/home/tyoneda/pipeline/jack")
     options = list()
-    options.append(config["train_input_file"]) # input file
-    options.append(config["dev_input_file"]) # input file
+    options.append(config["train_input_file"])  # input file
+    options.append(config["dev_input_file"])  # input file
     options.extend(["--saved_reader", config["saved_reader"]])
     if config["prependlinum"]:
         options.append("--prependlinum")
@@ -81,14 +82,15 @@ def inference_rte(config):
     # quit()
 
     # train data
-    options.extend(["--save_preds", config["train_predicted_labels_and_scores_file"]])
+    options.extend(
+        ["--save_preds", config["train_predicted_labels_and_scores_file"]])
     script = ["../fever/jack_reader.py"] + options
-    __run_python(script, gpu=True, env={"PYTHONPATH":"."})
+    __run_python(script, gpu=True, env={"PYTHONPATH": "."})
 
     # dev data
     options[-1] = config["dev_predicted_labels_and_scores_file"]
     script = ["../fever/jack_reader.py"] + options
-    __run_python(script, gpu=True, env={"PYTHONPATH":"."})
+    __run_python(script, gpu=True, env={"PYTHONPATH": "."})
 
 
 def neural_aggregator(config):
@@ -98,9 +100,9 @@ def neural_aggregator(config):
     options.extend(["--dev", config["dev_file"]])
     options.extend(["--epochs", str(config["epochs"])])
     options.extend(["--predicted_labels", config["predicted_labels_file"]])
-    
+
     script = ["neural_aggregator.py"] + options
-    __run_tpyhon(script, gpu=False)
+    __run_python(script, gpu=False)
 
 
 def score(config):
@@ -112,14 +114,21 @@ def score(config):
     options.extend(["--score_file", config["score_file"]])
 
     script = ["src/script/score.py"] + options
-    __run_python(script, gpu=False, env={"PYTHONPATH":"src"})
+    __run_python(script, gpu=False, env={"PYTHONPATH": "src"})
+
 
 def __run_python(script, gpu=False, env=dict()):
     LD_LIBRARY_PATH = "/share/apps/cuda-9.0/lib64:/share/apps/python-3.6.3-shared/lib:/share/apps/libc6_2.23/lib/x86_64-linux-gnu:/share/apps/libc6_2.23/lib64:/share/apps/gcc-6.2.0/lib64:/share/apps/gcc-6.2.0/lib"
-    python_gpu_prep = ["/share/apps/libc6_2.23/lib/x86_64-linux-gnu/ld-2.23.so","/home/tyoneda/anaconda3/bin/python3"]
+    python_gpu_prep = [
+        "/share/apps/libc6_2.23/lib/x86_64-linux-gnu/ld-2.23.so",
+        "/home/tyoneda/anaconda3/bin/python3"
+    ]
     prep = ["/home/tyoneda/anaconda3/bin/python3"]
     if gpu:
-        env.update({"LD_LIBRARY_PATH": LD_LIBRARY_PATH, "CUDA_VISIBLE_DEVICES": "0"})
+        env.update({
+            "LD_LIBRARY_PATH": LD_LIBRARY_PATH,
+            "CUDA_VISIBLE_DEVICES": "0"
+        })
         prep = python_gpu_prep
 
     with environ(env):
@@ -135,18 +144,18 @@ if __name__ == '__main__':
     now = datetime.datetime.now()
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
-    parser.add_argument("--model", default="{0:model_%Y%m%d%H%M%S}".format(now))
+    parser.add_argument(
+        "--model", default="{0:model_%Y%m%d%H%M%S}".format(now))
     args = parser.parse_args()
 
     with open(args.config) as f:
         config = json.load(f)
 
-
     # load config
     config["__variables"]["___model_name___"] = args.model
     model_dir = "results/{}".format(config["__variables"]["___model_name___"])
 
-    save_config(config, path=os.path.join(model_dir, "org_config.json")
+    save_config(config, path=os.path.join(model_dir, "org_config.json"))
 
     config = parse(config)
     if not os.path.exists(model_dir):
@@ -162,7 +171,9 @@ if __name__ == '__main__':
         print("skipping ir...")
 
     # convert format if file does not exist
-    if not os.path.exists(config["convert"]["train_converted_file"]) and os.path.exists(config["convert"]["dev_converted_file"]):
+    if not os.path.exists(
+            config["convert"]["train_converted_file"]) and os.path.exists(
+                config["convert"]["dev_converted_file"]):
         convert(config["convert"])
     else:
         print("skipping conversion...")
@@ -174,7 +185,8 @@ if __name__ == '__main__':
         print("skipping train rte...")
 
     # rte inference if file does not exist
-    if not os.path.exists(config["inference_rte"]["train_predicted_labels_and_scores_file"]):
+    if not os.path.exists(
+            config["inference_rte"]["train_predicted_labels_and_scores_file"]):
         inference_rte(config["inference_rte"])
     else:
         print("skipping inference rte...")
