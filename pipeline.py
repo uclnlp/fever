@@ -2,9 +2,18 @@ import datetime
 import argparse
 import json
 import os
+from contextlib import contextmanager
 import subprocess
 from config_parser import parse
 from fever_io import read_jsonl, save_jsonl
+
+
+@contextmanager
+def environ(env):
+    original_environ = os.environ.copy()
+    os.environ.update(env)
+    yield
+    os.environ = original_environ
 
 
 def load_config(config_path):
@@ -13,8 +22,8 @@ def load_config(config_path):
     return config
 
 
-def save_config(config, save_path):
-    with open(save_path, "w") as f:
+def save_config(config, path):
+    with open(path, "w") as f:
         json.dump(config, f)
 
 
@@ -50,78 +59,97 @@ def train_rte(config):
     options.append("--train {}".format(config["train"]))
     options.append("--dev {}".format(config["dev"]))
 
-    script = ["anaconda-python3-gpu", "bin/jack_train.py", "with"] + options
+    script = " ".join(["anaconda-python3-gpu", "bin/jack_train.py", "with"] + options)
     subprocess.run(script)
 
 
 def inference_rte(config):
     os.chdir("/home/tyoneda/pipeline/jack")
     options = list()
-    options.append("--saved_reader {}".format(config["saved_reader"]))
+    options.append(config["train_input_file"]) # input file
+    options.append(config["dev_input_file"]) # input file
+    options.extend(["--saved_reader", config["saved_reader"]])
     if config["prependlinum"]:
         options.append("--prependlinum")
     if config["prependtitle"]:
         options.append("--prependtitle")
     if config["n_sentences"]:
-        options.append("--n_sentences")
+        options.extend(["--n_sentences", str(config["n_sentences"])])
+
+    # print(["python3", "hello_world.py"])
+    # subprocess.run(["python3", "hello_world.py"])
+    # quit()
 
     # train data
-    options.append("--save_preds {}".format(config["train_predicted_labels_and_scores_file"]))
-    script = ["anaconda-python3-gpu", "jack_reader.py"] + options
-    print(script)
-    subprocess.run(script)
+    options.extend(["--save_preds", config["train_predicted_labels_and_scores_file"]])
+    script = ["../fever/jack_reader.py"] + options
+    __run_python(script, gpu=True, env={"PYTHONPATH":"."})
 
     # dev data
-    options[-1] = "--save_preds {}".format(config["dev_predicted_labels_and_scores_file"])
-    print(script)
-    script = ["anaconda-python3-gpu", "jack_reader.py"] + options
-    subprocess.run(script)
+    options[-1] = config["dev_predicted_labels_and_scores_file"]
+    script = ["../fever/jack_reader.py"] + options
+    __run_python(script, gpu=True, env={"PYTHONPATH":"."})
 
 
 def neural_aggregator(config):
     os.chdir("/home/tyoneda/pipeline/fever")
     options = list()
-    options.append("--train_file {}".format(config["train_file"]))
-    options.append("--dev_file {}".format(config["dev_file"]))
-    options.append("--epochs {}".format(config["epochs"]))
-    options.append("--predicted_labels {}".format(
-        config["predicted_labels_file"]))
-    script = ["python3", "neural_aggregator.py"] + options
-    print(script)
-    subprocess.run(script)
+    options.extend(["--train", config["train_file"]])
+    options.extend(["--dev", config["dev_file"]])
+    options.extend(["--epochs", str(config["epochs"])])
+    options.extend(["--predicted_labels", config["predicted_labels_file"]])
+    
+    script = ["neural_aggregator.py"] + options
+    __run_tpyhon(script, gpu=False)
 
 
 def score(config):
-    os.chdir("/home/tyoneda/pipeline/fever-baslines")
+    os.chdir("/home/tyoneda/pipeline/fever-baselines")
     options = list()
-    options.append("--predicted_labels {}".format(
-        config["predicted_labels_file"]))
-    options.append("--predicted_evidence {}".format(
-        config["predicted_evidence_file"]))
-    options.append("--actual {}".format(config["actual_file"]))
-    options.append("--out_file {}".format(config["out_file"]))
-    script = ["python3", "src/script/score.py"] + options
-    print(script)
-    subprocess.run(script)
+    options.extend(["--predicted_labels", config["predicted_labels_file"]])
+    options.extend(["--predicted_evidence", config["predicted_evidence_file"]])
+    options.extend(["--actual", config["actual_file"]])
+    options.extend(["--score_file", config["score_file"]])
+
+    script = ["src/script/score.py"] + options
+    __run_python(script, gpu=False, env={"PYTHONPATH":"src"})
+
+def __run_python(script, gpu=False, env=dict()):
+    LD_LIBRARY_PATH = "/share/apps/cuda-9.0/lib64:/share/apps/python-3.6.3-shared/lib:/share/apps/libc6_2.23/lib/x86_64-linux-gnu:/share/apps/libc6_2.23/lib64:/share/apps/gcc-6.2.0/lib64:/share/apps/gcc-6.2.0/lib"
+    python_gpu_prep = ["/share/apps/libc6_2.23/lib/x86_64-linux-gnu/ld-2.23.so","/home/tyoneda/anaconda3/bin/python3"]
+    prep = ["/home/tyoneda/anaconda3/bin/python3"]
+    if gpu:
+        env.update({"LD_LIBRARY_PATH": LD_LIBRARY_PATH, "CUDA_VISIBLE_DEVICES": "0"})
+        prep = python_gpu_prep
+
+    with environ(env):
+        script = prep + script
+        print(script)
+        ret = subprocess.run(script)
+        if ret.returncode != 0:
+            print(ret)
+            raise RuntimeError("shell returned non zero code.")
 
 
 if __name__ == '__main__':
+    now = datetime.datetime.now()
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
+    parser.add_argument("--model", default="{0:model_%Y%m%d%H%M%S}".format(now))
     args = parser.parse_args()
 
     with open(args.config) as f:
         config = json.load(f)
 
-    now = datetime.datetime.now()
+
     # load config
-    config["__variables"]["___model_name___"] = "{0:model_%Y%m%d%H%M%S}".format(now)
-    config = parse(config)
+    config["__variables"]["___model_name___"] = args.model
     model_dir = "results/{}".format(config["__variables"]["___model_name___"])
-    if not os.path.exits(model_dir):
+    config = parse(config)
+    if not os.path.exists(model_dir):
         os.mkdir(model_dir)
 
-    save_config(config, path="result/{}/config.json".format(config["__variables"]["___model_name___"]))
+    save_config(config, path=os.path.join(model_dir, "config.json"))
 
     # perform IR if file doesn't exist
     if not (os.path.exists(config["ir"]["train_target_file"])
