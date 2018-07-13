@@ -144,7 +144,7 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(
         train_set, batch_size=64, shuffle=True, num_workers=4)
     dev_dataloader = DataLoader(
-        dev_set, batch_size=64, shuffle=True, num_workers=4)
+        dev_set, batch_size=64, shuffle=False, num_workers=4)
 
     net = Net()
     print("----Neural Aggregator Architecture----")
