@@ -6,7 +6,7 @@
 	"___reader___": "pairwise_esim_reader"
     },
     "config":{
-        "save_dir":"___root_dir___/fever/data/results/___model_name___/config.json"
+        "save_dir":"___root_dir___/fever/results/___model_name___/config.json"
     },
     "ir":
     {
@@ -36,8 +36,8 @@
         "prependtitle": {"__overwrite": "convert prependtitle"},
         "prependlinum": {"__overwrite": "convert prependlinum"},
         "n_sentences": {"__overwrite": "convert n_sentences"},
-        "train_predicted_labels_and_scores_file": "___root_dir___/fever/data/results/___model_name___/train.predictions.jsonl",
-        "dev_predicted_labels_and_scores_file": "___root_dir___/fever/data/results/___model_name___/dev.predictions.jsonl"
+        "train_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/train.predictions.jsonl",
+        "dev_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/dev.predictions.jsonl"
     },
     "aggregator":
     {
