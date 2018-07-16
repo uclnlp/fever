@@ -6,9 +6,12 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
-sys.path.append("/Users/yoneda/workspace/UCL/fever/fever/")
 from fever_io import read_jsonl, save_jsonl
 
+torch.backends.cudnn.deterministic = True
+torch.manual_seed(1)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(1)
 
 class Net(nn.Module):
     def __init__(self, layers=[15, 10, 5]):
