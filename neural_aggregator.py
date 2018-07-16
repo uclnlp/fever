@@ -39,22 +39,26 @@ class PredictedLabelsDataset(Dataset):
         return len(self.instances)
 
     def __getitem__(self, idx):
-        if len(self.instances[idx]["predicted_labels"]) < self.n_sentences:
-            idx = 0
         return (create_target(self.instances[idx]["label"]),
                 create_input(self.instances[idx]["predicted_labels"],
-                             self.instances[idx]["scores"]))
+                             self.instances[idx]["scores"],
+                             n_sentences=self.n_sentences))
         # return (self.instances[idx]["label"], self.instances[idx]["predicted_labels"]) #, self.instances[idx]["scores"])
 
 
-def create_input(predicted_labels, scores):
+zero_plus_eye = np.vstack([np.eye(3), np.zeros((1,3))])
+zero_pad_idx = 3
+def create_input(predicted_labels, scores, n_sentences):
     pred_labels = [label2idx[pred_label] for pred_label in predicted_labels]
-    # print("pred_labels", pred_labels)
+    scores = scores.copy()
 
-    one_hot = eye[
-        pred_labels, :]  # equivalent to embedding_lookup(pred_labels, eye)
-    # print("one_hot", one_hot)
-    # print(np.multiply(one_hot, np.expand_dims(scores, axis=1)))
+    # fill zero if number of predicted_labels (it corresponds to the predicted evidences) are less than n_sentences
+    if len(pred_labels) < n_sentences:
+        n_fillup = n_sentences - len(pred_labels)
+        pred_labels += [zero_pad_idx] * n_fillup
+        scores += [0.] * n_fillup
+
+    one_hot = zero_plus_eye[ pred_labels, :]  # equivalent to embedding_lookup(pred_labels, eye)
 
     # np_out = np.mean(np.multiply(one_hot, np.expand_dims(scores, axis=1)), axis=0)
     np_out = np.reshape(
@@ -150,7 +154,6 @@ if __name__ == "__main__":
     parser.add_argument("--layers", nargs="+", required=True, help="<required> specify each width of layers (currently, should be 3 layers)")
     args = parser.parse_args()
 
-    eye = np.eye(3)
     # data: prepend_title_linum
     print(args)
     train_set = PredictedLabelsDataset(args.train, args.n_sentences)
@@ -169,6 +172,7 @@ if __name__ == "__main__":
     for epoch in range(args.epochs):  # loop over the dataset multiple times
         print("epoch:", epoch)
         running_loss = 0.0
+
         for i, (labels, inputs) in enumerate(train_dataloader):
             # zero the parameter gradients
             optimizer.zero_grad()
@@ -181,9 +185,9 @@ if __name__ == "__main__":
 
             # print statistics
             running_loss += loss.item()
-            if i % 5000 == 4999:    # print every 5000 mini-batches
+            if i % 1000 == 999:    # print every 1000 mini-batches
                 print('[%d, %5d] loss: %.3f' %
-                      (epoch + 1, i + 1, running_loss / 5000))
+                      (epoch + 1, i + 1, running_loss / 1000))
                 running_loss = 0.0
 
     print('Finished Training')
