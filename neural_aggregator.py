@@ -192,4 +192,6 @@ if __name__ == "__main__":
 
     results = predict(dev_dataloader)
     save_jsonl(results, "predict_results.json")
+    save_jsonl(results, args.predicted_labels)
     save_jsonl(result_simple_test, "simple_test_results.json")
+
