@@ -8,6 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 from fever_io import read_jsonl, save_jsonl
 
+np.random.seed(1)
 torch.backends.cudnn.deterministic = True
 torch.manual_seed(1)
 if torch.cuda.is_available():
