@@ -102,18 +102,11 @@ def simple_test(dev_dataloader):
     # test for prediction
     neural_hit = 0
     heuristic_hit = 0
-    debug = list()
     with torch.no_grad():
         for i, (target, input) in enumerate(dev_dataloader):
             neural_pred = net(input.float())
             _, pred_labels = torch.max(neural_pred, 1)
             neural_hit += torch.sum(pred_labels == target)
-            for pred_label, target_label in zip(pred_labels, target):
-                debug.append({
-                    "actual": idx2label[int(target_label, )],
-                    "predicted": idx2label[int(pred_label)]
-                })
-
     print("neural:", int(neural_hit) / len(dev_dataloader.dataset))
 
     for i, instance in enumerate(dev_dataloader.dataset.instances):
@@ -121,8 +114,6 @@ def simple_test(dev_dataloader):
         if heuristic_pred_label == instance["label"]:
             heuristic_hit += 1
     print("heuristic:", heuristic_hit / len(dev_dataloader.dataset.instances))
-
-    return debug
 
 
 def predict(dev_dataloader):
@@ -202,9 +193,6 @@ if __name__ == "__main__":
 
     print('Finished Training')
 
-    result_simple_test = simple_test(dev_dataloader)
-
+    simple_test(dev_dataloader)
     results = predict(dev_dataloader)
-    save_jsonl(results, "predict_results.json")
     save_jsonl(results, args.predicted_labels)
-    save_jsonl(result_simple_test, "simple_test_results.json")
