@@ -11,7 +11,7 @@ from fever_io import read_jsonl, save_jsonl
 
 
 class Net(nn.Module):
-    def __init__(self, layers=[15,10,5]):
+    def __init__(self, layers=[15, 10, 5]):
         super(Net, self).__init__()
         assert len(layers) == 3, "currently, only supports 3 layer MLP"
         # an affine operation: y = Wx + b
@@ -40,14 +40,17 @@ class PredictedLabelsDataset(Dataset):
 
     def __getitem__(self, idx):
         return (create_target(self.instances[idx]["label"]),
-                create_input(self.instances[idx]["predicted_labels"],
-                             self.instances[idx]["scores"],
-                             n_sentences=self.n_sentences))
+                create_input(
+                    self.instances[idx]["predicted_labels"],
+                    self.instances[idx]["scores"],
+                    n_sentences=self.n_sentences))
         # return (self.instances[idx]["label"], self.instances[idx]["predicted_labels"]) #, self.instances[idx]["scores"])
 
 
-zero_plus_eye = np.vstack([np.eye(3), np.zeros((1,3))])
+zero_plus_eye = np.vstack([np.eye(3), np.zeros((1, 3))])
 zero_pad_idx = 3
+
+
 def create_input(predicted_labels, scores, n_sentences):
     pred_labels = [label2idx[pred_label] for pred_label in predicted_labels]
     scores = scores.copy()
@@ -58,7 +61,8 @@ def create_input(predicted_labels, scores, n_sentences):
         pred_labels += [zero_pad_idx] * n_fillup
         scores += [0.] * n_fillup
 
-    one_hot = zero_plus_eye[ pred_labels, :]  # equivalent to embedding_lookup(pred_labels, eye)
+    one_hot = zero_plus_eye[
+        pred_labels, :]  # equivalent to embedding_lookup(pred_labels, eye)
 
     # np_out = np.mean(np.multiply(one_hot, np.expand_dims(scores, axis=1)), axis=0)
     np_out = np.reshape(
@@ -106,7 +110,7 @@ def simple_test(dev_dataloader):
             neural_hit += torch.sum(pred_labels == target)
             for pred_label, target_label in zip(pred_labels, target):
                 debug.append({
-                    "actual": idx2label[int(target_label,)],
+                    "actual": idx2label[int(target_label, )],
                     "predicted": idx2label[int(pred_label)]
                 })
 
@@ -151,7 +155,13 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", default=5, type=int)
     parser.add_argument("--n_sentences", default=5, type=int)
     parser.add_argument("--predicted_labels", required=True)
-    parser.add_argument("--layers", nargs="+", required=True, help="<required> specify each width of layers (currently, should be 3 layers)")
+    parser.add_argument(
+        "--layers",
+        nargs="+",
+        required=True,
+        help=
+        "<required> specify each width of layers (currently, should be 3 layers)"
+    )
     args = parser.parse_args()
 
     # data: prepend_title_linum
@@ -185,9 +195,9 @@ if __name__ == "__main__":
 
             # print statistics
             running_loss += loss.item()
-            if i % 1000 == 999:    # print every 1000 mini-batches
-                print('[%d, %5d] loss: %.3f' %
-                      (epoch + 1, i + 1, running_loss / 1000))
+            if i % 1000 == 999:  # print every 1000 mini-batches
+                print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1,
+                                                running_loss / 1000))
                 running_loss = 0.0
 
     print('Finished Training')
@@ -198,4 +208,3 @@ if __name__ == "__main__":
     save_jsonl(results, "predict_results.json")
     save_jsonl(results, args.predicted_labels)
     save_jsonl(result_simple_test, "simple_test_results.json")
-
