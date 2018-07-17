@@ -29,10 +29,14 @@ def save_config(config, path):
 
 
 def ir(ir_config):
-    raise RuntimeError("this func is under construction!")
-    train_target = "train_target={}".format(ir_config["train_target_file"])
-    dev_target = "dev_target={}".format(ir_config["dev_target_file"])
-    subprocess.run(["python3", "get_evidences.py"])
+    options = list()
+    options.append(["--train_input", ir_config["train_input_file"]])
+    options.append(["--dev_input", ir_config["dev_input_file"]])
+    options.append(["--train_target", ir_config["train_target_file"]])
+    options.append(["--dev_target", ir_config["dev_target_file"]])
+    options.append(["--n_pages", str(ir_config["n_pages"])])
+    options.append(["--n_sentences", str(ir_config["n_sentences"])])
+    __run_python(options)
 
 
 def convert(config):
