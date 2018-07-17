@@ -30,13 +30,14 @@ def save_config(config, path):
 
 def ir(ir_config):
     options = list()
-    options.append(["--train_input", ir_config["train_input_file"]])
-    options.append(["--dev_input", ir_config["dev_input_file"]])
-    options.append(["--train_target", ir_config["train_target_file"]])
-    options.append(["--dev_target", ir_config["dev_target_file"]])
-    options.append(["--n_pages", str(ir_config["n_pages"])])
-    options.append(["--n_sentences", str(ir_config["n_sentences"])])
-    __run_python(options)
+    options.extend(["--train_input", ir_config["train_input_file"]])
+    options.extend(["--dev_input", ir_config["dev_input_file"]])
+    options.extend(["--train_target", ir_config["train_target_file"]])
+    options.extend(["--dev_target", ir_config["dev_target_file"]])
+    options.extend(["--n_pages", str(ir_config["n_pages"])])
+    options.extend(["--n_sentences", str(ir_config["n_sentences"])])
+    script = ["get_evidence.py"] + options
+    __run_python(script, gpu=False)
 
 
 def convert(config):
@@ -166,6 +167,7 @@ if __name__ == '__main__':
 
     if not os.path.exists(model_dir):
         os.mkdir(model_dir)
+    print("model dir:", model_dir)
     save_config(config, path=os.path.join(model_dir, "org_config.json"))
     config = parse(config)
     save_config(config, path=os.path.join(model_dir, "config.json"))
