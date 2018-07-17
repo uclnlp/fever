@@ -11,7 +11,7 @@ import random
 import numpy as np
 from tqdm import tqdm
 from util import abs_path
-from fever_io import titles_to_jsonl_num, load_doclines, read_jsonl, get_evidence_sentence_list
+from fever_io import titles_to_jsonl_num, load_doclines, read_jsonl, save_jsonl, get_evidence_sentence_list
 
 
 def analyse(predictions, actual, out_file):
@@ -239,13 +239,24 @@ def save_wrong_instances(actual_file, predicted_labels_file,
         })
 
     random.shuffle(observations)
-    save_jsonl(observations, out_file)
+    save_jsonl_pretty_print(observations, out_file)
     print("pos_counter", pos_counter)
     print("neg_counter", neg_counter)
     print("wrong labels:", counter)
 
 
-def save_jsonl(dictionaries, path, print_message=True):
+def save_submission_file(predictions, path):
+    out = list()
+    for pred in predictions:
+        out.append({
+            "id": pred["id"],
+            "predicted_label": pred["predicted_label"],
+            "predicted_evidence": pred["predicted_evidence"]
+         })
+    save_jsonl(out, path)
+
+
+def save_jsonl_pretty_print(dictionaries, path, print_message=True):
     """save jsonl file from list of dictionaries
     """
     if os.path.exists(path):
@@ -267,6 +278,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    ids = []
     predicted_labels = []
     predicted_evidence = []
     actual = []
@@ -278,14 +290,16 @@ if __name__ == "__main__":
     with open(args.predicted_evidence, "r") as predictions_file:
         for line in predictions_file:
             predicted_evidence.append(json.loads(line)["predicted_sentences"])
+            id.append(json.loads(line)["id"])
 
     with open(args.actual, "r") as actual_file:
         for line in actual_file:
             actual.append(json.loads(line))
 
     predictions = []
-    for ev, label in zip(predicted_evidence, predicted_labels):
+    for id, ev, label in zip(ids, predicted_evidence, predicted_labels):
         predictions.append({
+            "id": id,
             "predicted_evidence": ev,
             "predicted_label": label
         })
