@@ -34,8 +34,8 @@ def ir(ir_config):
     options.extend(["--dev_input", ir_config["dev_input_file"]])
     options.extend(["--train_output", ir_config["train_output_file"]])
     options.extend(["--dev_output", ir_config["dev_output_file"]])
-    options.extend(["--n_pages", str(ir_config["n_pages"])])
-    options.extend(["--n_sentences", str(ir_config["n_sentences"])])
+    options.extend(["--n_docs", str(ir_config["n_pages"])])
+    options.extend(["--n_sents", str(ir_config["n_sentences"])])
     script = ["get_evidence.py"] + options
     __run_python(script, gpu=False)
 
@@ -173,8 +173,8 @@ if __name__ == '__main__':
     save_config(config, path=os.path.join(model_dir, "config.json"))
 
     # perform IR if file doesn't exist
-    if not (os.path.exists(config["ir"]["train_target_file"])
-            and os.path.exists(config["ir"]["dev_target_file"])):
+    if not (os.path.exists(config["ir"]["train_output_file"])
+            and os.path.exists(config["ir"]["dev_output_file"])):
         ir(config["ir"])
     else:
         print("skipping ir...")
