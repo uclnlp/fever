@@ -57,17 +57,26 @@ def feverscore():
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser("save ir results")
+    parser.add_argument("--train_input")
+    parser.add_argument("--dev_input")
+    parser.add_argument("--train_output")
+    parser.add_argument("--dev_output")
     parser.add_argument("--n_docs", type=int, default=5, help="how many documents to retrieve")
     parser.add_argument("--n_sents", type=int, default=5, help="how many setences to retrieve")
     args = parser.parse_args()
     print(args)
 
-    train, dev = load_paper_dataset()
+    train, dev = load_paper_dataset(train=args.train_input, dev=args.dev_input)
     # train, dev = load_split_trainset(9999)
     for split,data in [("train",train), ("dev",dev)]:
         docs, evidence=get_evidence(data, n_docs=args.n_docs, n_sents=args.n_sents)
         pred=tofeverformat(data,docs,evidence)
-        with open(split+".sentences.p{}.s{}.jsonl".format(args.n_docs, args.n_sents),"w") as w:
+        if split == "train":
+            out_file = args.train_output
+        if split == "dev":
+            out_file = args.dev_output
+
+        with open(out_file, "w") as w:
             for example in pred:
                 w.write(json.dumps(example)+"\n")
 
