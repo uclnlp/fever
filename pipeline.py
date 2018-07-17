@@ -32,8 +32,8 @@ def ir(ir_config):
     options = list()
     options.extend(["--train_input", ir_config["train_input_file"]])
     options.extend(["--dev_input", ir_config["dev_input_file"]])
-    options.extend(["--train_target", ir_config["train_target_file"]])
-    options.extend(["--dev_target", ir_config["dev_target_file"]])
+    options.extend(["--train_output", ir_config["train_target_file"]])
+    options.extend(["--dev_output", ir_config["dev_target_file"]])
     options.extend(["--n_pages", str(ir_config["n_pages"])])
     options.extend(["--n_sentences", str(ir_config["n_sentences"])])
     script = ["get_evidence.py"] + options
