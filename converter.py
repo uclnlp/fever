@@ -143,7 +143,7 @@ def convert(instances, prependlinum=False, prependtitle=False, use_ir_prediction
     # use "predicted_sentences" for NEI
     for instance in tqdm(instances, desc="process for NEI"):
         if instance["label"] == "NOT ENOUGH INFO":
-            evidences = instance["predicted_sentences"]
+            evidences = instance["predicted_sentences"][:n_sentences]
             # assert evidences == [(title, linum), (title, linum), ...]
 
             # change its shape to the normal evidence format
@@ -187,8 +187,6 @@ if __name__ == "__main__":
     # parser.add_argument("--testset", help="turn on when you convert test data", action="store_true")
     args = parser.parse_args()
     print(args)
-    if args.n_sentences!= 5 and not args.use_ir_pred:
-        raise RuntimeError("parameter n_sentences must be used with use_ir_pred flag")
 
     if args.convert_test:
         test_in = '''[{"id": 15812, "verifiable": "VERIFIABLE", "label": "REFUTES", "claim": "Peggy Sue Got Married is a Egyptian film released in 1986.", "evidence": [[[31205, 37902, "Peggy_Sue_Got_Married", 0], [31205, 37902, "Francis_Ford_Coppola", 0]], [[31211, 37908, "Peggy_Sue_Got_Married", 0]]], "predicted_pages": ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", "Peggy_Sue_Got_Married_-LRB-song-RRB-", "Peggy_Sue_Got_Married", "Peggy_Sue", "Peggy_Sue_-LRB-band-RRB-"], "predicted_sentences": [["Peggy_Sue_Got_Married", 0], ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", 0], ["Peggy_Sue_Got_Married_-LRB-song-RRB-", 0], ["Peggy_Sue", 0], ["Peggy_Sue_Got_Married_-LRB-musical-RRB-", 2]]}, {"id": 229289, "verifiable": "NOT VERIFIABLE", "label": "NOT ENOUGH INFO", "claim": "Neal Schon was named in 1954.", "evidence": [[[273626, null, null, null]]], "predicted_pages": ["Neal_Schon", "Neal", "Named", "Was_-LRB-Not_Was-RRB-", "Was"], "predicted_sentences": [["Neal_Schon", 0], ["Neal_Schon", 6], ["Neal_Schon", 5], ["Neal_Schon", 1], ["Neal_Schon", 2]]}, {"id": 15711, "verifiable": "VERIFIABLE", "label": "SUPPORTS", "claim": "Liverpool F.C. was valued at $1.55 billion at one point.", "evidence": [[[31112, 37788, "Liverpool_F.C.", 11]]], "predicted_pages": ["Liverpool_F.C.", "Liverpool_F.C._-LRB-Montevideo-RRB-", "Liverpool_F.C._-LRB-Superleague_Formula_team-RRB-", "Liverpool_F.C._-LRB-disambiguation-RRB-", "Liverpool"], "predicted_sentences": [["Liverpool_F.C.", 11], ["Liverpool", 0], ["Liverpool", 9], ["Liverpool", 10], ["Liverpool", 8]]}]'''
