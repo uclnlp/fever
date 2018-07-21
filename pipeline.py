@@ -41,33 +41,40 @@ def ir(ir_config):
 
 
 def convert(config):
-    raise RuntimeError("this func is under construction!")
     options = list()
-    options.append(config)
+    options.append(config["train_input_file"])
+    options.append(config["train_converted_file"])
     if config["prependtitle"]:
         options.append("--prependtitle")
     if config["prependlinum"]:
         options.append("--prependlinum")
     if config["use_ir_pred"]:
         options.append("--use_ir_pred")
-        options.append("--n_sentences {}".format(config["n_sentences"]))
+    if config["n_sentences"]:
+        options.extend(["--n_sentences", str(config["n_sentences"])])
 
-    script = ["python3", "converter.py"] + options
-    print(" ".join(script))
-    subprocess.run(script)
+    # train data
+    script = ["converter.py"] + options
+    __run_python(script, gpu=False, env={"PYTHONPATH": "."})
 
+    # dev data
+    options[0] = config["dev_input_file"]
+    options[1] = config["dev_converted_file"]
+    script = ["converter.py"] + options
+    __run_python(script, gpu=False, env={"PYTHONPATH": "."})
 
 def train_rte(config):
-    raise RuntimeError("this func is under construction!")
+    os.chdir("../jack")
     options = list()
-    options = ["config='{}'".format(config["jack_config_file"])]
-    options.append("--save_dir {}".format(config["save_dir"]))
-    options.append("--train {}".format(config["train"]))
-    options.append("--dev {}".format(config["dev"]))
+    options.append("with")
+    options.append("config={}".format(config["jack_config_file"]))
+    options.append("save_dir={}".format(config["save_dir"]))
+    options.append("train={}".format(config["train_file"]))
+    options.append("dev={}".format(config["dev_file"]))
 
-    script = " ".join(["anaconda-python3-gpu", "bin/jack_train.py", "with"] +
-                      options)
-    subprocess.run(script)
+    script = ["bin/jack-train.py"] + options
+    __run_python(script, gpu=True, env={"PYTHONPATH": "."})
+    os.chdir("../fever")
 
 
 def inference_rte(config):
@@ -82,10 +89,6 @@ def inference_rte(config):
         options.append("--prependtitle")
     if config["n_sentences"]:
         options.extend(["--n_sentences", str(config["n_sentences"])])
-
-    # print(["python3", "hello_world.py"])
-    # subprocess.run(["python3", "hello_world.py"])
-    # quit()
 
     # train data
     script = ["../fever/jack_reader.py"] + options
@@ -120,6 +123,7 @@ def score(config):
     options.extend(["--predicted_evidence", config["predicted_evidence_file"]])
     options.extend(["--actual", config["actual_file"]])
     options.extend(["--score_file", config["score_file"]])
+    options.extend(["--submission_file", config["submission_file"]])
 
     script = ["src/scripts/score.py"] + options
     __run_python(script, gpu=False, env={"PYTHONPATH": "src:../fever"})
@@ -180,9 +184,9 @@ if __name__ == '__main__':
         print("skipping ir...")
 
     # convert format if file does not exist
-    if not os.path.exists(
+    if not( os.path.exists(
             config["convert"]["train_converted_file"]) and os.path.exists(
-                config["convert"]["dev_converted_file"]):
+                config["convert"]["dev_converted_file"])):
         convert(config["convert"])
     else:
         print("skipping conversion...")
