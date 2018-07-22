@@ -111,6 +111,8 @@ def neural_aggregator(config):
     options.extend(["--n_sentences", str(config["n_sentences"])])
     layers = [str(num) for num in config["layers"]]
     options.extend(["--layers"] + layers)
+    if "sampling" in config and config["sampling"]:
+        options.append("--sampling")
 
     script = ["neural_aggregator.py"] + options
     __run_python(script, gpu=False)

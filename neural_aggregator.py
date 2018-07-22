@@ -1,4 +1,5 @@
 import sys
+from collections import Counter
 import argparse
 import torch
 import torch.nn as nn
@@ -33,10 +34,14 @@ class Net(nn.Module):
 class PredictedLabelsDataset(Dataset):
     """Predicted Labels dataset."""
 
-    def __init__(self, jsonl_file, n_sentences=5):
+    def __init__(self, jsonl_file, sample=False, n_sentences=5):
         """
         """
-        self.instances = read_jsonl(jsonl_file)
+        instances = read_jsonl(jsonl_file)
+        if sample:
+            instances = sample(instances)
+
+        self.instances = instances
         self.n_sentences = n_sentences
 
     def __len__(self):
@@ -50,6 +55,23 @@ class PredictedLabelsDataset(Dataset):
                     n_sentences=self.n_sentences))
         # return (self.instances[idx]["label"], self.instances[idx]["predicted_labels"]) #, self.instances[idx]["scores"])
 
+
+def sample(train_set):
+    print("performing sampling...")
+    sampled_instances = list()
+    label2freq = Counter((instance["label"] for instance in train_set))
+    print(label2freq)
+    min_freq = min(label2freq.values())
+    counter_dict = dict()
+    for instance in train_set:
+        label = instance["label"]
+        if instance not in counter_dict:
+            instance[label] = 1
+        if counter_dict[label] < min_freq:
+            instance[label] += 1
+            sampled_instances.append(instance)
+
+    return sampled_instances
 
 zero_plus_eye = np.vstack([np.eye(3), np.zeros((1, 3))])
 zero_pad_idx = 3
@@ -150,6 +172,7 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", default=5, type=int)
     parser.add_argument("--n_sentences", default=5, type=int)
     parser.add_argument("--predicted_labels", required=True)
+    parser.add_argument("--sampling", action="store_true")
     parser.add_argument(
         "--layers",
         nargs="+",
@@ -161,7 +184,7 @@ if __name__ == "__main__":
 
     # data: prepend_title_linum
     print(args)
-    train_set = PredictedLabelsDataset(args.train, args.n_sentences)
+    train_set = PredictedLabelsDataset(args.train, args.n_sentences, sampling=args.sampling)
     dev_set = PredictedLabelsDataset(args.dev, args.n_sentences)
     train_dataloader = DataLoader(
         train_set, batch_size=64, shuffle=True, num_workers=4)
