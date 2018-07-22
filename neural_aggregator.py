@@ -34,11 +34,11 @@ class Net(nn.Module):
 class PredictedLabelsDataset(Dataset):
     """Predicted Labels dataset."""
 
-    def __init__(self, jsonl_file, sample=False, n_sentences=5):
+    def __init__(self, jsonl_file, n_sentences=5, sampling=False):
         """
         """
         instances = read_jsonl(jsonl_file)
-        if sample:
+        if sampling:
             instances = sample(instances)
 
         self.instances = instances
@@ -60,17 +60,18 @@ def sample(train_set):
     print("performing sampling...")
     sampled_instances = list()
     label2freq = Counter((instance["label"] for instance in train_set))
-    print(label2freq)
+    print("label2freq:", label2freq)
     min_freq = min(label2freq.values())
     counter_dict = dict()
     for instance in train_set:
         label = instance["label"]
-        if instance not in counter_dict:
-            instance[label] = 1
-        if counter_dict[label] < min_freq:
-            instance[label] += 1
+        if label not in counter_dict:
+            counter_dict[label] = 1
+        elif counter_dict[label] < min_freq:
+            counter_dict[label] += 1
             sampled_instances.append(instance)
 
+    assert all(count == min_freq for count in counter_dict.values())
     return sampled_instances
 
 zero_plus_eye = np.vstack([np.eye(3), np.zeros((1, 3))])
