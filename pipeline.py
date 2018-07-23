@@ -112,10 +112,10 @@ def neural_aggregator(config):
     options = list()
     options.extend(["--train", config["train_file"]])
     options.extend(["--dev", config["dev_file"]])
-    if "test" in config:
-        options.extend(["--test", config["test_file"]])
+    options.extend(["--test", config["test_file"]])
     options.extend(["--epochs", str(config["epochs"])])
     options.extend(["--predicted_labels", config["predicted_labels_file"]])
+    options.extend(["--test_predicted_labels", config["test_predicted_labels_file"]])
     options.extend(["--n_sentences", str(config["n_sentences"])])
     layers = [str(num) for num in config["layers"]]
     options.extend(["--layers"] + layers)
