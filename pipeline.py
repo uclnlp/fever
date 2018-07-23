@@ -1,3 +1,5 @@
+import collections
+from copy import deepcopy
 import logging
 import datetime
 import argparse
@@ -158,6 +160,15 @@ def __run_python(script, gpu=False, env=dict()):
             raise RuntimeError("shell returned non zero code.")
 
 
+def update(d, u):
+    for k, v in u.items():
+        if isinstance(v, collections.Mapping):
+            d[k] = update(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
@@ -174,16 +185,7 @@ if __name__ == '__main__':
     with open(args.config) as f:
         config = json.load(f)
 
-    # load child config if specified
-    if "parent_config" in config and config["parent_config"]:
-        path = config["parent_config"]
-        logger.info("loading parent config from {}".format(path))
-        with open(path) as f:
-            parent_config = json.load(f)
-        parent_config.update(config)
-        config = parent_config
-
-    # load config
+    # load and save original config
     config["__variables"]["___model_name___"] = args.model
     model_dir = "results/{}".format(config["__variables"]["___model_name___"])
 
@@ -191,6 +193,16 @@ if __name__ == '__main__':
         os.mkdir(model_dir)
     logger.info("model dir: %s", model_dir)
     save_config(config, path=os.path.join(model_dir, "org_config.json"))
+
+    # load child config if specified
+    if "parent_config" in config and config["parent_config"]:
+        path = config["parent_config"]
+        logger.info("loading parent config from {}".format(path))
+        with open(path) as f:
+            parent_config = json.load(f)
+        config = update(deepcopy(parent_config), config)
+        save_config(config, path=os.path.join(model_dir, "parent_config.json"))
+
     config = parse(config)
     save_config(config, path=os.path.join(model_dir, "config.json"))
 
