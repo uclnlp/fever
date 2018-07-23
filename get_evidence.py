@@ -75,7 +75,7 @@ if __name__=="__main__":
         if split == "dev":
             out_file = args.dev_output
         if os.path.exists(out_file):
-            print("file exists. skipping ir...".format(out_file))
+            print("file {} exists. skipping ir...".format(out_file))
             continue
 
         docs, evidence=get_evidence(data, n_docs=args.n_docs, n_sents=args.n_sents)
