@@ -6,11 +6,15 @@ import sys
 from util import abs_path
 from tqdm import tqdm
 
-def save_jsonl(dictionaries, path, print_message=True):
+def save_jsonl(dictionaries, path, print_message=True, skip_if_exists=False):
     """save jsonl file from list of dictionaries
     """
     if os.path.exists(path):
-        raise OSError("file {} already exists".format(path))
+        if not skip_if_exists:
+            raise OSError("file {} already exists".format(path))
+        else:
+            print("CAUTION: skip saving (file {} already exists)".format(path))
+            return
 
     if print_message:
         print("saving at {}".format(path))

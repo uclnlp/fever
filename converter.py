@@ -197,10 +197,10 @@ if __name__ == "__main__":
         print("\noutput:\n", json.dumps(snli_format_instances, indent=4))
 
     else:
-        assert not os.path.exists(args.tar), "file {} alreadly exists".format(
-            args.tar)
+        if os.path.exists(args.tar):
+            print("WARNING: file {} alreadly exists".format(args.tar))
         keyerr_count = 0
 
         instances = read_jsonl(args.src)
         snli_format_instances = convert(instances, prependlinum=args.prependlinum, prependtitle=args.prependtitle, use_ir_prediction=args.use_ir_pred, n_sentences=args.n_sentences)
-        save_jsonl(snli_format_instances, args.tar)
+        save_jsonl(snli_format_instances, args.tar, skip_if_exists=True)
