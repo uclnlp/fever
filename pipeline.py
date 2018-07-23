@@ -71,6 +71,9 @@ def train_rte(config):
     options.append("save_dir={}".format(config["save_dir"]))
     options.append("train={}".format(config["train_file"]))
     options.append("dev={}".format(config["dev_file"]))
+    options.append("test={}".format(config["dev_file"]))
+    if "load_dir" in config and config["load_dir"] != "":
+        options.append("load_dir={}".format(config["load_dir"]))
 
     script = ["bin/jack-train.py"] + options
     __run_python(script, gpu=True, env={"PYTHONPATH": "."})
@@ -141,7 +144,7 @@ def __run_python(script, gpu=False, env=dict()):
     if gpu:
         env.update({
             "LD_LIBRARY_PATH": LD_LIBRARY_PATH,
-            "CUDA_VISIBLE_DEVICES": "0"
+            # "CUDA_VISIBLE_DEVICES": "0"
         })
         prep = python_gpu_prep
 
