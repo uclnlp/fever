@@ -34,7 +34,7 @@ class Net(nn.Module):
 class PredictedLabelsDataset(Dataset):
     """Predicted Labels dataset."""
 
-    def __init__(self, jsonl_file, n_sentences=5, sampling=False):
+    def __init__(self, jsonl_file, n_sentences=5, sampling=False, test=False):
         """
         """
         instances = read_jsonl(jsonl_file)
@@ -43,16 +43,22 @@ class PredictedLabelsDataset(Dataset):
 
         self.instances = instances
         self.n_sentences = n_sentences
+        self.test = test
 
     def __len__(self):
         return len(self.instances)
 
     def __getitem__(self, idx):
-        return (create_target(self.instances[idx]["label"]),
-                create_input(
-                    self.instances[idx]["predicted_labels"],
-                    self.instances[idx]["scores"],
-                    n_sentences=self.n_sentences))
+        if self.test:
+            label = create_target("DUMMY LABEL")
+        else:
+            label = create_target(self.instances[idx]["label"])
+        input = create_input(
+            self.instances[idx]["predicted_labels"],
+            self.instances[idx]["scores"],
+            n_sentences=self.n_sentences)
+
+        return (label, input)
         # return (self.instances[idx]["label"], self.instances[idx]["predicted_labels"]) #, self.instances[idx]["scores"])
 
 
@@ -143,10 +149,10 @@ def simple_test(dev_dataloader):
     print("heuristic:", heuristic_hit / len(dev_dataloader.dataset.instances))
 
 
-def predict(dev_dataloader):
+def predict(test_dataloader):
     results = list()
     with torch.no_grad():
-        for i, (labels, input) in enumerate(dev_dataloader):
+        for i, (labels, input) in enumerate(test_dataloader):
             neural_preds = net(input.float())
             _, pred_labels = torch.max(neural_preds, 1)
 
@@ -159,7 +165,7 @@ def predict(dev_dataloader):
     return results
 
 
-label2idx = {"SUPPORTS": 0, "REFUTES": 1, "NOT ENOUGH INFO": 2}
+label2idx = {"SUPPORTS": 0, "REFUTES": 1, "NOT ENOUGH INFO": 2, "DUMMY LABEL": 3}
 idx2label = {idx: label for label, idx in label2idx.items()}
 supports = idx2label[0]
 refutes = idx2label[1]
@@ -169,10 +175,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--train", required=True)
     parser.add_argument("--dev", required=True)
+    parser.add_argument("--test", required=True)
     parser.add_argument("--batch_size", default=64, type=int)
     parser.add_argument("--epochs", default=5, type=int)
     parser.add_argument("--n_sentences", default=5, type=int)
     parser.add_argument("--predicted_labels", required=True)
+    parser.add_argument("--test_predicted_labels", required=True)
     parser.add_argument("--sampling", action="store_true")
     parser.add_argument(
         "--layers",
@@ -187,10 +195,13 @@ if __name__ == "__main__":
     print(args)
     train_set = PredictedLabelsDataset(args.train, args.n_sentences, sampling=args.sampling)
     dev_set = PredictedLabelsDataset(args.dev, args.n_sentences)
+    test_set = PredictedLabelsDataset(args.test, args.n_sentences, test=True)
     train_dataloader = DataLoader(
         train_set, batch_size=64, shuffle=True, num_workers=4)
     dev_dataloader = DataLoader(
         dev_set, batch_size=64, shuffle=False, num_workers=4)
+    test_dataloader = DataLoader(
+        test_set, batch_size=64, shuffle=False, num_workers=4)
 
     net = Net(layers=[int(width) for width in args.layers])
     print("----Neural Aggregator Architecture----")
@@ -221,6 +232,10 @@ if __name__ == "__main__":
 
     print('Finished Training')
 
+    print("dev set:")
     simple_test(dev_dataloader)
-    results = predict(dev_dataloader)
-    save_jsonl(results, args.predicted_labels)
+
+    dev_results = predict(dev_dataloader)
+    test_results = predict(test_dataloader)
+    save_jsonl(dev_results, args.predicted_labels)
+    save_jsonl(test_results, args.test_predicted_labels)
