@@ -23,7 +23,7 @@
       "train_input_file": {"__overwrite": "ir train_output_file"},
       "train_converted_file": "___root_dir___/fever/data/converted/train.sentences.p15.s30_title.jsonl",
       "dev_input_file": {"__overwrite": "ir dev_output_file"},
-      "dev_converted_file": "___root_dir___/fever/data/converted/train.sentences.p15.s30_title.jsonl"
+      "dev_converted_file": "___root_dir___/fever/data/converted/dev.sentences.p15.s30_title.jsonl"
   },
   "train_rte": {
       "jack_config_file": "___root_dir___/jack/conf/nli/fever/esim.yaml",
@@ -64,12 +64,14 @@
     ],
     "epochs": 5,
       "predicted_labels_file": "___root_dir___/fever/results/___model_name___/aggregated_labels.jsonl",
+      "test_predicted_labels_file": "___root_dir___/fever/results/___model_name___/test_aggregated_labels.jsonl",
     "train_file": {
       "__overwrite": "inference_rte train_predicted_labels_and_scores_file"
     },
     "dev_file": {
       "__overwrite": "inference_rte dev_predicted_labels_and_scores_file"
     },
+      "test_file": "___root_dir___/fever/data/shared_task_dev_public.json",
     "n_sentences": {
       "__overwrite": "inference_rte n_sentences"
     }
