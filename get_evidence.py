@@ -1,3 +1,4 @@
+import os
 import argparse
 from line_ir import line_ir
 from doc_ir import doc_ir
@@ -69,12 +70,16 @@ if __name__=="__main__":
     train, dev = load_paper_dataset(train=args.train_input, dev=args.dev_input)
     # train, dev = load_split_trainset(9999)
     for split,data in [("train",train), ("dev",dev)]:
-        docs, evidence=get_evidence(data, n_docs=args.n_docs, n_sents=args.n_sents)
-        pred=tofeverformat(data,docs,evidence)
         if split == "train":
             out_file = args.train_output
         if split == "dev":
             out_file = args.dev_output
+        if os.path.exists(out_file):
+            print("file exists. skipping ir...".format(out_file))
+            continue
+
+        docs, evidence=get_evidence(data, n_docs=args.n_docs, n_sents=args.n_sents)
+        pred=tofeverformat(data,docs,evidence)
 
         with open(out_file, "w") as w:
             for example in pred:
