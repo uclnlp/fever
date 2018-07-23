@@ -1,3 +1,4 @@
+import logging
 import datetime
 import argparse
 import json
@@ -150,14 +151,17 @@ def __run_python(script, gpu=False, env=dict()):
 
     with environ(env):
         script = prep + script
-        print(script)
+        logger.info("running: %s", script)
         ret = subprocess.run(script)
         if ret.returncode != 0:
-            print(ret)
+            logger.info("returned: %s", ret)
             raise RuntimeError("shell returned non zero code.")
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+
     now = datetime.datetime.now()
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
@@ -170,13 +174,22 @@ if __name__ == '__main__':
     with open(args.config) as f:
         config = json.load(f)
 
+    # load child config if specified
+    if "parent_config" in config and config["parent_config"]:
+        path = config["parent_config"]
+        logger.info("loading parent config from {}".format(path))
+        with open(path) as f:
+            parent_config = json.load(f)
+        parent_config.update(config)
+        config = parent_config
+
     # load config
     config["__variables"]["___model_name___"] = args.model
     model_dir = "results/{}".format(config["__variables"]["___model_name___"])
 
     if not os.path.exists(model_dir):
         os.mkdir(model_dir)
-    print("model dir:", model_dir)
+    logger.info("model dir: %s", model_dir)
     save_config(config, path=os.path.join(model_dir, "org_config.json"))
     config = parse(config)
     save_config(config, path=os.path.join(model_dir, "config.json"))
@@ -186,7 +199,7 @@ if __name__ == '__main__':
             and os.path.exists(config["ir"]["dev_output_file"])):
         ir(config["ir"])
     else:
-        print("skipping ir...")
+        logger.info("skipping ir...")
 
     # convert format if file does not exist
     if not( os.path.exists(
@@ -194,26 +207,26 @@ if __name__ == '__main__':
                 config["convert"]["dev_converted_file"])):
         convert(config["convert"])
     else:
-        print("skipping conversion...")
+        logger.info("skipping conversion...")
 
     # train rte model if file does not exist
     if not os.path.isdir(config["train_rte"]["save_dir"]):
         train_rte(config["train_rte"])
     else:
-        print("skipping train rte...")
+        logger.info("skipping train rte...")
 
     # rte inference if file does not exist
     if not os.path.exists(
             config["inference_rte"]["train_predicted_labels_and_scores_file"]):
         inference_rte(config["inference_rte"])
     else:
-        print("skipping inference rte...")
+        logger.info("skipping inference rte...")
 
     # aggregation if file not exists
     if not os.path.exists(config["aggregator"]["predicted_labels_file"]):
         neural_aggregator(config["aggregator"])
     else:
-        print("skipping aggregation...")
+        logger.info("skipping aggregation...")
 
     # scoring
     if not os.path.exists(config["score"]["score_file"]):
