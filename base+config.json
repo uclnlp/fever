@@ -1,0 +1,31 @@
+{
+  "__model_description": {
+    "save_dir": "___root_dir___/fever/results/___model_name___/config.json"
+  },
+  "ir": {
+      "n_sentences":10,
+    "train_output_file": "___root_dir___/fever/data/indexed_data/train.sentences.p10.s30.jsonl",
+    "dev_output_file": "___root_dir___/fever/data/indexed_data/dev.sentences.p10.s30.jsonl"
+  },
+  "convert": {
+      "n_sentences": 5,
+      "train_converted_file": "___root_dir___/fever/data/converted/train.sentences.p10.s30_title.jsonl",
+      "dev_converted_file": "___root_dir___/fever/data/converted/dev.sentences.p10.s30_title.jsonl"
+  },
+  "train_rte": {
+      "save_dir": "___root_dir___/results/___model_name___/___reader___"
+  },
+  "inference_rte": {
+    "n_sentences": 15,
+    "train_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/train.predictions.jsonl",
+      "dev_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/dev.predictions.jsonl"
+  },
+  "aggregator": {
+    "layers": [
+      45,
+      25,
+      10
+    ],
+      "sampling": true
+  }
+}
