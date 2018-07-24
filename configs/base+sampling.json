@@ -1,10 +1,11 @@
 {
   "parent_config": "base_config.json",
-    "__description": "this model starts from aggregation",
-  "aggregator": {
-      "train_file": "___root_dir___/fever/results/base/train.predictions.jsonl",
-      "dev_file": "___root_dir___/fever/results/___model_name___/dev.predictions.jsonl",
-      "test_file": "___root_dir___/fever/results/___model_name___/test.predictions.jsonl"
+  "__description": "this model starts from aggregation",
+  "__variables": {
+    "___train_rte___": "base",
+    "___inference_rte___": "base",
+    "___aggregator___": "base+sampling",
+    "___score___": "base+sampling"
   },
   "score": {
     "sampling": true
