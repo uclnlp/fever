@@ -101,7 +101,7 @@ def train_rte(config):
 
 
 def inference_rte(config):
-    os.chdir(os.path.join(root_dir, "/jack"))
+    os.chdir(os.path.join(root_dir, "jack"))
     options = list()
     options.append(config["train_input_file"])  # input file
     options.append(config["train_predicted_labels_and_scores_file"])
