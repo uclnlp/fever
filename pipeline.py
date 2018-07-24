@@ -57,14 +57,30 @@ def convert(config):
         options.extend(["--n_sentences", str(config["n_sentences"])])
 
     # train data
-    script = ["converter.py"] + options
-    __run_python(script, gpu=False, env={"PYTHONPATH": "."})
+    if not os.path.exists(config["train_converted_file"]):
+        script = ["converter.py"] + options
+        __run_python(script, gpu=False, env={"PYTHONPATH": "."})
+    else:
+        logger.info("%s already exists. skipping conversion for train", config["train_converted_file"])
 
     # dev data
-    options[0] = config["dev_input_file"]
-    options[1] = config["dev_converted_file"]
-    script = ["converter.py"] + options
-    __run_python(script, gpu=False, env={"PYTHONPATH": "."})
+    if not os.path.exists(config["dev_converted_file"]):
+        options[0] = config["dev_input_file"]
+        options[1] = config["dev_converted_file"]
+        script = ["converter.py"] + options
+        __run_python(script, gpu=False, env={"PYTHONPATH": "."})
+    else:
+        logger.info("%s already exists. skipping conversion for dev", config["dev_converted_file"])
+
+    # test data
+    if not os.path.exists(config["test_converted_file"]):
+        options[0] = config["test_input_file"]
+        options[1] = config["test_converted_file"]
+        script = ["converter.py"] + options
+        __run_python(script, gpu=False, env={"PYTHONPATH": "."})
+    else:
+        logger.info("%s already exists. skipping conversion for test", config["test_converted_file"])
+
 
 def train_rte(config):
     os.chdir("../jack")
@@ -247,10 +263,12 @@ if __name__ == '__main__':
         logger.info("skipping ir...")
 
     # convert format if file does not exist
+    conf_convert = config["convert"]
     if not( os.path.exists(
-            config["convert"]["train_converted_file"]) and os.path.exists(
-                config["convert"]["dev_converted_file"])):
-        convert(config["convert"])
+            conf_convert["train_converted_file"]) and os.path.exists(
+                conf_convert["dev_converted_file"]) and os.path.exists(
+                    conf_convert["test_converted_file"])):
+        convert(conf_convert)
     else:
         logger.info("skipping conversion...")
 
