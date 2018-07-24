@@ -256,14 +256,20 @@ if __name__ == '__main__':
     save_config(config, path=os.path.join(model_dir, "config.json"))
 
     # perform IR if file doesn't exist
-    if not (os.path.exists(config["ir"]["train_output_file"])
-            and os.path.exists(config["ir"]["dev_output_file"])):
+    config_ir = config["ir"]
+    logger.info("%s exists?: %s", config_ir["train_output_file"], os.path.exists(config_ir["train_output_file"]))
+    logger.info("%s exists?: %s", config_ir["dev_output_file"], os.path.exists(config_ir["dev_output_file"]))
+    if not (os.path.exists(config_ir["train_output_file"])
+            and os.path.exists(config_ir["dev_output_file"])):
         ir(config["ir"])
     else:
         logger.info("skipping ir...")
 
     # convert format if file does not exist
     conf_convert = config["convert"]
+    logger.info("%s exists?: %s", conf_convert["train_converted_file"], os.path.exists(config_ir["train_converted_file"]))
+    logger.info("%s exists?: %s", conf_convert["dev_converted_file"], os.path.exists(config_ir["dev_converted_file"]))
+    logger.info("%s exists?: %s", conf_convert["test_converted_file"], os.path.exists(config_ir["test_converted_file"]))
     if not( os.path.exists(
             conf_convert["train_converted_file"]) and os.path.exists(
                 conf_convert["dev_converted_file"]) and os.path.exists(
@@ -280,6 +286,9 @@ if __name__ == '__main__':
 
     # rte inference if file does not exist
     conf_inference = config["inference_rte"]
+    logger.info("%s exists?: %s", conf_inference["train_predicted_labels_and_scores_file"], os.path.exists(conf_inference["train_predicted_labels_and_scores_file"]))
+    logger.info("%s exists?: %s", conf_inference["dev_predicted_labels_and_scores_file"], os.path.exists(conf_inference["dev_predicted_labels_and_scores_file"]))
+    logger.info("%s exists?: %s", conf_inference["test_predicted_labels_and_scores_file"], os.path.exists(conf_inference["test_predicted_labels_and_scores_file"]))
     if not os.path.exists(
             conf_inference["train_predicted_labels_and_scores_file"]) or not os.path.exists(conf_inference["dev_predicted_labels_and_scores_file"]) or not os.path.exists(conf_inference["test_predicted_labels_and_scores_file"]):
         inference_rte(config["inference_rte"])
