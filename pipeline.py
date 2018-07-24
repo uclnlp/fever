@@ -97,20 +97,29 @@ def inference_rte(config):
         options.extend(["--n_sentences", str(config["n_sentences"])])
 
     # train data
-    script = ["../fever/jack_reader.py"] + options
-    __run_python(script, gpu=True, env={"PYTHONPATH": "."})
+    if not os.path.exists(config["train_predicted_labels_and_scores_file"]):
+        script = ["../fever/jack_reader.py"] + options
+        __run_python(script, gpu=True, env={"PYTHONPATH": "."})
+    else:
+        logger.info("skipping inference rte for train. %s exists", config["train_predicted_labels_and_scores_file"])
 
     # dev data
-    options[0] = config["dev_input_file"]
-    options[1] = config["dev_predicted_labels_and_scores_file"]
-    script = ["../fever/jack_reader.py"] + options
-    __run_python(script, gpu=True, env={"PYTHONPATH": "."})
+    if not os.path.exists(config["dev_predicted_labels_and_scores_file"]):
+        options[0] = config["dev_input_file"]
+        options[1] = config["dev_predicted_labels_and_scores_file"]
+        script = ["../fever/jack_reader.py"] + options
+        __run_python(script, gpu=True, env={"PYTHONPATH": "."})
+    else:
+        logger.info("skipping inference rte for dev. %s exists", config["dev_predicted_labels_and_scores_file"])
 
     # test data
-    options[0] = config["test_input_file"]
-    options[1] = config["test_predicted_labels_and_scores_file"]
-    script = ["../fever/jack_reader.py"] + options
-    __run_python(script, gpu=True, env={"PYTHONPATH": "."})
+    if not os.path.exists(config["test_predicted_labels_and_scores_file"]):
+        options[0] = config["test_input_file"]
+        options[1] = config["test_predicted_labels_and_scores_file"]
+        script = ["../fever/jack_reader.py"] + options
+        __run_python(script, gpu=True, env={"PYTHONPATH": "."})
+    else:
+        logger.info("skipping inference rte for test. %s exists", config["test_predicted_labels_and_scores_file"])
 
 def neural_aggregator(config):
     os.chdir("/home/tyoneda/pipeline/fever")
@@ -249,8 +258,9 @@ if __name__ == '__main__':
         logger.info("skipping train rte...")
 
     # rte inference if file does not exist
+    conf_inference = config["inference_rte"]
     if not os.path.exists(
-            config["inference_rte"]["train_predicted_labels_and_scores_file"]):
+            conf_inference["train_predicted_labels_and_scores_file"]) or not os.path.exists(conf_inference["dev_predicted_labels_and_scores_file"]) or not os.path.exists(conf_inference["test_predicted_labels_and_scores_file"]):
         inference_rte(config["inference_rte"])
     else:
         logger.info("skipping inference rte...")
