@@ -9,8 +9,10 @@
   "ir": {
     "train_output_file": "___root_dir___/fever/data/indexed_data/train.sentences.p15.s30.jsonl",
     "dev_output_file": "___root_dir___/fever/data/indexed_data/dev.sentences.p15.s30.jsonl",
+    "test_output_file": "___root_dir___/fever/data/indexed_data/shared_task_dev.sentences.p10.s30.jsonl",
     "train_input_file": "___root_dir___/fever/data/train.jsonl",
     "dev_input_file": "___root_dir___/fever/data/dev.jsonl",
+    "test_input_file": "___root_dir___/fever/data/shared_task_dev.jsonl",
     "n_pages": 15,
     "n_sentences": 30
   },
@@ -44,6 +46,7 @@
     "n_sentences": 15,
     "train_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/train.predictions.jsonl",
     "dev_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/dev.predictions.jsonl",
+    "test_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/test.predictions.jsonl",
     "train_input_file": {
       "__overwrite": "ir train_output_file"
     },
@@ -75,7 +78,9 @@
     "dev_file": {
       "__overwrite": "inference_rte dev_predicted_labels_and_scores_file"
     },
-    "test_file": "___root_dir___/fever/data/shared_task_dev_public.json",
+    "test_file": {
+      "__overwrite": "inference_rte test_predicted_labels_and_scores_file"
+    },
     "n_sentences": {
       "__overwrite": "inference_rte n_sentences"
     }
