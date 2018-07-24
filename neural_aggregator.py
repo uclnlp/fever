@@ -117,6 +117,7 @@ def create_input2(predicted_labels, scores, sentence_scores, n_sentences):
     scores = scores.copy()
     ev_scores = [score for _, _, score in sentence_scores]
 
+    assert len(scores) == len(ev_scores), "{} != {}".format(len(scores), len(ev_scores))
     # fill zero if number of predicted_labels (it corresponds to the predicted evidences) are less than n_sentences
     if len(pred_labels) < n_sentences:
         n_fillup = n_sentences - len(pred_labels)
