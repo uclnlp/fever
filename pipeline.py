@@ -279,8 +279,10 @@ if __name__ == '__main__':
         logger.info("skipping conversion...")
 
     # train rte model if file does not exist
-    if not os.path.isdir(config["train_rte"]["save_dir"]):
-        train_rte(config["train_rte"])
+    conf_train_rte = config["train_rte"]
+    logger.info("%s exists?: %s", conf_train_rte["save_dir"], os.path.exists(conf_train_rte["save_dir"]))
+    if not os.path.isdir(conf_train_rte["save_dir"]):
+        train_rte(conf_train_rte)
     else:
         logger.info("skipping train rte...")
 
