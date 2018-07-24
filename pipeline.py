@@ -267,9 +267,9 @@ if __name__ == '__main__':
 
     # convert format if file does not exist
     conf_convert = config["convert"]
-    logger.info("%s exists?: %s", conf_convert["train_converted_file"], os.path.exists(config_ir["train_converted_file"]))
-    logger.info("%s exists?: %s", conf_convert["dev_converted_file"], os.path.exists(config_ir["dev_converted_file"]))
-    logger.info("%s exists?: %s", conf_convert["test_converted_file"], os.path.exists(config_ir["test_converted_file"]))
+    logger.info("%s exists?: %s", conf_convert["train_converted_file"], os.path.exists(conf_convert["train_converted_file"]))
+    logger.info("%s exists?: %s", conf_convert["dev_converted_file"], os.path.exists(conf_convert["dev_converted_file"]))
+    logger.info("%s exists?: %s", conf_convert["test_converted_file"], os.path.exists(conf_convert["test_converted_file"]))
     if not( os.path.exists(
             conf_convert["train_converted_file"]) and os.path.exists(
                 conf_convert["dev_converted_file"]) and os.path.exists(
