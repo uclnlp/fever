@@ -105,7 +105,7 @@
       "predicted_labels_file": {
         "__overwrite": "aggregator test_predicted_labels_file"
       },
-      "predicted_evidence_file": "___root_dir___/fever/shared_task_dev.sentences.p15.s30.jsonl",
+        "predicted_evidence_file": {"__overwrite": "ir test_output_file"},
         "actual_file": "___root_dir___/fever/shared_task_dev.jsonl",
         "submission_file": "___root_dir___/fever/results/___model_name___/test_submission.jsonl"
     },
