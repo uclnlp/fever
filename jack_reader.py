@@ -144,7 +144,7 @@ def save_predictions(instances, preds_list, path):
         if "scored_sentences" in instance:
             dic["ev_scores"] = instance["scored_sentences"]
 
-        store.append()
+        store.append(dic)
 
     save_jsonl(store, path)
 
