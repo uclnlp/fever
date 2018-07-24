@@ -59,7 +59,7 @@ class PredictedLabelsDataset(Dataset):
             input = create_input2(
                 self.instances[idx]["predicted_labels"],
                 self.instances[idx]["scores"],
-                self.instances[idx]["scored_sentences"],
+                self.instances[idx]["ev_scores"],
                 n_sentences=self.n_sentences)
         else:
             input = create_input(
