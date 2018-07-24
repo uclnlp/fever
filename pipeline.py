@@ -210,6 +210,7 @@ if __name__ == '__main__':
         "--overwrite", action="store_true")
     args = parser.parse_args()
     if os.path.exists(os.path.join("results", args.model, "org_config.json")) and not args.overwrite:
+        logger.warning("overwriting the existing model due to --overwrite flag.")
         raise RuntimeError("you cannot overwrite the config. use different model name.")
 
     with open(args.config) as f:
