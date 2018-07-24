@@ -9,7 +9,7 @@
   "ir": {
     "train_output_file": "___root_dir___/fever/data/indexed_data/train.sentences.p15.s30.jsonl",
     "dev_output_file": "___root_dir___/fever/data/indexed_data/dev.sentences.p15.s30.jsonl",
-    "test_output_file": "___root_dir___/fever/data/indexed_data/shared_task_dev.sentences.p10.s30.jsonl",
+    "test_output_file": "___root_dir___/fever/data/indexed_data/shared_task_dev.sentences.p15.s30.jsonl",
     "train_input_file": "___root_dir___/fever/data/train.jsonl",
     "dev_input_file": "___root_dir___/fever/data/dev.jsonl",
     "test_input_file": "___root_dir___/fever/data/shared_task_dev.jsonl",
@@ -31,6 +31,10 @@
     },
     "dev_converted_file": "___root_dir___/fever/data/converted/dev.sentences.p15.s30_title.jsonl"
   },
+  "test_input_file": {
+    "__overwrite": "ir test_output_file"
+  },
+  "test_converted_file": "___root_dir___/fever/data/converted/shared_task_dev.sentences.p15.s30_title.jsonl",
   "train_rte": {
     "jack_config_file": "___root_dir___/jack/conf/nli/fever/esim.yaml",
     "load_dir": "esim_snli",
@@ -105,9 +109,11 @@
       "predicted_labels_file": {
         "__overwrite": "aggregator test_predicted_labels_file"
       },
-        "predicted_evidence_file": {"__overwrite": "ir test_output_file"},
-        "actual_file": "___root_dir___/fever/data/shared_task_dev.jsonl",
-        "submission_file": "___root_dir___/fever/results/___model_name___/test_submission.jsonl"
+      "predicted_evidence_file": {
+        "__overwrite": "ir test_output_file"
+      },
+      "actual_file": "___root_dir___/fever/data/shared_task_dev.jsonl",
+      "submission_file": "___root_dir___/fever/results/___model_name___/test_submission.jsonl"
     },
     "_additional_comment": null
   }
