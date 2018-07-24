@@ -47,7 +47,7 @@
     "train_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/train.predictions.jsonl",
     "dev_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/dev.predictions.jsonl",
     "test_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/test.predictions.jsonl",
-    "tra
+    "train_input_file": {
       "__overwrite": "ir train_output_file"
     },
     "dev_input_file": {
@@ -105,7 +105,7 @@
       "predicted_labels_file": {
         "__overwrite": "aggregator test_predicted_labels_file"
       },
-        "predicted_evidence_file": {"__overwrite": "ir test_output_file"}
+        "predicted_evidence_file": {"__overwrite": "ir test_output_file"},
         "actual_file": "___root_dir___/fever/data/shared_task_dev.jsonl",
         "submission_file": "___root_dir___/fever/results/___model_name___/test_submission.jsonl"
     },
