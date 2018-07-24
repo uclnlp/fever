@@ -1,0 +1,20 @@
+{
+  "parent_config": "configs/base_config.json",
+  "__description": "this model starts from aggregation",
+  "__variables": {
+    "___train_rte___": "base",
+    "___inference_rte___": "base+sampling2",
+    "___aggregator___": "base+sampling2",
+    "___score___": "base+sampling2",
+    "___reader___": "reader2",
+    "___model_name___": "base+sampling2"
+  },
+  "aggregator": {
+    "layers": [
+      45,
+      30,
+      5
+    ],
+    "sampling": true
+  }
+}
