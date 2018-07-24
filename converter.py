@@ -186,7 +186,7 @@ def convert(instances, prependlinum=False, prependtitle=False, use_ir_prediction
     for instance in tqdm(instances, desc="conversion"):
         converted_instances.extend(
             _convert_instance(
-                instance, t2l2s, prependlinum=prependlinum, prependtitle=prependtitle, use_ir_prediction=use_ir_prediction, n_sentences=n_sentences))
+                instance, t2l2s, prependlinum=prependlinum, prependtitle=prependtitle, use_ir_prediction=use_ir_prediction, n_sentences=n_sentences, test=test))
 
     return converted_instances
 
