@@ -34,7 +34,7 @@ class Net(nn.Module):
 class PredictedLabelsDataset(Dataset):
     """Predicted Labels dataset."""
 
-    def __init__(self, jsonl_file, n_sentences=5, sampling=False, test=False):
+    def __init__(self, jsonl_file, n_sentences=5, sampling=False, test=False, use_ev_scores=False):
         """
         """
         instances = read_jsonl(jsonl_file)
@@ -44,6 +44,7 @@ class PredictedLabelsDataset(Dataset):
         self.instances = instances
         self.n_sentences = n_sentences
         self.test = test
+        self.use_ev_scores = use_ev_scores
 
     def __len__(self):
         return len(self.instances)
@@ -53,10 +54,18 @@ class PredictedLabelsDataset(Dataset):
             label = create_target("DUMMY LABEL")
         else:
             label = create_target(self.instances[idx]["label"])
-        input = create_input(
-            self.instances[idx]["predicted_labels"],
-            self.instances[idx]["scores"],
-            n_sentences=self.n_sentences)
+
+        if self.use_ev_scores:
+            input = create_input2(
+                self.instances[idx]["predicted_labels"],
+                self.instances[idx]["scores"],
+                self.instances[idx]["scored_sentences"],
+                n_sentences=self.n_sentences)
+        else:
+            input = create_input(
+                self.instances[idx]["predicted_labels"],
+                self.instances[idx]["scores"],
+                n_sentences=self.n_sentences)
 
         return (label, input)
         # return (self.instances[idx]["label"], self.instances[idx]["predicted_labels"]) #, self.instances[idx]["scores"])
@@ -100,6 +109,28 @@ def create_input(predicted_labels, scores, n_sentences):
     # np_out = np.mean(np.multiply(one_hot, np.expand_dims(scores, axis=1)), axis=0)
     np_out = np.reshape(
         np.multiply(one_hot, np.expand_dims(scores, axis=1)), (-1))
+    return np_out
+
+
+def create_input2(predicted_labels, scores, sentence_scores, n_sentences):
+    pred_labels = [label2idx[pred_label] for pred_label in predicted_labels]
+    scores = scores.copy()
+    ev_scores = [score for _, _, score in sentence_scores]
+
+    # fill zero if number of predicted_labels (it corresponds to the predicted evidences) are less than n_sentences
+    if len(pred_labels) < n_sentences:
+        n_fillup = n_sentences - len(pred_labels)
+        pred_labels += [zero_pad_idx] * n_fillup
+        scores += [0.] * n_fillup
+
+    one_hot = zero_plus_eye[
+        pred_labels, :]  # equivalent to embedding_lookup(pred_labels, eye)
+
+    # np_out = np.mean(np.multiply(one_hot, np.expand_dims(scores, axis=1)), axis=0)
+    np_rtes = np.reshape(
+        np.multiply(one_hot, np.expand_dims(scores, axis=1)), (-1))
+    np_irs = np.array(ev_scores)
+    np_out = np.concatenate([np_rtes, np_irs])
     return np_out
 
 
