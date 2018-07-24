@@ -34,7 +34,7 @@ class Net(nn.Module):
 class PredictedLabelsDataset(Dataset):
     """Predicted Labels dataset."""
 
-    def __init__(self, jsonl_file, n_sentences=5, sampling=False, test=False, use_ev_scores=False):
+    def __init__(self, jsonl_file, n_sentences=5, sampling=False, use_ev_scores=False, test=False):
         """
         """
         instances = read_jsonl(jsonl_file)
@@ -213,6 +213,7 @@ if __name__ == "__main__":
     parser.add_argument("--predicted_labels", required=True)
     parser.add_argument("--test_predicted_labels", required=True)
     parser.add_argument("--sampling", action="store_true")
+    parser.add_argument("--ev_scores", action="store_true")
     parser.add_argument(
         "--layers",
         nargs="+",
@@ -224,9 +225,9 @@ if __name__ == "__main__":
 
     # data: prepend_title_linum
     print(args)
-    train_set = PredictedLabelsDataset(args.train, args.n_sentences, sampling=args.sampling)
-    dev_set = PredictedLabelsDataset(args.dev, args.n_sentences)
-    test_set = PredictedLabelsDataset(args.test, args.n_sentences, test=True)
+    train_set = PredictedLabelsDataset(args.train, args.n_sentences, sampling=args.sampling, use_ev_scores=args.ev_scores)
+    dev_set = PredictedLabelsDataset(args.dev, args.n_sentences, use_ev_scores=args.ev_scores)
+    test_set = PredictedLabelsDataset(args.test, args.n_sentences, use_ev_scores=args.ev_scores, test=True)
     train_dataloader = DataLoader(
         train_set, batch_size=64, shuffle=True, num_workers=4)
     dev_dataloader = DataLoader(
