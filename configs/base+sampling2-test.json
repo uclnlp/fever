@@ -7,6 +7,12 @@
     "___aggregator___": "base+sampling2-test",
     "___score___": "base+sampling2-test"
   },
+  "convert": {
+    "test_input_file": {
+      "__overwrite": "ir test_output_file"
+    },
+    "test_converted_file": "___root_dir___/fever/data/converted/shared_task_dev.sentences.p15.s30_title.real.jsonl"
+  },
   "aggregator": {
     "sampling": true
   }
