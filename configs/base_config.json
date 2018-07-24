@@ -1,6 +1,6 @@
 {
   "__variables": {
-    "___root_dir___": "/home/tyoneda/pipeline",
+    "___root_dir___": "/cluster/project2/mr/tyoneda/pipeline",
     "___train_rte___": "base",
     "___inference_rte___": "base",
     "___aggregator___": "base",
