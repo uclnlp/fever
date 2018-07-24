@@ -41,10 +41,12 @@ def tofeverformat(data,docs,evidence):
         cid=instance["id"]
         instance["predicted_pages"]=list()
         instance["predicted_sentences"]=list()
+        instance["scored_sentences"]=list()
         for doc,score in docs[cid]:
             instance["predicted_pages"].append(doc)
         for doc,line,score in evidence[cid]:
             instance["predicted_sentences"].append([doc,line])
+            instance["scored_sentences"].append([doc,line,score])
     return data2
 
 
