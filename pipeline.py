@@ -201,7 +201,7 @@ if __name__ == '__main__':
 
     # load and save original config
     if "__variables" not in config:
-        config["__varibles"] = {}
+        config["__variables"] = {}
     config["__variables"]["___model_name___"] = args.model
     model_dir = "results/{}".format(config["__variables"]["___model_name___"])
 
