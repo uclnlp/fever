@@ -221,7 +221,7 @@ if __name__ == '__main__':
         logger.info("loading parent config from {}".format(path))
         with open(path) as f:
             parent_config = json.load(f)
-        save_config(config, path=os.path.join(model_dir, "parent_config.json"))
+        save_config(parent_config, path=os.path.join(model_dir, "parent_config.json"))
         config = update(deepcopy(parent_config), config)
 
     config = parse(config)
