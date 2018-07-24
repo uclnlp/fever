@@ -151,6 +151,8 @@ def neural_aggregator(config):
     options.extend(["--layers"] + layers)
     if "sampling" in config and config["sampling"]:
         options.append("--sampling")
+    if "ev_scores" in config and config["ev_scores"]:
+        options.append("--ev_scores")
 
     script = ["neural_aggregator.py"] + options
     __run_python(script, gpu=False)

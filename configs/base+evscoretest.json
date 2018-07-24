@@ -1,0 +1,19 @@
+{
+  "parent_config": "configs/base_config.json",
+  "__description": "this model starts from inference rte",
+  "__variables": {
+    "___train_rte___": "base",
+    "___inference_rte___": "base+evscoretest",
+    "___aggregator___": "base+evscoretest",
+    "___score___": "base+evscoretest"
+  },
+  "inference_rte": {
+      "train_input_file": "___root_dir___/fever/data/indexed_data/dev.sentences.p15.s30.jsonl",
+      "dev_input_file": "___root_dir___/fever/data/indexed_data/dev.sentences.p15.s30.jsonl",
+      "test_input_file": "___root_dir___/fever/data/indexed_data/new_output.jsonl"
+  },
+  "aggregator": {
+      "sampling": true,
+      "ev_scores": true
+  }
+}
