@@ -87,7 +87,13 @@
     },
     "actual_file": {
       "__overwrite": "ir dev_input_file"
-    }
-  },
+    },
+      "test": {
+        "predicted_labels_file": {
+        "__overwrite": "aggregator test_predicted_labels_file"
+        },
+          "predicted_evidence_file": "___root_dir___/fever/shared_task_dev.sentences.p15.s30.jsonl",
+        "actual_file": "___root_dir___/fever/shared_task_dev.jsonl"
+      },
   "_additional_comment": null
 }
