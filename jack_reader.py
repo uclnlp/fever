@@ -131,14 +131,20 @@ def save_predictions(instances, preds_list, path):
         pred_sents = instance["evidence"] # refer to read_ir_result
         pred_labels = [pred[0].text for pred in preds]
         scores = [float(pred[0].score) for pred in preds]
-        store.append({
+        dic = {
             "id": id,
             "label": label,
             "scores": scores,
             "predicted_labels": [convert_label(pred_label, inverse=True) for pred_label in pred_labels],
             "claim": claim,
             "predicted_sentences": pred_sents
-        })
+        }
+
+        # scores of ir part
+        if "scored_sentences" in instance:
+            dic["ev_scores"] = instance["scored_sentences"]
+
+        store.append()
 
     save_jsonl(store, path)
 
