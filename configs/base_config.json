@@ -1,0 +1,120 @@
+{
+  "__variables": {
+    "___root_dir___": "/home/tyoneda/pipeline",
+    "___reader___": "reader"
+  },
+  "__model_description": {
+    "save_dir": "___root_dir___/fever/results/___model_name___/config.json"
+  },
+  "ir": {
+    "train_output_file": "___root_dir___/fever/data/indexed_data/train.sentences.p15.s30.jsonl",
+    "dev_output_file": "___root_dir___/fever/data/indexed_data/dev.sentences.p15.s30.jsonl",
+    "test_output_file": "___root_dir___/fever/data/indexed_data/shared_task_dev.sentences.p15.s30.jsonl",
+    "train_input_file": "___root_dir___/fever/data/train.jsonl",
+    "dev_input_file": "___root_dir___/fever/data/dev.jsonl",
+    "test_input_file": "___root_dir___/fever/data/shared_task_dev.jsonl",
+    "n_pages": 15,
+    "n_sentences": 30
+  },
+  "convert": {
+    "__comment": "",
+    "prependtitle": true,
+    "prependlinum": false,
+    "use_ir_pred": false,
+    "n_sentences": 5,
+    "train_input_file": {
+      "__overwrite": "ir train_output_file"
+    },
+    "train_converted_file": "___root_dir___/fever/data/converted/train.sentences.p15.s30_title.jsonl",
+    "dev_input_file": {
+      "__overwrite": "ir dev_output_file"
+    },
+      "dev_converted_file": "___root_dir___/fever/data/converted/dev.sentences.p15.s30_title.jsonl",
+  "test_input_file": {
+    "__overwrite": "ir test_output_file"
+  },
+  "test_converted_file": "___root_dir___/fever/data/converted/shared_task_dev.sentences.p15.s30_title.jsonl"
+  },
+  "train_rte": {
+    "jack_config_file": "___root_dir___/jack/conf/nli/fever/esim.yaml",
+    "load_dir": "esim_snli",
+    "save_dir": "___root_dir___/results/___model_name___/___reader___",
+    "train_file": {
+      "__overwrite": "convert train_converted_file"
+    },
+    "dev_file": {
+      "__overwrite": "convert dev_converted_file"
+    }
+  },
+  "inference_rte": {
+    "n_sentences": 15,
+    "train_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/train.predictions.jsonl",
+    "dev_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/dev.predictions.jsonl",
+    "test_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/test.predictions.jsonl",
+    "train_input_file": {
+      "__overwrite": "ir train_output_file"
+    },
+    "dev_input_file": {
+      "__overwrite": "ir dev_output_file"
+    },
+    "test_input_file": {
+      "__overwrite": "ir test_output_file"
+    },
+    "saved_reader": {
+      "__overwrite": "train_rte save_dir"
+    },
+    "prependtitle": {
+      "__overwrite": "convert prependtitle"
+    },
+    "prependlinum": {
+      "__overwrite": "convert prependlinum"
+    }
+  },
+  "aggregator": {
+    "layers": [
+      45,
+      25,
+      10
+    ],
+    "epochs": 5,
+    "predicted_labels_file": "___root_dir___/fever/results/___model_name___/aggregated_labels.jsonl",
+    "test_predicted_labels_file": "___root_dir___/fever/results/___model_name___/test_aggregated_labels.jsonl",
+    "train_file": {
+      "__overwrite": "inference_rte train_predicted_labels_and_scores_file"
+    },
+    "dev_file": {
+      "__overwrite": "inference_rte dev_predicted_labels_and_scores_file"
+    },
+    "test_file": {
+      "__overwrite": "inference_rte test_predicted_labels_and_scores_file"
+    },
+    "n_sentences": {
+      "__overwrite": "inference_rte n_sentences"
+    }
+  },
+  "score": {
+    "score_file": "___root_dir___/fever/results/___model_name___/score.jsonl",
+    "submission_file": "___root_dir___/fever/results/___model_name___/submission.jsonl",
+    "predicted_labels_file": {
+      "__overwrite": "aggregator predicted_labels_file"
+    },
+    "predicted_evidence_file": {
+      "__overwrite": "ir dev_output_file"
+    },
+    "actual_file": {
+      "__overwrite": "ir dev_input_file"
+    },
+    "test": {
+      "score_file": "___root_dir___/fever/results/___model_name___/test_score.jsonl",
+      "predicted_labels_file": {
+        "__overwrite": "aggregator test_predicted_labels_file"
+      },
+      "predicted_evidence_file": {
+        "__overwrite": "ir test_output_file"
+      },
+      "actual_file": "___root_dir___/fever/data/shared_task_dev.jsonl",
+      "submission_file": "___root_dir___/fever/results/___model_name___/test_submission.jsonl"
+    },
+    "_additional_comment": null
+  }
+}

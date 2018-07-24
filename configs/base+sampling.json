@@ -1,0 +1,6 @@
+{
+  "parent_config": "base_config.json",
+  "score": {
+    "sampling": true
+  }
+}

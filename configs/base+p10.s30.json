@@ -1,0 +1,21 @@
+{
+  "parent_config": "base_config.json",
+  "__model_description": {
+    "__comment": "p10.s30"
+  },
+  "ir": {
+    "train_output_file": "___root_dir___/fever/data/indexed_data/train.sentences.p10.s30.jsonl",
+    "dev_output_file": "___root_dir___/fever/data/indexed_data/dev.sentences.p10.s30.jsonl",
+    "test_output_file": "___root_dir___/fever/data/indexed_data/shared_task_dev.sentences.p10.s30.jsonl",
+    "train_input_file": "___root_dir___/fever/data/train.jsonl",
+    "dev_input_file": "___root_dir___/fever/data/dev.jsonl",
+    "test_input_file": "___root_dir___/fever/data/shared_task_dev.jsonl",
+    "n_pages": 10,
+    "n_sentences": 30
+  },
+  "convert": {
+    "train_converted_file": "___root_dir___/fever/data/converted/train.sentences.p10.s30_title.jsonl",
+    "dev_converted_file": "___root_dir___/fever/data/converted/dev.sentences.p10.s30_title.jsonl",
+    "test_converted_file": "___root_dir___/fever/data/converted/shared_task_dev.sentences.p10.s30_title.jsonl"
+  }
+}
