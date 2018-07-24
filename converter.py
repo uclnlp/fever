@@ -17,7 +17,8 @@ def convert_label(label, inverse=False):
     fever2snli = {
         "SUPPORTS": "entailment",
         "REFUTES": "contradiction",
-        "NOT ENOUGH INFO": "neutral"
+        "NOT ENOUGH INFO": "neutral",
+        "DUMMY LABEL": "dummy label"
     }
     snli2fever = {snli: fever for fever, snli in fever2snli.items()}
     if not inverse:
@@ -72,7 +73,7 @@ def sampling(converted_instances):
     return sampled_instances
 
 
-def _convert_instance(instance, t2l2s, prependlinum, prependtitle, use_ir_prediction, n_sentences):
+def _convert_instance(instance, t2l2s, prependlinum, prependtitle, use_ir_prediction, n_sentences, test=False):
     """convert single instance to either one or multiple instances
     Args
     instance: instance of FEVER dataset.
@@ -85,6 +86,12 @@ def _convert_instance(instance, t2l2s, prependlinum, prependtitle, use_ir_predic
     def _evidence_format(evidences):
         """return evidence sentence from (possibly) multiple evidence sentences"""
         return " ".join(evidences)
+
+    def get_evidence_linum(evidence_set):
+        if test:
+            return [(title, linum) for title, linum in evidence_set if title in t2l2s]
+        else:
+            return [(title, linum) for _, _, title, linum in evidence_set if title in t2l2s]
 
     converted_instances = list()
     # assert instance["evidence"] == [[[hoge, hoge, title, linum], [hoge, hoge, title, linum]], [[..],[..],..], ...]
@@ -109,10 +116,14 @@ def _convert_instance(instance, t2l2s, prependlinum, prependtitle, use_ir_predic
         converted_instances = sampling(converted_instances)
 
     else:
-        for eidx, evidence_set in enumerate(instance["evidence"]):
-            evidence_linum = [(title, linum)
-                              for _, _, title, linum in evidence_set
-                              if title in t2l2s]
+        if test:
+            evidence_sets = instance["predicted_evidence"]
+        else:
+            evidence_sets = instance["evidence"]
+
+        for eidx, evidence_set in enumerate(evidence_sets):
+            evidence_linum = get_evidence_linum(evidence_set)
+            label = "DUMMY LABEL" if test else instance["label"]
 
             # continue if evidence_linum is empty
             if not evidence_linum:
@@ -121,7 +132,7 @@ def _convert_instance(instance, t2l2s, prependlinum, prependtitle, use_ir_predic
                 snli_format(
                     id="{}-{}".format(instance["id"], str(eidx)),
                     pair_id="{}-{}".format(instance["id"], str(eidx)),
-                    label=convert_label(instance["label"]),
+                    label=convert_label(label),
                     evidence=_evidence_format(
                         get_evidence_sentence_list(
                             evidence_linum, t2l2s, prependlinum=prependlinum, prependtitle=prependtitle)),
@@ -129,7 +140,7 @@ def _convert_instance(instance, t2l2s, prependlinum, prependtitle, use_ir_predic
     return converted_instances
 
 
-def convert(instances, prependlinum=False, prependtitle=False, use_ir_prediction=False, n_sentences=5):
+def convert(instances, prependlinum=False, prependtitle=False, use_ir_prediction=False, n_sentences=5, test=False):
     """convert FEVER format to jack SNLI format
     Arg
     instances: list of dictionary of FEVER format
@@ -142,22 +153,27 @@ def convert(instances, prependlinum=False, prependtitle=False, use_ir_prediction
 
     # use "predicted_sentences" for NEI
     for instance in tqdm(instances, desc="process for NEI"):
-        if instance["label"] == "NOT ENOUGH INFO":
+        if test:
             evidences = instance["predicted_sentences"][:n_sentences]
-            # assert evidences == [(title, linum), (title, linum), ...]
-
-            # change its shape to the normal evidence format
-            evidences = [[["dummy", "dummy", title, linum]]
-                         for title, linum in evidences]
-            instance["evidence"] = evidences
-
-        if use_ir_prediction:
-            titles = [title for title, _ in instance["predicted_sentences"][:n_sentences]]
+            titles = [title for evidence_set in instance["predicted_sentences"] for title, _ in evidence_set]
         else:
-            titles = [
-                title for evidence_set in instance["evidence"]
-            for _, _, title, _ in evidence_set
-            ]
+            if instance["label"] == "NOT ENOUGH INFO":
+                evidences = instance["predicted_sentences"][:n_sentences]
+                # assert evidences == [(title, linum), (title, linum), ...]
+
+                # change its shape to the normal evidence format
+                evidences = [[["dummy", "dummy", title, linum]]
+                             for title, linum in evidences]
+                instance["evidence"] = evidences
+
+            if use_ir_prediction:
+                titles = [title for title, _ in instance["predicted_sentences"][:n_sentences]]
+            else:
+                titles = [
+                    title for evidence_set in instance["evidence"]
+                for _, _, title, _ in evidence_set
+                ]
+
         all_titles.extend(titles)
 
     print("loading wiki data...")
@@ -184,6 +200,7 @@ if __name__ == "__main__":
     parser.add_argument("--prependlinum", action="store_true")
     parser.add_argument("--prependtitle", action="store_true")
     parser.add_argument("--convert_test", action="store_true")
+    parser.add_argument("--test", action="store_true")
     # parser.add_argument("--testset", help="turn on when you convert test data", action="store_true")
     args = parser.parse_args()
     print(args)
@@ -193,7 +210,9 @@ if __name__ == "__main__":
 
         print("input:\n", test_in)
         fever_format = json.loads(test_in)
-        snli_format_instances = convert(fever_format, prependlinum=args.prependlinum, prependtitle=args.prependtitle, use_ir_prediction=args.use_ir_pred, n_sentences=args.n_sentences)
+      
+
+  snli_format_instances = convert(fever_format, prependlinum=args.prependlinum, prependtitle=args.prependtitle, use_ir_prediction=args.use_ir_pred, n_sentences=args.n_sentences, test=args.test)
         print("\noutput:\n", json.dumps(snli_format_instances, indent=4))
 
     else:

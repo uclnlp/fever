@@ -68,7 +68,7 @@ def convert(config):
     if not os.path.exists(config["dev_converted_file"]):
         options[0] = config["dev_input_file"]
         options[1] = config["dev_converted_file"]
-        script = ["converter.py"] + options
+        script = ["converter.py"] + options + ["--test"]
         __run_python(script, gpu=False, env={"PYTHONPATH": "."})
     else:
         logger.info("%s already exists. skipping conversion for dev", config["dev_converted_file"])
@@ -77,7 +77,7 @@ def convert(config):
     if not os.path.exists(config["test_converted_file"]):
         options[0] = config["test_input_file"]
         options[1] = config["test_converted_file"]
-        script = ["converter.py"] + options
+        script = ["converter.py"] + options + ["--test"]
         __run_python(script, gpu=False, env={"PYTHONPATH": "."})
     else:
         logger.info("%s already exists. skipping conversion for test", config["test_converted_file"])
