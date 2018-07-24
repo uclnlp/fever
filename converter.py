@@ -212,7 +212,7 @@ if __name__ == "__main__":
         fever_format = json.loads(test_in)
       
 
-  snli_format_instances = convert(fever_format, prependlinum=args.prependlinum, prependtitle=args.prependtitle, use_ir_prediction=args.use_ir_pred, n_sentences=args.n_sentences, test=args.test)
+        snli_format_instances = convert(fever_format, prependlinum=args.prependlinum, prependtitle=args.prependtitle, use_ir_prediction=args.use_ir_pred, n_sentences=args.n_sentences, test=args.test)
         print("\noutput:\n", json.dumps(snli_format_instances, indent=4))
 
     else:
