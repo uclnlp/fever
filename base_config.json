@@ -45,7 +45,7 @@
     "dev_file": {
       "__overwrite": "convert dev_converted_file"
     }
-  }
+  },
   "inference_rte": {
     "n_sentences": 15,
     "train_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/train.predictions.jsonl",
