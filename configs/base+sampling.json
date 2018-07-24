@@ -7,7 +7,7 @@
     "___aggregator___": "base+sampling",
     "___score___": "base+sampling"
   },
-  "score": {
+  "aggregator": {
     "sampling": true
   }
 }
