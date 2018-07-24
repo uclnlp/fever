@@ -1,5 +1,5 @@
 {
-  "parent_config": "base_config.json",
+  "parent_config": "configs/base_config.json",
   "__description": "this model starts from aggregation",
   "__variables": {
     "___train_rte___": "base",
