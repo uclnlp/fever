@@ -206,8 +206,10 @@ if __name__ == '__main__':
     parser.add_argument("--config", required=True)
     parser.add_argument(
         "--model", default="{0:model_%Y%m%d%H%M%S}".format(now))
+    parser.add_argument(
+        "--overwrite", action="store_true")
     args = parser.parse_args()
-    if os.path.exists(os.path.join("results", args.model, "org_config.json")):
+    if os.path.exists(os.path.join("results", args.model, "org_config.json")) and not args.overwrite:
         raise RuntimeError("you cannot overwrite the config. use different model name.")
 
     with open(args.config) as f:
