@@ -1,0 +1,13 @@
+{
+  "parent_config": "configs/base_config.json",
+  "__description": "this model starts from aggregation",
+  "__variables": {
+    "___train_rte___": "base",
+    "___inference_rte___": "base+sampling2-test",
+    "___aggregator___": "base+sampling2-test",
+    "___score___": "base+sampling2-test"
+  },
+  "aggregator": {
+    "sampling": true
+  }
+}
