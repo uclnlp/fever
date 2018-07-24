@@ -39,7 +39,7 @@
   "train_rte": {
     "jack_config_file": "___root_dir___/jack/conf/nli/fever/esim.yaml",
     "load_dir": "esim_snli",
-    "save_dir": "___root_dir___/results/___train_rte___/___reader___",
+    "save_dir": "___root_dir___/fever/results/___train_rte___/___reader___",
     "train_file": {
       "__overwrite": "convert train_converted_file"
     },
