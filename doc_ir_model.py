@@ -5,7 +5,7 @@ from doc_ir import *
 from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import gazetteers, names
 from collections import Counter
-from fever_io import titles_to_jsonl_num, load_split_trainset, load_paper_dataset
+from fever_io import titles_to_jsonl_num, load_split_trainset, load_paper_dataset, titles_to_tf, load_doc_tf
 import pickle
 from tqdm import tqdm
 from random import random, shuffle
@@ -14,21 +14,21 @@ from random import random, shuffle
 class doc_ir_model:
     def __init__(self,phrase_features=phrase_features):
         self.model=LogisticRegression(C=100000000,solver="sag",max_iter=100000)
-        featurelist=sorted(list(phrase_features("dummy",0,"dummy","dummy").keys()))
+        featurelist=sorted(list(phrase_features("dummy",0,"dummy","dummy",{"dummy":(0,0)}).keys()))
         self.f2v={f:i for i,f in enumerate(featurelist)}
     def fit(self,X,y):
         self.model.fit(X,y)
     def prob(self,x):
         return self.model.predict_proba(x)[0,1]
-    def score_instance(self,phrase="dummy",start=0,title="dummy",claim="dummy"):
+    def score_instance(self,phrase="dummy",start=0,title="dummy",claim="dummy",ctoks=word_tokenize("dummy"),tf=dict()):
         x=np.zeros(shape=(1,len(self.f2v)),dtype=np.float32)
-        self.process_instance(phrase,start,title,claim,0,x)
+        self.process_instance(phrase,start,title,claim,ctoks,tf,0,x)
         return self.prob(x)
-    def process_instance(self,phrase="dummy",start=0,title="dummy",claim="dummy",obsnum=0,array=np.zeros(shape=(1,1)),dtype=np.float32):
-        features=phrase_features(phrase,start,title,claim)
+    def process_instance(self,phrase="dummy",start=0,title="dummy",claim="dummy",ctoks=word_tokenize("dummy"),tf=dict(),obsnum=0,array=np.zeros(shape=(1,1)),dtype=np.float32):
+        features=phrase_features(phrase,start,title,claim,ctoks,tf)
         for f in features:
             array[obsnum,self.f2v[f]]=float(features[f])        
-    def process_train(self,selected,train):
+    def process_train(self,selected,train,doctf):
         obs=len(selected)*2
         nvars=len(self.f2v)
         X=np.zeros(shape=(obs,nvars),dtype=np.float32)
@@ -38,13 +38,15 @@ class doc_ir_model:
             cid=example["id"]
             if cid in selected:
                 claim=example["claim"]
+                ctoks=word_tokenize(claim.lower())
                 for yn in selected[cid]:
                     [title,phrase,start]=selected[cid][yn]
-                    self.process_instance(phrase,start,title,claim,obsnum,X)
+                    tf=doctf[title]
+                    self.process_instance(phrase,start,title,claim,ctoks,tf,obsnum,X)
                     y[obsnum]=float(yn)
                     obsnum+=1
         assert obsnum==obs
-        return X,y 
+        return X,y  
         
     
         
@@ -179,7 +181,25 @@ if __name__ == "__main__":
         except:
             selected=select_docs(train)
         model=doc_ir_model()
-        X,y=model.process_train(selected,train)
+        rdocs=dict()
+        for example in tqdm(train):
+            cid=example["id"]
+            if cid in selected:
+                claim=example["claim"]
+                ctoks=word_tokenize(claim.lower())
+                titles=list()
+                for yn in selected[cid]:
+                    [title,phrase,start]=selected[cid][yn]
+                    titles.append(title)
+                rdocs[example["id"]]=(titles,ctoks)
+        try:
+            t2tf=titles_to_tf()
+            doctf=load_doc_tf(rdocs,t2tf)
+        except:
+            term_and_doc_freqs()
+            t2tf=titles_to_tf()
+            doctf=load_doc_tf(rdocs,t2tf)
+        X,y=model.process_train(selected,train,doctf)
         model.fit(X,y)
         with open("data/doc_ir_model.bin","wb") as wb:
             pickle.dump(model,wb)

@@ -2,7 +2,7 @@ from util import edict, pdict, normalize_title, load_stoplist
 from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import gazetteers, names
 from collections import Counter
-from fever_io import titles_to_jsonl_num, load_split_trainset
+from fever_io import titles_to_jsonl_num, load_split_trainset, titles_to_tf, load_doc_tf
 import pickle
 from tqdm import tqdm
 import numpy as np
@@ -36,10 +36,19 @@ def find_titles_in_claim(claim="",edocs=edict()):
                 docset[d].append((phrase,start))
     return docset
 
-def phrase_features(phrase="",start=0,title="",claim=""):
+def phrase_features(phrase="",start=0,title="",claim="",ctoks=word_tokenize("dummy"),termfreqs=dict()):
     features=dict()
     stoks=phrase.split()
     t_toks,rmndr = normalize_title(title,rflag=True)
+    features["terms"]=0
+    features["terms0"]=0
+    numtoks=0
+    for tok in ctoks:
+        if tok in termfreqs:
+            tf,tf0=termfreqs[tok]
+            features["terms"]+=(tf>0)
+            features["terms0"]+=(tf0>0)
+            numtoks+=1
     features["rmndr"]=(rmndr=="")
     features["rinc"]=((rmndr!="") and (rmndr in claim))
     features["start"]=start
@@ -79,22 +88,23 @@ def score_phrase(features=dict()):
     return score
         
 
-def score_title(ps_list=[],title="dummy",claim="dummy",model=None):
+
+def score_title(ps_list=[],title="dummy",claim="dummy",ctoks=word_tokenize("dummy"),model=None,tf=dict()):
     maxscore=-1000000
     for phrase,start in ps_list:
         if model is None:
             score=score_phrase(phrase_features(phrase,start,title,claim))
         else:
-            score=model.score_instance(phrase,start,title,claim)
+            score=model.score_instance(phrase,start,title,claim,ctoks,tf)
         maxscore=max(maxscore,score)
     return maxscore
 
 
-def best_titles(claim="",edocs=edict(),best=5,model=None):
-    t2phrases=find_titles_in_claim(claim,edocs)
+def best_titles(claim="",ctoks=word_tokenize("dummy"),t2phrases=dict(),doctf=dict(),best=5,model=None):
     tscores=list()
     for title in t2phrases:
-        tscores.append((title,score_title(t2phrases[title],title,claim,model)))
+        tf=doctf[title]
+        tscores.append((title,score_title(t2phrases[title],title,claim,ctoks,model,tf)))
     tscores=sorted(tscores,key=lambda x:-1*x[1])[:best]
     return tscores
 
@@ -147,13 +157,23 @@ def title_hits(data=list(),tscores=dict()):
 
 
 
+
 def doc_ir(data=list(),edocs=edict(),best=5,model=None):
     """
     Returns a dictionary of n best document titles for each claim.
     """
+    rdocs=dict()
+    for example in tqdm(data):
+        claim=example["claim"]
+        titles=find_titles_in_claim(claim,edocs)
+        ctoks=word_tokenize(claim.lower())
+        rdocs[example["id"]]=(titles,ctoks)
+    t2tf=titles_to_tf()
+    doctf=load_doc_tf(rdocs,t2tf)
     docs=dict()
     for example in tqdm(data):
-        tscores=best_titles(example["claim"],edocs,best,model)
+        titles,ctoks=rdocs[example["id"]]
+        tscores=best_titles(example["claim"],ctoks,titles,doctf,best,model)
         docs[example["id"]]=tscores
     return docs
     

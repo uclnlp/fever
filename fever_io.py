@@ -5,6 +5,111 @@ import os
 import sys
 from util import abs_path
 from tqdm import tqdm
+from collections import Counter
+from nltk import word_tokenize
+
+def term_and_doc_freqs():
+    df=Counter()
+    df0=Counter()
+    with open("data/tf","w") as f:
+        with open("data/tf_pointers","w") as p:
+            for filename in tqdm(sorted(os.listdir("data/wiki-pages/wiki-pages/"))):
+                with open("data/wiki-pages/wiki-pages/"+filename, 'r') as openfile:
+                    for line in openfile:
+                        data=json.loads(line.rstrip("\n"))
+                        title=data["id"]
+                        tf=Counter()
+                        tf0=Counter()
+                        tset=set()
+                        t0set=set()
+                        lines=data["lines"]
+                        for l in lines.split("\n"):
+                            fields=l.split("\t")
+                            if fields[0].isnumeric():
+                                l_id=int(fields[0])
+                                l_txt=fields[1]
+                                toks=word_tokenize(l_txt.lower())
+                                for tok in toks:
+                                    if l_id==0:
+                                        tf0[tok]+=1
+                                        t0set.add(tok)
+                                    else:
+                                        tf[tok]+=1
+                                        tset.add(tok)
+                        for tok in tset:
+                            df[tok]+=1
+                        for tok in t0set:
+                            df0[tok]+=1
+                        if title != "":
+                            point=f.tell()
+                            f.write(title+"\n")
+                            p.write(title+"\t"+str(point))
+                            terms=0
+                            for tok,c in tf.most_common():
+                                if tok != "":
+                                    c0=tf0[tok]
+                                    del tf0[tok]
+                                    f.write(" "+tok+" "+str(c)+" "+str(c0)+"\n")
+                                    terms+=1
+                            for tok,c0 in tf0.most_common():
+                                if tok != "":
+                                    c=tf[tok]
+                                    f.write(" "+tok+" "+str(c)+" "+str(c0)+"\n")
+                                    terms+=1
+                            p.write("\t"+str(terms)+"\n")
+    with open("data/df","w") as f:
+        for tok,c in df.most_common():
+            if tok != "":
+                c0=df0[tok]
+                del df0[tok]
+                f.write(tok+" "+str(c)+" "+str(c0)+"\n")
+        for tok,c0 in df0.most_common():
+            if tok != "":
+                c=df[tok]
+                f.write(tok+" "+str(c)+" "+str(c0)+"\n")
+
+def titles_to_tf(tf_pointers="data/tf_pointers"):
+    t2tf=dict()
+    with open(tf_pointers) as f:
+        for line in f:
+            fields=line.rstrip("\n").split("\t")
+            title=fields[0]
+            point=int(fields[1])
+            terms=int(fields[2])
+            t2tf[title]=(point,terms)
+    return t2tf
+
+def load_doc_tf(docs=dict(),t2tf=dict(),term_freqs="data/tf"):
+    doctf=dict()
+    toks=dict()
+    points=set()
+    for cid in docs:
+        titles, ctoks = docs[cid]
+        for title in titles:
+            doctf[title]=dict()
+            if title not in toks:
+                toks[title]=set()
+            for tok in ctoks:
+                toks[title].add(tok)
+            point,terms=t2tf[title]
+            points.add(point)
+    points=sorted(list(points))
+    with open(term_freqs) as f:
+        for point in points:
+            f.seek(point,0)
+            line=f.readline()
+            title=line.rstrip("\n")
+            p,terms=t2tf[title]
+            for i in range(terms):
+                line=f.readline()
+                fields=line.lstrip(" ").split()
+                tok=fields[0]
+                if tok in toks[title]:
+                    tf=int(fields[1])
+                    tf0=int(fields[2])
+                    doctf[title][tok]=(tf,tf0)
+    return doctf
+
 
 def save_jsonl(dictionaries, path, print_message=True):
     """save jsonl file from list of dictionaries
