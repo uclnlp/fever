@@ -106,7 +106,8 @@
         "__overwrite": "aggregator test_predicted_labels_file"
       },
       "predicted_evidence_file": "___root_dir___/fever/shared_task_dev.sentences.p15.s30.jsonl",
-      "actual_file": "___root_dir___/fever/shared_task_dev.jsonl"
+        "actual_file": "___root_dir___/fever/shared_task_dev.jsonl",
+        "submission_file": "___root_dir___/fever/results/___model_name___/test_submission.jsonl"
     },
     "_additional_comment": null
   }
