@@ -106,6 +106,11 @@ def inference_rte(config):
     script = ["../fever/jack_reader.py"] + options
     __run_python(script, gpu=True, env={"PYTHONPATH": "."})
 
+    # test data
+    options[0] = config["test_input_file"]
+    options[1] = config["test_predicted_labels_and_scores_file"]
+    script = ["../fever/jack_reader.py"] + options
+    __run_python(script, gpu=True, env={"PYTHONPATH": "."})
 
 def neural_aggregator(config):
     os.chdir("/home/tyoneda/pipeline/fever")
