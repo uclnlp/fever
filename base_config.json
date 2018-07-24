@@ -23,7 +23,7 @@
       "train_input_file": {"__overwrite": "ir train_output_file"},
       "train_converted_file": "___root_dir___/fever/data/converted/train.sentences.p15.s30_title.jsonl",
       "dev_input_file": {"__overwrite": "ir dev_output_file"},
-      "dev_converted_file": "___root_dir___/fever/data/converted/train.sentences.p15.s30_title.jsonl"
+      "dev_converted_file": "___root_dir___/fever/data/converted/dev.sentences.p15.s30_title.jsonl"
   },
   "train_rte": {
       "jack_config_file": "___root_dir___/jack/conf/nli/fever/esim.yaml",
