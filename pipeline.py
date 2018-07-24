@@ -11,6 +11,7 @@ from config_parser import parse
 from fever_io import read_jsonl, save_jsonl
 
 
+root_dir = "/cluster/project2/mr/tyoneda/pipeline"
 @contextmanager
 def environ(env):
     original_environ_dict = os.environ.copy()
@@ -100,7 +101,7 @@ def train_rte(config):
 
 
 def inference_rte(config):
-    os.chdir("/home/tyoneda/pipeline/jack")
+    os.chdir(os.path.join(root_dir, "/jack"))
     options = list()
     options.append(config["train_input_file"])  # input file
     options.append(config["train_predicted_labels_and_scores_file"])
@@ -138,7 +139,7 @@ def inference_rte(config):
         logger.info("skipping inference rte for test. %s exists", config["test_predicted_labels_and_scores_file"])
 
 def neural_aggregator(config):
-    os.chdir("/home/tyoneda/pipeline/fever")
+    os.chdir(os.path.join(root_dir, "fever"))
     options = list()
     options.extend(["--train", config["train_file"]])
     options.extend(["--dev", config["dev_file"]])
@@ -159,7 +160,7 @@ def neural_aggregator(config):
 
 
 def score(config):
-    os.chdir("/home/tyoneda/pipeline/fever-baselines")
+    os.chdir(os.path.join(root_dir, "fever-baselines"))
     options = list()
     options.extend(["--predicted_labels", config["predicted_labels_file"]])
     options.extend(["--predicted_evidence", config["predicted_evidence_file"]])
