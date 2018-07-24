@@ -53,6 +53,9 @@
     "dev_input_file": {
       "__overwrite": "ir dev_output_file"
     },
+    "test_input_file": {
+      "__overwrite": "ir test_output_file"
+    },
     "saved_reader": {
       "__overwrite": "train_rte save_dir"
     },
