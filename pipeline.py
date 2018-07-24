@@ -139,6 +139,18 @@ def score(config):
     __run_python(script, gpu=False, env={"PYTHONPATH": "src:../fever"})
 
 
+    if "test" in config and config["test"]:
+        options = list()
+        options.extend(["--predicted_labels", config["test"]["predicted_labels_file"]])
+        options.extend(["--predicted_evidence", config["test"]["predicted_evidence_file"]])
+        options.extend(["--actual", config["test"]["actual_file"]])
+        options.extend(["--score_file", config["test"]["score_file"]])
+        options.extend(["--submission_file", config["test"]["submission_file"]])
+
+        script = ["src/scripts/score.py"] + options
+        __run_python(script, gpu=False, env={"PYTHONPATH": "src:../fever"})
+
+
 def __run_python(script, gpu=False, env=dict()):
     LD_LIBRARY_PATH = "/share/apps/cuda-9.0/lib64:/share/apps/python-3.6.3-shared/lib:/share/apps/libc6_2.23/lib/x86_64-linux-gnu:/share/apps/libc6_2.23/lib64:/share/apps/gcc-6.2.0/lib64:/share/apps/gcc-6.2.0/lib"
     python_gpu_prep = [
