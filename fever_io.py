@@ -1,5 +1,6 @@
 import json
 import random
+import re
 import os
 import sys
 from util import abs_path
@@ -82,7 +83,7 @@ def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="
     """
     t2jnum=dict()
     try:
-        with open(doctitles) as f:
+        with open(doctitles, "r") as f:
             for line in f:
                 fields=line.rstrip("\n").split("\t")
                 title=fields[0]
@@ -109,18 +110,37 @@ def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="
     return t2jnum
 
 
-def get_evidence_sentence(evidences, t2l2s, cutoff=None):
-    """lookup corresponding sentences and return concatenated text
+def get_evidence_sentence_list(evidences, t2l2s, prependlinum=False, prependtitle=False):
+    """lookup corresponding sentences and return list of sentences
     Args
     evidences: [(title, linum), ...]
     t2l2s: title2line2sentence <- output of load_doc_lines
 
     Returns
-    evidence sentence (str)
+    list of evidence sentences
     """
-    titles = [title for title, _ in evidences][:cutoff]
-    linums = [linum for _, linum in evidences][:cutoff]
-    return " ".join([t2l2s[title][linum] for title, linum in zip(titles, linums)])
+    SEP = "#"
+    def process_title(title):
+        """ 'hoge_fuga_hoo' -> 'hoge fuga hoo' """
+        return re.sub("_", " ", title)
+
+    def maybe_prepend(title, linum):
+        prep = list()
+        if prependtitle:
+            prep.append(title)
+        if prependlinum:
+            prep.append(str(linum))
+
+        content = " {} ".format(SEP).join(prep)
+        if prep:
+            return "{0} {1} {0}".format(SEP, content)
+        else:
+            return content
+
+    titles = [title for title, _ in evidences]
+    linums = [linum for _, linum in evidences]
+
+    return [ (maybe_prepend(process_title(title), linum) + " " + t2l2s[title][linum]).strip() for title, linum in zip(titles, linums)]
 
 
 def load_wikipedia(wikipedia_dir="data/wiki-pages/wiki-pages/", howmany=99999):
