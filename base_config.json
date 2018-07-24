@@ -101,6 +101,7 @@
       "__overwrite": "ir dev_input_file"
     },
     "test": {
+      "score_file": "___root_dir___/fever/results/___model_name___/test_score.jsonl",
       "predicted_labels_file": {
         "__overwrite": "aggregator test_predicted_labels_file"
       },
