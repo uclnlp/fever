@@ -2,25 +2,39 @@
     "__variables":
     {
         "___root_dir___":"/home/tyoneda/pipeline",
-        "___model_name___": "model_name",
-	"___reader___": "pairwise_esim_reader"
+        "___model_name___": "pre_trained",
+        "___reader___": "esim_pre_trained_appendtitle+"
+    },
+    "__model_description":
+    {
+        "data": "pre_trained model",
+        "feature": "usint model pre-trained on SNLI"
     },
     "config":{
         "save_dir":"___root_dir___/fever/results/___model_name___/config.json"
     },
     "ir":
     {
-        "train_target_file": "___root_dir___/fever/data/indexed_data/train.sentences.p5.s5.ver20180629.jsonl",
-        "dev_target_file": "___root_dir___/fever/data/indexed_data/dev.sentences.p5.s5.ver20180629.jsonl"
+        "__train_output_file": "___root_dir___/fever/data/indexed_data/train.sentences.p10.s30.jsonl",
+        "__dev_output_file": "___root_dir___/fever/data/indexed_data/dev.sentences.p10.s30.jsonl",
+        "train_output_file": "___root_dir___/fever/data/indexed_data/train.sentences.p5.s5.ver20180629.jsonl",
+        "dev_output_file": "___root_dir___/fever/data/indexed_data/dev.sentences.p5.s5.ver20180629.jsonl",
+        "train_input_file": "___root_dir___/fever/data/train.jsonl",
+        "dev_input_file": "___root_dir___/fever/data/dev.jsonl",
+        "__train_output_file": "___root_dir___/fever/data/indexed_data/train.shared_task_data.jsonl",
+        "__dev_output_file": "___root_dir___/fever/data/indexed_data/dev.shared_task_data.jsonl",
+        "n_pages": 5,
+        "n_sentences": 5
     },
     "convert":
     {
-        "prependtitle": false,
+        "__comment": "not using now",
+        "prependtitle": true,
         "prependlinum": false,
         "use_ir_pred": false,
         "n_sentences": 5,
-        "train_converted_file": "___root_dir___/fever/data/converted/train.sentences.use_ir_pred_filtered.p5.s5.jsonl",
-        "dev_converted_file": "___root_dir___/fever/data/converted/dev.sentences.use_ir_pred_filtered.p5.s5.jsonl"
+        "train_converted_file": "not using now ___root_dir___/fever/data/converted/train.sentences.use_ir_pred_filtered.p5.s5.jsonl",
+        "dev_converted_file": "not using now ___root_dir___/fever/data/converted/dev.sentences.use_ir_pred_filtered.p5.s5.jsonl"
     },
     "train_rte":
     {
@@ -30,12 +44,12 @@
     },
     "inference_rte":
     {
-        "train_input_file": {"__overwrite": "ir train_target_file"},
-        "dev_input_file": {"__overwrite": "ir dev_target_file"},
+        "train_input_file": {"__overwrite": "ir train_output_file"},
+        "dev_input_file": {"__overwrite": "ir dev_output_file"},
         "saved_reader": {"__overwrite": "train_rte save_dir"},
         "prependtitle": {"__overwrite": "convert prependtitle"},
         "prependlinum": {"__overwrite": "convert prependlinum"},
-        "n_sentences": {"__overwrite": "convert n_sentences"},
+        "n_sentences": 5,
         "train_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/train.predictions.jsonl",
         "dev_predicted_labels_and_scores_file": "___root_dir___/fever/results/___model_name___/dev.predictions.jsonl"
     },
@@ -43,14 +57,16 @@
     {
         "train_file": {"__overwrite": "inference_rte train_predicted_labels_and_scores_file"},
         "dev_file": {"__overwrite": "inference_rte dev_predicted_labels_and_scores_file"},
+        "layers": [15, 10, 5],
         "epochs": 5,
+        "n_sentences": {"__overwrite": "inference_rte n_sentences"},
         "predicted_labels_file": "___root_dir___/fever/results/___model_name___/aggregated_labels.jsonl"
     },
     "score":
     {
         "predicted_labels_file": {"__overwrite": "aggregator predicted_labels_file"},
-        "predicted_evidence_file": {"__overwrite": "ir dev_target_file"},
-        "actual_file": "___root_dir___/fever/fever/dev.jsonl",
+        "predicted_evidence_file": {"__overwrite": "ir dev_output_file"},
+        "actual_file": {"__overwrite": "ir dev_input_file"},
         "score_file": "___root_dir___/fever/results/___model_name___/score.jsonl"
     },
     "_additional_comment":

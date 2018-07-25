@@ -89,9 +89,11 @@ def _convert_instance(instance, t2l2s, prependlinum, prependtitle, use_ir_predic
 
     def get_evidence_linum(evidence_set):
         if test:
-            return [(title, linum) for title, linum in evidence_set if title in t2l2s]
+            title, linum = evidence_set
+            return [(title, linum)]
         else:
             return [(title, linum) for _, _, title, linum in evidence_set if title in t2l2s]
+
 
     converted_instances = list()
     # assert instance["evidence"] == [[[hoge, hoge, title, linum], [hoge, hoge, title, linum]], [[..],[..],..], ...]
@@ -117,7 +119,7 @@ def _convert_instance(instance, t2l2s, prependlinum, prependtitle, use_ir_predic
 
     else:
         if test:
-            evidence_sets = instance["predicted_evidence"]
+            evidence_sets = instance["predicted_sentences"]
         else:
             evidence_sets = instance["evidence"]
 
@@ -155,7 +157,8 @@ def convert(instances, prependlinum=False, prependtitle=False, use_ir_prediction
     for instance in tqdm(instances, desc="process for NEI"):
         if test:
             evidences = instance["predicted_sentences"][:n_sentences]
-            titles = [title for evidence_set in instance["predicted_sentences"] for title, _ in evidence_set]
+            titles = [title for  title, _ in [title_linum for title_linum in instance["predicted_sentences"]]]
+            # titles = [title for evidence_set in instance["predicted_sentences"] for title, _ in evidence_set]
         else:
             if instance["label"] == "NOT ENOUGH INFO":
                 evidences = instance["predicted_sentences"][:n_sentences]
@@ -221,5 +224,5 @@ if __name__ == "__main__":
         keyerr_count = 0
 
         instances = read_jsonl(args.src)
-        snli_format_instances = convert(instances, prependlinum=args.prependlinum, prependtitle=args.prependtitle, use_ir_prediction=args.use_ir_pred, n_sentences=args.n_sentences)
+        snli_format_instances = convert(instances, prependlinum=args.prependlinum, prependtitle=args.prependtitle, use_ir_prediction=args.use_ir_pred, n_sentences=args.n_sentences, test=args.test)
         save_jsonl(snli_format_instances, args.tar, skip_if_exists=True)

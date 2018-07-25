@@ -7,6 +7,10 @@
     "___aggregator___": "base+sampling2-test",
     "___score___": "base+sampling2-test"
   },
+  "ir": {
+    "dev_output_file": "___root_dir___/fever/data/indexed_data/dev.sentences.p15.s30.jsonl",
+    "test_output_file": "___root_dir___/fever/data/indexed_data/shared_task_dev.sentences.p15.s30_title.real.jsonl"
+  },
   "convert": {
     "test_input_file": {
       "__overwrite": "ir test_output_file"
@@ -15,5 +19,19 @@
   },
   "aggregator": {
     "sampling": true
+  },
+  "score": {
+    "test": {
+      "score_file": "___root_dir___/fever/results/___score___/test_score.jsonl",
+      "predicted_labels_file": {
+        "__overwrite": "aggregator test_predicted_labels_file"
+      },
+      "predicted_evidence_file": {
+        "__overwrite": "ir test_output_file"
+      },
+      "actual_file": "___root_dir___/fever/data/shared_task_dev.jsonl",
+      "submission_file": "___root_dir___/fever/results/___score___/test_submission.jsonl"
+    },
+    "_additional_comment": null
   }
 }

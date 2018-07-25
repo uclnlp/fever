@@ -56,6 +56,7 @@ class PredictedLabelsDataset(Dataset):
             label = create_target(self.instances[idx]["label"])
 
         if self.use_ev_scores:
+            import pdb; pdb.set_trace()
             input = create_input2(
                 self.instances[idx]["predicted_labels"],
                 self.instances[idx]["scores"],
@@ -226,15 +227,15 @@ if __name__ == "__main__":
 
     # data: prepend_title_linum
     print(args)
-    train_set = PredictedLabelsDataset(args.train, args.n_sentences, sampling=args.sampling, use_ev_scores=args.ev_scores)
-    dev_set = PredictedLabelsDataset(args.dev, args.n_sentences, use_ev_scores=args.ev_scores)
+    train_set = PredictedLabelsDataset(args.train, args.n_sentences, sampling=args.sampling)#, use_ev_scores=args.ev_scores)
+    dev_set = PredictedLabelsDataset(args.dev, args.n_sentences)#, use_ev_scores=args.ev_scores)
     test_set = PredictedLabelsDataset(args.test, args.n_sentences, use_ev_scores=args.ev_scores, test=True)
     train_dataloader = DataLoader(
         train_set, batch_size=64, shuffle=True, num_workers=4)
     dev_dataloader = DataLoader(
         dev_set, batch_size=64, shuffle=False, num_workers=4)
     test_dataloader = DataLoader(
-        test_set, batch_size=64, shuffle=False, num_workers=4)
+        test_set, batch_size=64, shuffle=False, num_workers=0)
 
     net = Net(layers=[int(width) for width in args.layers])
     print("----Neural Aggregator Architecture----")
