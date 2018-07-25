@@ -73,15 +73,6 @@ def convert(config):
     else:
         logger.info("%s already exists. skipping conversion for dev", config["dev_converted_file"])
 
-    # test data
-    if not os.path.exists(config["test_converted_file"]):
-        options[0] = config["test_input_file"]
-        options[1] = config["test_converted_file"]
-        script = ["converter.py"] + options + ["--test"]
-        __run_python(script, gpu=False, env={"PYTHONPATH": "."})
-    else:
-        logger.info("%s already exists. skipping conversion for test", config["test_converted_file"])
-
 
 def train_rte(config):
     os.chdir("../jack")
