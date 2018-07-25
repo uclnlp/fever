@@ -34,9 +34,6 @@ def __parse(org_dictionary, dictionary=None, variables=dict()):
 
         if isinstance(val, str):
             # replacement
-            if key == "dev_file":
-                import ipdb; ipdb.set_trace()
-
             for src, tar in variables.items():
                 if src in val:
                     val = val.replace(src, tar)
@@ -52,6 +49,10 @@ def __parse(org_dictionary, dictionary=None, variables=dict()):
 def parse(config):
     # set variables if key "__variables" exits
     if "__variables" in config:
+        model_name = config["__variables"]["___model_name___"]
+        for value in config["__variables"].values():
+            if value == "___model_name___": continue
+            value.replace("___model_name___", model_name)
         variables = config["__variables"]
         del config["__variables"]
     else:
