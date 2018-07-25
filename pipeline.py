@@ -308,7 +308,7 @@ if __name__ == '__main__':
         logger.info("skipping aggregation...")
 
     if "rerank" in config and not os.path.exists(config["rerank"]["reranked_evidence_file"]):
-        rerank(config)
+        rerank(config["rerank"])
 
     # scoring
     if not os.path.exists(config["score"]["score_file"]):
