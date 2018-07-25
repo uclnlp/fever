@@ -150,6 +150,18 @@ def neural_aggregator(config):
     __run_python(script, gpu=False)
 
 
+def rerank(config):
+    options = list()
+    options.extend(["--rte_predictions", config["predicted_labels_and_scores_file"]])
+    options.extend(["--aggregated_labels", config["predicted_labels_file"]])
+    options.extend(["--predicted_evidences", config["predicted_evidence_file"]])
+    options.extend(["--reranked_evidences", config["reranked_evidence_file"]])
+    options.extend(["--n_sentences", str(config["n_sentences"])])
+
+    script = ["rerank.py"] + options
+    __run_python(script, gpu=False)
+
+
 def score(config):
     os.chdir(os.path.join(root_dir, "fever-baselines"))
     options = list()
@@ -294,6 +306,9 @@ if __name__ == '__main__':
         neural_aggregator(config["aggregator"])
     else:
         logger.info("skipping aggregation...")
+
+    if "rerank" in config and not os.path.exists(config["rerank"]["reranked_evidence_file"]):
+        rerank(config)
 
     # scoring
     if not os.path.exists(config["score"]["score_file"]):
