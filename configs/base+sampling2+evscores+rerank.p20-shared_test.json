@@ -1,0 +1,72 @@
+{
+  "parent_config": "configs/base_config.json",
+  "__description": "this model starts from conversion",
+  "__variables": {
+    "___train_rte___": "base",
+    "___reader___": "reader2",
+    "___inference_rte___": "___model_name___",
+    "___aggregator___": "___model_name___",
+    "___rerank___": "___model_name___",
+    "___score___": "___model_name___"
+  },
+  "ir": {
+    "train_output_file": "___root_dir___/fever/data/indexed_data/train.sentences.scores.p15.s30.jsonl",
+    "dev_output_file": "___root_dir___/fever/data/indexed_data/dev.sentences.scores.p15.s30.jsonl",
+    "test_output_file": "___root_dir___/fever/data/indexed_data/shared_task_test.sentences.scores.p15.s30.jsonl",
+    "train_input_file": "___root_dir___/fever/data/train.jsonl",
+    "dev_input_file": "___root_dir___/fever/data/dev.jsonl",
+    "test_input_file": "___root_dir___/fever/data/shared_task_test.jsonl",
+    "n_pages": 15,
+    "n_sentences": 30
+  },
+  "inference_rte": {
+    "n_sentences": 20
+  },
+  "aggregator": {
+    "layers": [
+      80,
+      50,
+      20
+    ],
+    "sampling": true,
+    "ev_scores": true
+  },
+  "rerank": {
+    "reranked_evidence_file": "___root_dir___/fever/results/___rerank___/reranked_evidences.jsonl",
+    "predicted_labels_and_scores_file": {
+      "__overwrite": "inference_rte dev_predicted_labels_and_scores_file"
+    },
+    "predicted_labels_file": {
+      "__overwrite": "aggregator predicted_labels_file"
+    },
+    "predicted_evidence_file": {
+      "__overwrite": "ir dev_output_file"
+    },
+    "n_sentences": {
+      "__overwrite": "inference_rte n_sentences"
+    },
+    "test_reranked_evidence_file": "___root_dir___/fever/results/___rerank___/test_reranked_evidences.jsonl",
+    "test_predicted_labels_and_scores_file": {
+      "__overwrite": "inference_rte test_predicted_labels_and_scores_file"
+    },
+    "test_predicted_labels_file": {
+      "__overwrite": "aggregator test_predicted_labels_file"
+    },
+    "test_predicted_evidence_file": {
+      "__overwrite": "ir test_output_file"
+    },
+    "n_sentences": {
+      "__overwrite": "inference_rte n_sentences"
+    }
+  },
+  "score": {
+    "predicted_evidence_file": {
+      "__overwrite": "rerank reranked_evidence_file"
+    },
+    "test": {
+      "predicted_evidence_file": {
+        "__overwrite": "rerank test_reranked_evidence_file"
+      }
+    }
+  }
+}
