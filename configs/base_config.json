@@ -30,11 +30,7 @@
     "dev_input_file": {
       "__overwrite": "ir dev_output_file"
     },
-    "dev_converted_file": "___root_dir___/fever/data/converted/dev.sentences.p15.s30_title.jsonl",
-    "test_input_file": {
-      "__overwrite": "ir test_output_file"
-    },
-    "test_converted_file": "___root_dir___/fever/data/converted/shared_task_dev.sentences.p15.s30_title.jsonl"
+    "dev_converted_file": "___root_dir___/fever/data/converted/dev.sentences.p15.s30_title.jsonl"
   },
   "train_rte": {
     "jack_config_file": "___root_dir___/jack/conf/nli/fever/esim.yaml",
