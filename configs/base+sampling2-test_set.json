@@ -5,12 +5,12 @@
     "___train_rte___": "base",
     "___inference_rte___": "___model_name___",
     "___aggregator___": "___model_name___",
-      "___score___": "___model_name___",
-      "___reader___": "reader2"
+    "___score___": "___model_name___",
+    "___reader___": "reader2"
   },
   "ir": {
-    "test_output_file": "___root_dir___/fever/data/indexed_data/test.sentences.scores.p15.s30.jsonl",
-    "test_input_file": "___root_dir___/fever/data/test.jsonl"
+    "dev_output_file": "___root_dir___/fever/data/indexed_data/test.sentences.scores.p15.s30.jsonl",
+    "dev_input_file": "___root_dir___/fever/data/test.jsonl"
   },
   "aggregator": {
     "sampling": true
