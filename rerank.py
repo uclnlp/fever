@@ -30,10 +30,12 @@ if __name__ == "__main__":
     aggregated_labels = load_jsonl(args.aggregated_labels, key="predicted")
     predicted_evidences = load_jsonl(args.predicted_evidences, key="predicted_sentences")
     ids = load_jsonl(args.predicted_evidences, key="id")
+    if args.test:
+        labels = load_jsonl(args.predicted_evidences, key="label")
 
     predictions = []
     assert len(rte_predictions) == len(aggregated_labels) == len(predicted_evidences) == len(ids), "{}, {}, {}, {}".format(len(rte_predictions), len(aggregated_labels), len(predicted_evidences), len(ids))
-    for id, ev, rte_labels, aggr_label in zip(ids, predicted_evidences, rte_predictions, aggregated_labels):
+    for idx, (id, ev, rte_labels, aggr_label) in enumerate(zip(ids, predicted_evidences, rte_predictions, aggregated_labels)):
         predictions.append({"id": id, "rte_preds": rte_labels, "predicted_label": aggr_label, "predicted_evidence": ev[:args.n_sentences]})
 
     out_preds = list()
@@ -50,10 +52,13 @@ if __name__ == "__main__":
         else:
             out_ev = pred["predicted_evidence"]
 
-        out_preds.append({
+        out_dict = {
             "id": pred["id"],
             "predicted_sentences": out_ev
-        })
+        }
+        if args.test:
+            out_dict["label"] = labels[idx]
+        out_preds.append(out_dict)
 
     print("saving file at {}".format(args.reranked_evidences))
     with open(args.reranked_evidences, "w") as f:
