@@ -1,0 +1,21 @@
+{
+  "parent_config": "configs/base_config.json",
+  "__description": "this model starts from conversion",
+  "__variables": {
+    "___train_rte___": "base",
+    "___reader___": "reader2",
+    "___inference_rte___": "base+sampling2-shared_test",
+    "___aggregator___": "base+sampling2-shared_test",
+    "___score___": "base+sampling2-shared_test",
+    "___model_name___": "base+sampling2-shared_test"
+  },
+  "ir": {
+    "test_output_file": "___root_dir___/fever/data/indexed_data/shared_task_test.sentences.scores.p15.s30.jsonl",
+    "test_input_file": "___root_dir___/fever/data/shared_task_test.jsonl",
+    "n_pages": 15,
+    "n_sentences": 30
+  },
+  "aggregator": {
+    "sampling": true
+  }
+}
