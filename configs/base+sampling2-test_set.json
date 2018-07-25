@@ -1,0 +1,17 @@
+{
+  "parent_config": "configs/base_config.json",
+  "__description": "this model starts from aggregation",
+  "__variables": {
+    "___train_rte___": "base+sampling2",
+    "___inference_rte___": "___model_name___",
+    "___aggregator___": "___model_name___",
+    "___score___": "___model_name___"
+  },
+  "ir": {
+    "test_output_file": "___root_dir___/fever/data/indexed_data/test.sentences.p15.s30.jsonl",
+    "test_input_file": "___root_dir___/fever/data/test.jsonl",
+  },
+  "aggregator": {
+    "sampling": true
+  }
+}
