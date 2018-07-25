@@ -171,7 +171,7 @@ def score(config):
         options.extend(["--score_file", config["test"]["score_file"]])
         options.extend(["--submission_file", config["test"]["submission_file"]])
 
-        script = ["src/scripts/score.py"] + options
+        script = ["src/scripts/score.py"] + options + ["--test"]
         __run_python(script, gpu=False, env={"PYTHONPATH": "src:../fever"})
 
 
@@ -263,11 +263,9 @@ if __name__ == '__main__':
     conf_convert = config["convert"]
     logger.info("%s exists?: %s", conf_convert["train_converted_file"], os.path.exists(conf_convert["train_converted_file"]))
     logger.info("%s exists?: %s", conf_convert["dev_converted_file"], os.path.exists(conf_convert["dev_converted_file"]))
-    logger.info("%s exists?: %s", conf_convert["test_converted_file"], os.path.exists(conf_convert["test_converted_file"]))
     if not( os.path.exists(
             conf_convert["train_converted_file"]) and os.path.exists(
-                conf_convert["dev_converted_file"]) and os.path.exists(
-                    conf_convert["test_converted_file"])):
+                conf_convert["dev_converted_file"])):
         convert(conf_convert)
     else:
         logger.info("skipping conversion...")
