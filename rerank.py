@@ -30,8 +30,6 @@ if __name__ == "__main__":
     aggregated_labels = load_jsonl(args.aggregated_labels, key="predicted")
     predicted_evidences = load_jsonl(args.predicted_evidences, key="predicted_sentences")
     ids = load_jsonl(args.predicted_evidences, key="id")
-    if args.test:
-        labels = load_jsonl(args.predicted_evidences, key="label")
 
     predictions = []
     assert len(rte_predictions) == len(aggregated_labels) == len(predicted_evidences) == len(ids), "{}, {}, {}, {}".format(len(rte_predictions), len(aggregated_labels), len(predicted_evidences), len(ids))
@@ -56,8 +54,6 @@ if __name__ == "__main__":
             "id": pred["id"],
             "predicted_sentences": out_ev
         }
-        if args.test:
-            out_dict["label"] = labels[idx]
         out_preds.append(out_dict)
 
     print("saving file at {}".format(args.reranked_evidences))
