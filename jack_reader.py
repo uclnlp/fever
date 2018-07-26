@@ -124,6 +124,7 @@ def predict(reader, all_settings, batch_size):
 
 def save_predictions(instances, preds_list, path):
     store = list()
+    assert len(instances) == len(preds_list)
     for instance, preds in zip(instances, preds_list):
         id = instance["id"]
         claim = instance["claim"]
@@ -175,6 +176,7 @@ if __name__ == "__main__":
     preds_length = list()
     all_settings = list()
     instances = read_ir_result(args.in_file, n_sentences=args.n_sentences, prependlinum=args.prependlinum, prependtitle=args.prependtitle, concatev=args.concatev)
+
     for instance in instances:
         evidence_list = instance["evidence"]
         claim = instance["claim"]
