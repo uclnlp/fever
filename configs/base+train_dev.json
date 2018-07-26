@@ -1,0 +1,25 @@
+{
+  "__variables": {
+    "___root_dir___": "/cluster/project2/mr/tyoneda/pipeline",
+    "___train_rte___": "___model_name___",
+    "___inference_rte___": "___model_name___",
+    "___aggregator___": "___model_name___",
+    "___score___": "___model_name___",
+    "___reader___": "reader"
+  },
+  "ir": {
+    "train_output_file": "___root_dir___/fever/data/indexed_data/train+dev.sentences.p15.s30.jsonl",
+    "dev_output_file": "___root_dir___/fever/data/indexed_data/test.sentences.p15.s30.jsonl",
+    "test_output_file": "___root_dir___/fever/data/indexed_data/shared_task_test.sentences.p15.s30.jsonl",
+    "train_input_file": "___root_dir___/fever/data/train+dev.jsonl",
+    "dev_input_file": "___root_dir___/fever/data/test.jsonl",
+    "test_input_file": "___root_dir___/fever/data/shared_task_test.jsonl"
+  },
+  "convert": {
+    "train_converted_file": "___root_dir___/fever/data/converted/train+dev.sentences.p15.s30_title.jsonl",
+    "dev_converted_file": "___root_dir___/fever/data/converted/test.sentences.p15.s30_title.jsonl"
+  },
+  "train_rte": {
+    "save_dir": "___root_dir___/fever/results/___train_rte___/___reader___"
+  }
+}
