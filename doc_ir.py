@@ -57,25 +57,15 @@ def phrase_features(phrase="",start=0,title="",claim="",ctoks=word_tokenize("dum
     features["lend1"]=(features["lend"]==1)
     features["cap1"]=stoks[0][0].isupper()
     features["stop1"]=(stoks[0].lower() in stop)
-    features["people1"]=(stoks[0] in people)
-    features["places1"]=(stoks[0] in places)
     features["capany"]=False
     features["capall"]=True
     features["stopany"]=False
     features["stopall"]=True
-    features["peopleany"]=False
-    features["peopleall"]=True
-    features["placesany"]=False
-    features["placesall"]=True
     for tok in stoks:
         features["capany"]=(features["capany"] or tok[0].isupper())
         features["capall"]=(features["capall"] and tok[0].isupper())
         features["stopany"]=(features["stopany"] or tok.lower() in stop)
         features["stopall"]=(features["stopall"] and tok.lower() in stop)
-        features["peopleany"]=(features["peopleany"] or tok in people)
-        features["peopleall"]=(features["peopleall"] and tok in people)
-        features["placesany"]=(features["placesany"] or tok in places)
-        features["placesall"]=(features["placesall"] and tok in places)
     return features
     
 
