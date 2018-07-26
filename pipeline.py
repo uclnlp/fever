@@ -151,6 +151,7 @@ def neural_aggregator(config):
 
 
 def rerank(config):
+    logger.info("running reranking for dev set")
     options = list()
     options.extend(["--rte_predictions", config["predicted_labels_and_scores_file"]])
     options.extend(["--aggregated_labels", config["predicted_labels_file"]])
@@ -161,6 +162,16 @@ def rerank(config):
     script = ["rerank.py"] + options
     __run_python(script, gpu=False)
 
+    logger.info("running reranking for test set")
+    options = list()
+    options.extend(["--rte_predictions", config["test_predicted_labels_and_scores_file"]])
+    options.extend(["--aggregated_labels", config["test_predicted_labels_file"]])
+    options.extend(["--predicted_evidences", config["test_predicted_evidence_file"]])
+    options.extend(["--reranked_evidences", config["test_reranked_evidence_file"]])
+    options.extend(["--n_sentences", str(config["n_sentences"])])
+
+    script = ["rerank.py"] + options
+    __run_python(script, gpu=False)
 
 def score(config):
     os.chdir(os.path.join(root_dir, "fever-baselines"))
