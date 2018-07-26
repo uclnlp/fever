@@ -5,7 +5,7 @@ from doc_ir import *
 from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import gazetteers, names
 from collections import Counter
-from fever_io import titles_to_jsonl_num, load_split_trainset, load_paper_dataset, titles_to_tf, load_doc_tf
+from fever_io import titles_to_jsonl_num, load_split_trainset, load_paper_dataset, titles_to_tf, load_doc_tf, term_and_doc_freqs
 import pickle
 from tqdm import tqdm
 from random import random, shuffle
