@@ -55,6 +55,11 @@ class PredictedLabelsDataset(Dataset):
         else:
             label = create_target(self.instances[idx]["label"])
 
+        if not self.instances[idx]["scores"]:
+            print("missing", idx)
+            # print(self.instances[idx])
+            # import ipdb
+            # ipdb.set_trace()
         if self.use_ev_scores:
             input = create_input3(  # rather than create_input2
                 self.instances[idx]["predicted_labels"],
@@ -118,16 +123,33 @@ def create_input3(predicted_labels, scores, sentence_scores, n_sentences):
     All 3 class probabilities are given.
     """
     assert len(predicted_labels[0]) == len(scores)
+
+    if len(sentence_scores) == 0:
+        return np.zeros([4*n_sentences])
+
     # loop over the predicted evidences
     features_per_predicted_evidence = []
     for per_evidence_labels, per_evidence_scores, ir_evidence_scores in \
                         list(zip(predicted_labels[0], scores, sentence_scores))[:n_sentences]:
 
-        new_features = per_evidence_scores + [ir_evidence_scores[2]]
+        if not per_evidence_scores: # sometimes this is empty.
+            new_features = [0.0, 0.0, 0.0, 0.0]
+        else:
+            # default case
+            new_features = per_evidence_scores + [ir_evidence_scores[2]]
 
         # 4 new features
         features_per_predicted_evidence.extend(new_features)
+
+    for missing_evidence in range(n_sentences - len(sentence_scores)):
+        features_per_predicted_evidence.extend([0.0, 0.0, 0.0, 0.0])
+
     np_out = np.array(features_per_predicted_evidence)
+
+    if np_out.shape != (4*n_sentences,):
+        import ipdb
+        ipdb.set_trace()
+    assert np_out.shape == (4*n_sentences,), (np_out, len(predicted_labels[0]), len(scores), len(sentence_scores))
     return np_out
 
 
@@ -265,12 +287,11 @@ if __name__ == "__main__":
         dev_set = PredictedLabelsDataset(args.dev, args.n_sentences, use_ev_scores=args.ev_scores)
         test_set = PredictedLabelsDataset(args.test, args.n_sentences, use_ev_scores=args.ev_scores, test=True)
         train_dataloader = DataLoader(
-            train_set, batch_size=64, shuffle=True, num_workers=4)
+            train_set, batch_size=64, shuffle=True, num_workers=0)
         dev_dataloader = DataLoader(
-            dev_set, batch_size=64, shuffle=False, num_workers=4)
+            dev_set, batch_size=64, shuffle=False, num_workers=0)
         test_dataloader = DataLoader(
-            test_set, batch_size=64, shuffle=False, num_workers=4)
-
+            test_set, batch_size=64, shuffle=False, num_workers=0)
 
 
         net = Net(layers=[int(width) for width in args.layers])
@@ -278,7 +299,18 @@ if __name__ == "__main__":
 
         print(net)
 
-        criterion = nn.CrossEntropyLoss()
+        class_weights = [1.0, 1.0, 1.0]
+        if 1:   # properly set class weights
+            label2freq = Counter((instance["label"] for instance in train_set.instances))
+            class_weights = [0, 0, 0]
+            total = sum(label2freq.values())
+            for label in label2freq:
+                class_weights[ label2idx[label] ] = 1.0/(label2freq[label])*total
+            print(label2freq)
+            print("Class Weights:", class_weights)
+
+        criterion = nn.CrossEntropyLoss(weight=torch.tensor(class_weights))
+        #criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(net.parameters())
         for epoch in range(args.epochs):  # loop over the dataset multiple times
             print("epoch:", epoch)
