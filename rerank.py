@@ -38,6 +38,7 @@ if __name__ == "__main__":
 
     out_preds = list()
     for pred in predictions:
+        assert len(pred["rte_preds"]) == len(pred["predicted_evidence"])
         # no reranking if num of rte preds are lower than 5
         if len(pred["rte_preds"]) > 5 and pred["predicted_label"] != "NOT ENOUGH INFO":
             correct_ev_flags = (pred["predicted_label"] == np.array(pred["rte_preds"]))
