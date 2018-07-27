@@ -56,7 +56,8 @@ class PredictedLabelsDataset(Dataset):
             label = create_target(self.instances[idx]["label"])
 
         if not self.instances[idx]["scores"]:
-            print("missing", idx)
+            pass
+            #print("missing", idx)
             # print(self.instances[idx])
             # import ipdb
             # ipdb.set_trace()
@@ -277,7 +278,7 @@ if __name__ == "__main__":
     # data: prepend_title_linum
     print(args)
     hyperparameter2performance = dict()
-    for n_sentences in range(1, 16):
+    for n_sentences in [9]:#range(1, 16):
         print("=========== n_sentences {}============".format(str(n_sentences)))
         args.n_sentences = n_sentences
         # number of inputs will be 4 times number of evidence sentences.
@@ -312,7 +313,9 @@ if __name__ == "__main__":
 
         criterion = nn.CrossEntropyLoss(weight=torch.tensor(class_weights))
         #criterion = nn.CrossEntropyLoss()
-        optimizer = optim.Adam(net.parameters(), weight_decay=args.l2/2.0)
+        #optimizer = optim.Adam(net.parameters(), weight_decay=args.l2/2.0)
+        optimizer = optim.Adam(net.parameters())
+        dev_results_throughout_training = []
         for epoch in range(args.epochs):  # loop over the dataset multiple times
             print("epoch:", epoch)
             running_loss = 0.0
@@ -333,12 +336,15 @@ if __name__ == "__main__":
                     print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1,
                                                     running_loss / 1000))
                     running_loss = 0.0
+            # monitor dev loss throughout training
+            dev_results_throughout_training.append(simple_test(dev_dataloader))
 
         print('Finished Training')
 
         print("dev set:")
         performance = simple_test(dev_dataloader)
-        hyperparameter2performance[n_sentences] = performance
+        #hyperparameter2performance[n_sentences] = performance
+        hyperparameter2performance[n_sentences] = max(dev_results_throughout_training)
 
     for k, v in sorted(hyperparameter2performance.items()):
         print(v)
