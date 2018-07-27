@@ -264,6 +264,7 @@ if __name__ == "__main__":
     parser.add_argument("--test_predicted_labels", required=True)
     parser.add_argument("--sampling", action="store_true")
     parser.add_argument("--ev_scores", action="store_true")
+    parser.add_argument("--l2", default=0.0, type=float, required=False)
     parser.add_argument(
         "--layers",
         nargs="+",
@@ -311,7 +312,7 @@ if __name__ == "__main__":
 
         criterion = nn.CrossEntropyLoss(weight=torch.tensor(class_weights))
         #criterion = nn.CrossEntropyLoss()
-        optimizer = optim.Adam(net.parameters())
+        optimizer = optim.Adam(net.parameters(), weight_decay=args.l2/2.0)
         for epoch in range(args.epochs):  # loop over the dataset multiple times
             print("epoch:", epoch)
             running_loss = 0.0
@@ -340,7 +341,7 @@ if __name__ == "__main__":
         hyperparameter2performance[n_sentences] = performance
 
     for k, v in sorted(hyperparameter2performance.items()):
-        print(k, v)
+        print(v)
 
 
     dev_results = predict(dev_dataloader)
