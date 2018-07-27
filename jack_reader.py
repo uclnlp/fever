@@ -122,24 +122,33 @@ def predict(reader, all_settings, batch_size):
     return preds_list
 
 
-def save_predictions(instances, preds_list, path):
+def save_predictions(instances, preds_list, path, scores_for_all_candidates=True):
     store = list()
     assert len(instances) == len(preds_list)
     for instance, preds in zip(instances, preds_list):
         id = instance["id"]
         claim = instance["claim"]
         pred_sents = instance["evidence"] # refer to read_ir_result
-        pred_labels = [pred[0].text for pred in preds]
-        scores = [float(pred[0].score) for pred in preds]
+        if scores_for_all_candidates:
+            pred_labels_list = [[pred.text for pred in preds_instance]for preds_instance in preds]
+            scores = [[float(pred.score) for pred in preds_instance] for preds_instance in preds]
+        else:
+            pred_labels = [pred[0].text for pred in preds]
+            scores = [float(pred[0].score) for pred in preds]
+
         dic = {
             "id": id,
             "scores": scores,
-            "predicted_labels": [convert_label(pred_label, inverse=True) for pred_label in pred_labels],
             "claim": claim,
             "predicted_sentences": pred_sents
         }
         if "label" in instance:
             dic["label"] = instance["label"]
+
+        if scores_for_all_candidates:
+            dic["predicted_labels"] =  [[convert_label(pred_label, inverse=True) for pred_label in pred_labels] for pred_labels in pred_labels_list],
+        else:
+            dic["predicted_labels"] = [convert_label(pred_label, inverse=True) for pred_label in pred_labels]
 
         # scores of ir part
         if "scored_sentences" in instance:
