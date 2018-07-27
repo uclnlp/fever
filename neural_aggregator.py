@@ -56,7 +56,7 @@ class PredictedLabelsDataset(Dataset):
             label = create_target(self.instances[idx]["label"])
 
         if self.use_ev_scores:
-            input = create_input2(
+            input = create_input3(  # rather than create_input2
                 self.instances[idx]["predicted_labels"],
                 self.instances[idx]["scores"],
                 self.instances[idx]["ev_scores"],
@@ -112,7 +112,30 @@ def create_input(predicted_labels, scores, n_sentences):
     return np_out
 
 
+def create_input3(predicted_labels, scores, sentence_scores, n_sentences):
+    """
+    4 features for each predicted evidence: the 3 RTE class probabilities, and the IR score.
+    All 3 class probabilities are given.
+    """
+    assert len(predicted_labels[0]) == len(scores)
+    # loop over the predicted evidences
+    features_per_predicted_evidence = []
+    for per_evidence_labels, per_evidence_scores, ir_evidence_scores in \
+                        list(zip(predicted_labels[0], scores, sentence_scores))[:n_sentences]:
+
+        new_features = per_evidence_scores + [ir_evidence_scores[2]]
+
+        # 4 new features
+        features_per_predicted_evidence.extend(new_features)
+    np_out = np.array(features_per_predicted_evidence)
+    return np_out
+
+
 def create_input2(predicted_labels, scores, sentence_scores, n_sentences):
+    """
+    4 features for each predicted evidence: the 3 RTE class probabilities, and the IR score.
+    However, the non-winning class probabilies are set to 0.
+    """
     pred_labels = [label2idx[pred_label] for pred_label in predicted_labels]
     scores = scores.copy()
     ev_scores = [score for _, _, score in sentence_scores][:len(scores)]
@@ -175,13 +198,14 @@ def simple_test(dev_dataloader):
             neural_pred = net(input.float())
             _, pred_labels = torch.max(neural_pred, 1)
             neural_hit += torch.sum(pred_labels == target)
-    print("neural:", int(neural_hit) / len(dev_dataloader.dataset))
-
-    for i, instance in enumerate(dev_dataloader.dataset.instances):
-        heuristic_pred_label = aggregate_preds(instance["predicted_labels"])
-        if heuristic_pred_label == instance["label"]:
-            heuristic_hit += 1
-    print("heuristic:", heuristic_hit / len(dev_dataloader.dataset.instances))
+    performance = int(neural_hit) / len(dev_dataloader.dataset)
+    print("neural:", performance)
+    return performance
+    # for i, instance in enumerate(dev_dataloader.dataset.instances):
+    #     heuristic_pred_label = aggregate_preds(instance["predicted_labels"])
+    #     if heuristic_pred_label == instance["label"]:
+    #         heuristic_hit += 1
+    # print("heuristic:", heuristic_hit / len(dev_dataloader.dataset.instances))
 
 
 def predict(test_dataloader):
@@ -229,47 +253,63 @@ if __name__ == "__main__":
 
     # data: prepend_title_linum
     print(args)
-    train_set = PredictedLabelsDataset(args.train, args.n_sentences, sampling=args.sampling, use_ev_scores=args.ev_scores)
-    dev_set = PredictedLabelsDataset(args.dev, args.n_sentences, use_ev_scores=args.ev_scores)
-    test_set = PredictedLabelsDataset(args.test, args.n_sentences, use_ev_scores=args.ev_scores, test=True)
-    train_dataloader = DataLoader(
-        train_set, batch_size=64, shuffle=True, num_workers=4)
-    dev_dataloader = DataLoader(
-        dev_set, batch_size=64, shuffle=False, num_workers=4)
-    test_dataloader = DataLoader(
-        test_set, batch_size=64, shuffle=False, num_workers=4)
+    hyperparameter2performance = dict()
+    for n_sentences in range(1, 16):
+        print("=========== n_sentences {}============".format(str(n_sentences)))
+        args.n_sentences = n_sentences
+        # number of inputs will be 4 times number of evidence sentences.
+        args.layers[0] = args.n_sentences * 4
 
-    net = Net(layers=[int(width) for width in args.layers])
-    print("----Neural Aggregator Architecture----")
-    print(net)
 
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(net.parameters())
-    for epoch in range(args.epochs):  # loop over the dataset multiple times
-        print("epoch:", epoch)
-        running_loss = 0.0
+        train_set = PredictedLabelsDataset(args.train, args.n_sentences, sampling=args.sampling, use_ev_scores=args.ev_scores)
+        dev_set = PredictedLabelsDataset(args.dev, args.n_sentences, use_ev_scores=args.ev_scores)
+        test_set = PredictedLabelsDataset(args.test, args.n_sentences, use_ev_scores=args.ev_scores, test=True)
+        train_dataloader = DataLoader(
+            train_set, batch_size=64, shuffle=True, num_workers=4)
+        dev_dataloader = DataLoader(
+            dev_set, batch_size=64, shuffle=False, num_workers=4)
+        test_dataloader = DataLoader(
+            test_set, batch_size=64, shuffle=False, num_workers=4)
 
-        for i, (labels, inputs) in enumerate(train_dataloader):
-            # zero the parameter gradients
-            optimizer.zero_grad()
 
-            # forward + backward + optimize
-            outputs = net(inputs.float())
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
 
-            # print statistics
-            running_loss += loss.item()
-            if i % 1000 == 999:  # print every 1000 mini-batches
-                print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1,
-                                                running_loss / 1000))
-                running_loss = 0.0
+        net = Net(layers=[int(width) for width in args.layers])
+        print("----Neural Aggregator Architecture----")
 
-    print('Finished Training')
+        print(net)
 
-    print("dev set:")
-    simple_test(dev_dataloader)
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.Adam(net.parameters())
+        for epoch in range(args.epochs):  # loop over the dataset multiple times
+            print("epoch:", epoch)
+            running_loss = 0.0
+
+            for i, (labels, inputs) in enumerate(train_dataloader):
+                # zero the parameter gradients
+                optimizer.zero_grad()
+
+                # forward + backward + optimize
+                outputs = net(inputs.float())
+                loss = criterion(outputs, labels)
+                loss.backward()
+                optimizer.step()
+
+                # print statistics
+                running_loss += loss.item()
+                if i % 1000 == 999:  # print every 1000 mini-batches
+                    print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1,
+                                                    running_loss / 1000))
+                    running_loss = 0.0
+
+        print('Finished Training')
+
+        print("dev set:")
+        performance = simple_test(dev_dataloader)
+        hyperparameter2performance[n_sentences] = performance
+
+    for k, v in sorted(hyperparameter2performance.items()):
+        print(k, v)
+
 
     dev_results = predict(dev_dataloader)
     test_results = predict(test_dataloader)
