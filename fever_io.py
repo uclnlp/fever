@@ -108,7 +108,7 @@ def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="
                         lines=data["lines"]
                         if lines != "":
                             w.write(title+"\t"+jnum+"\t"+str(point)+"\n")
-                        t2jnum[title]=(jnum,point)
+                            t2jnum[title]=(jnum,point)
                         point=f.tell()
                         line=f.readline()
     return t2jnum
