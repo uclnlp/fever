@@ -1,0 +1,20 @@
+{
+"manifest_version": 2,
+    "name": "[Fact checker]",
+    "description": "[Fact checker]",
+    "version": "1.0",
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*/*"
+            ],
+			"css": ["fix.css"],
+            "js": [
+                "jquery.min.js","content.js"
+            ],
+            "run_at": "document_end"
+        }
+    ], "web_accessible_resources": [
+        "fix.css"
+    ]
+}
