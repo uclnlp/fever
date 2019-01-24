@@ -1,3 +1,4 @@
+import os
 import argparse
 import numpy as np
 from sklearn.linear_model import LogisticRegression
@@ -73,6 +74,8 @@ def select_docs(train):
     sofar={"SUPPORTS": 0, "REFUTES": 0}
     try:
         with open("data/edocs.bin","rb") as rb:
+            if os.path.getsize("data/edocs.bin") < 100:
+                raise RuntimeError("Size of edocs.bin is too small. It may be an empty file.")
             edocs=pickle.load(rb)
     except:
         t2jnum=titles_to_jsonl_num()
@@ -188,6 +191,8 @@ if __name__ == "__main__":
         X,y=model.process_train(selected,train)
         model.fit(X,y)
         with open("data/doc_ir_model.bin","wb") as wb:
+            if os.path.getsize("data/edocs.bin") < 100:
+                raise RuntimeError("Size of edocs.bin is too small. It may be an empty file.")
             pickle.dump(model,wb)
     try:
         with open("data/edocs.bin","rb") as rb:
