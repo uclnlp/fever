@@ -94,6 +94,8 @@ def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="
                 jnum=fields[1]
                 point=int(fields[2])
                 t2jnum[title]=(jnum,point)
+            if len(t2jnum) == 0:
+                raise RuntimeError("doctitles file ({}) might be empty.".format(doctitles))
     except:
         with open(doctitles,"w") as w:
             for i in tqdm(range(1,110)):
