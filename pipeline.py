@@ -199,17 +199,24 @@ def score(config):
 
 
 def __run_python(script, gpu=False, env=dict()):
-    LD_LIBRARY_PATH = "/share/apps/cuda-9.0/lib64:/share/apps/python-3.6.3-shared/lib:/share/apps/libc6_2.23/lib/x86_64-linux-gnu:/share/apps/libc6_2.23/lib64:/share/apps/gcc-6.2.0/lib64:/share/apps/gcc-6.2.0/lib"
+    ### You might need to add env vars or/and python executables.
+    # Examples:
+    # LD_LIBRARY_PATH = "/share/apps/cuda-9.0/lib64:/share/apps/python-3.6.3-shared/lib:/share/apps/libc6_2.23/lib/x86_64-linux-gnu:/share/apps/libc6_2.23/lib64:/share/apps/gcc-6.2.0/lib64:/share/apps/gcc-6.2.0/lib"
+    # python_gpu_prep = [
+    #     "/share/apps/libc6_2.23/lib/x86_64-linux-gnu/ld-2.23.so",
+    #     "/home/tyoneda/anaconda3/bin/python3"
+    # ]
+    # prep = ["/home/tyoneda/anaconda3/bin/python3"]
+
     python_gpu_prep = [
-        "/share/apps/libc6_2.23/lib/x86_64-linux-gnu/ld-2.23.so",
-        "/home/tyoneda/anaconda3/bin/python3"
+        "python3"
     ]
-    prep = ["/home/tyoneda/anaconda3/bin/python3"]
+    prep = ["python3"]
     if gpu:
-        env.update({
-            "LD_LIBRARY_PATH": LD_LIBRARY_PATH,
-            # "CUDA_VISIBLE_DEVICES": "0"
-        })
+        # env.update({
+        #     "LD_LIBRARY_PATH": LD_LIBRARY_PATH,
+        #     # "CUDA_VISIBLE_DEVICES": "0"
+        # })
         prep = python_gpu_prep
 
     with environ(env):
