@@ -11,7 +11,7 @@ from config_parser import parse
 from fever_io import read_jsonl, save_jsonl
 
 
-root_dir = "/cluster/project2/mr/tyoneda/pipeline"
+root_dir = "**BASE_DIR**/pipeline"
 @contextmanager
 def environ(env):
     original_environ_dict = os.environ.copy()
