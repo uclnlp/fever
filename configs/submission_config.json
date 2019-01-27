@@ -1,0 +1,75 @@
+{
+  "parent_config": "configs/base_config.json",
+  "__description": "train on our train+dev+test data",
+  "__variables": {
+    "___root_dir___": "**BASE_DIR**",
+    "___train_rte___": "___model_name___",
+    "___inference_rte___": "___model_name___",
+    "___aggregator___": "___model_name___",
+    "___score___": "___model_name___",
+    "___reader___": "reader",
+    "___rerank___": "___model_name___",
+    "___model_name___": "base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission"
+  },
+  "ir": {
+    "train_output_file": "___root_dir___/fever/data/indexed_data/train+dev+test.ver0727.p15.s30.jsonl",
+    "dev_output_file": "___root_dir___/fever/data/indexed_data/test.ver0727.p15.s30.jsonl",
+    "test_output_file": "___root_dir___/fever/data/indexed_data/shared_task_test.ver0727.p15.s30.jsonl",
+    "train_input_file": "___root_dir___/fever/data/train.jsonl",
+    "dev_input_file": "___root_dir___/fever/data/test.jsonl",
+    "test_input_file": "___root_dir___/fever/data/shared_task_test.jsonl"
+  },
+  "convert": {
+    "train_converted_file": "___root_dir___/fever/data/converted/train+dev+test.ver0727.p15.s30_title.jsonl",
+    "dev_converted_file": "___root_dir___/fever/data/converted/test.ver0727.p15.s30_title.jsonl"
+  },
+  "train_rte": {
+    "save_dir": "___root_dir___/fever/results/___train_rte___/___reader___"
+  },
+  "inference_rte": {
+    "n_sentences": 15
+  },
+  "aggregator": {
+    "layers": [
+      28,
+      100,
+      100
+    ],
+    "n_sentences": 7,
+    "sampling": false,
+    "ev_scores": true
+  },
+  "rerank": {
+    "reranked_evidence_file": "___root_dir___/fever/results/___rerank___/reranked_evidences.jsonl",
+    "predicted_labels_and_scores_file": {
+      "__overwrite": "inference_rte dev_predicted_labels_and_scores_file"
+    },
+    "predicted_labels_file": {
+      "__overwrite": "aggregator predicted_labels_file"
+    },
+    "predicted_evidence_file": {
+      "__overwrite": "ir dev_output_file"
+    },
+    "n_sentences": 15,
+    "test_reranked_evidence_file": "___root_dir___/fever/results/___rerank___/test_reranked_evidences.jsonl",
+    "test_predicted_labels_and_scores_file": {
+      "__overwrite": "inference_rte test_predicted_labels_and_scores_file"
+    },
+    "test_predicted_labels_file": {
+      "__overwrite": "aggregator test_predicted_labels_file"
+    },
+    "test_predicted_evidence_file": {
+      "__overwrite": "ir test_output_file"
+    }
+  },
+  "score": {
+    "predicted_evidence_file": {
+      "__overwrite": "rerank reranked_evidence_file"
+    },
+    "test": {
+      "predicted_evidence_file": {
+        "__overwrite": "rerank test_reranked_evidence_file"
+      }
+    }
+  }
+}
