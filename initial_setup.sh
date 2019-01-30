@@ -4,22 +4,23 @@
 # (** This does not expand symlink)
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+pushd . > /dev/null
 # clone takuma-ynd/jack.git
 cd ${THIS_FILE_PATH}/../
 git clone https://github.com/takuma-ynd/jack.git
 cd jack
 
-pushd . > /dev/null
-# if "python3" command is available, use that.
-if command -v python3 &>/dev/null; then
-    python3 -m pip install -e .[tf]
-else
-    python -m pip install -e .[tf]
-fi
-bash ./data/GloVe/download.sh
+# This part can fail depending on the python environment. -> better to manually run this.
+# # if "python3" command is available, use that.
+# if command -v python3 &>/dev/null; then
+#     python3 -m pip install -e .[tf]
+# else
+#     python -m pip install -e .[tf]
+# fi
+# bash ./data/GloVe/download.sh
 popd > /dev/null
 
-# mkdir data
+mkdir data
 
 download_if_not_exists() {
     if [ ! -f $2 ]; then
