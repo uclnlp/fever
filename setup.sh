@@ -1,15 +1,8 @@
 #!/usr/bin/env bash
 
-# super complicated but this just gets the current directory.
-pushd . > /dev/null
-CURRENT_DIR="${BASH_SOURCE[0]}"
-if ([ -h "${CURRENT_DIR}" ]); then
-    while([ -h "${CURRENT_DIR}" ]); do cd `dirname "$SCRIPT_PATH"`;
-                                       CURRENT_DIR=`readlink "${SCRIPT_PATH}"`; done
-fi
-cd `dirname ${CURRENT_DIR}` > /dev/null
-CURRENT_DIR=`pwd`;
-popd  > /dev/null
+# get the absolute path of this file
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "replacing **BASE_DIR** with ${CURRENT_DIR}"
 
 # escape slashes
