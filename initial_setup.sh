@@ -36,7 +36,7 @@ download_if_not_exists "https://s3-eu-west-1.amazonaws.com/fever.public/wiki-pag
 
 if [ ! -d data/wiki-pages/wiki-pages ]; then
     mkdir data/wiki-pages
-    unzip /tmp/wiki-pages.zip -d data/wiki-pages/wiki-pages
+    unzip /tmp/wiki-pages.zip -d data/wiki-pages
 fi
 
 bash setup.sh
