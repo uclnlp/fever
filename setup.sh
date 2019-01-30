@@ -9,7 +9,7 @@ echo "replacing **BASE_DIR** with ${CURRENT_DIR}"
 ESCAPED_CURRENT_DIR=$(echo ${CURRENT_DIR}| sed 's/\//\\\//g')
 
 # replace
-sed -i '' -e "s/\*\*BASE_DIR\*\*/${ESCAPED_CURRENT_DIR}/g" ${CURRENT_DIR}/configs/submission_config.json ${CURRENT_DIR}/configs/base_config.json ${CURRENT_DIR}/pipeline.py
+sed -i -e "s/\*\*BASE_DIR\*\*/${ESCAPED_CURRENT_DIR}/g" ${CURRENT_DIR}/configs/submission_config.json ${CURRENT_DIR}/configs/base_config.json ${CURRENT_DIR}/pipeline.py
 
 
 
