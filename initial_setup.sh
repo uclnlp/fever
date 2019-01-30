@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # get the absolute path of this file
+# (** This does not expand symlink)
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # clone takuma-ynd/jack.git
