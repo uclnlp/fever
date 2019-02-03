@@ -3,7 +3,7 @@
   "__description": "train on our train+dev+test data",
   "__variables": {
     "___root_dir___": "**BASE_DIR**",
-    "___train_rte___": "___model_name___",
+    "___train_rte___": "base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission",
     "___inference_rte___": "___model_name___",
     "___aggregator___": "___model_name___",
     "___score___": "___model_name___",
