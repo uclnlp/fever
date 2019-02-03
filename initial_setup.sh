@@ -21,6 +21,7 @@ cd jack
 popd > /dev/null
 
 mkdir data
+mkdir results
 
 download_if_not_exists() {
     if [ ! -f $2 ]; then
@@ -33,12 +34,17 @@ download_if_not_exists "https://s3-eu-west-1.amazonaws.com/fever.public/train.js
 download_if_not_exists "https://s3-eu-west-1.amazonaws.com/fever.public/shared_task_dev.jsonl" "data/dev.jsonl"
 download_if_not_exists "https://s3-eu-west-1.amazonaws.com/fever.public/shared_task_test.jsonl" "data/test.jsonl"
 download_if_not_exists "https://s3-eu-west-1.amazonaws.com/fever.public/wiki-pages.zip" "/tmp/wiki-pages.zip"
+# download trained model
+download_if_not_exists "http://tti-coin.jp/data/yoneda/fever/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip" "/tmp/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip"
 
 if [ ! -d data/wiki-pages/wiki-pages ]; then
     mkdir data/wiki-pages
     unzip /tmp/wiki-pages.zip -d data/wiki-pages
+    rm /tmp/wiki-pages.zip
+fi
+
+if [ ! -d results/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission ]; then
+    unzip /tmp/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip -d results
 fi
 
 bash setup.sh
-
-
