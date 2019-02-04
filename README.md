@@ -5,21 +5,29 @@ To reproduce our FEVER shared task results:
 
 ## Initial steps
 1. switch to the takuma-dev branch
-2. clone this fork of the jack repo: https://github.com/takuma-ynd/jack
-3. `cd jack` and download required data by `bash ./data/GloVe/download.sh`
-4. create a data directory within the fever repo and download the FEVER [train.jsonl](https://s3-eu-west-1.amazonaws.com/fever.public/train.jsonl), [dev.jsonl](https://s3-eu-west-1.amazonaws.com/fever.public/shared_task_dev.jsonl) and [shared_task_test.jsonl](https://s3-eu-west-1.amazonaws.com/fever.public/shared_task_test.jsonl) datasets
-5. download [wiki-data](https://s3-eu-west-1.amazonaws.com/fever.public/wiki-pages.zip) and place it under `data/wiki-pages` (**Note!!: path to a json file will be `data/wiki-pages/wiki-pages/wiki-xxx.jsonl`**)
-6. run `bash setup.sh` to automatically set up the directory path
+2. run `bash initial_setup.sh` (This will download several files and take some time.)
+3. move to `jack` directory and install dependencies according to the README. (i.e., run `python3 -m pip install -e .[tf]`)
+4. move to `fever-baselines` directory and install dependencies (`pip install -r requirements.txt
+` should be enough)
+
+After step 2, `fever`, `jack`, `fever-baselines` directory should be at the same level (these should be in the same directory).
 
 ## Reproduce our result
-1. run `bash download.sh` to get our trained model and required data
-2. `python3 pipeline.py --config configs/submission_config.json --model [arbitrary name]`
+`python3 pipeline.py --config configs/submission_config.json --model [arbitrary name]`
+
+Output files will be generated under `results/[model name]`.
+`submission.json` and `test_submission.json` correspond to the output for development and test set for each. 
+(**Note that the score displayed after running this particular model is not valid, since we included development set for the training even though the score is calculated based on the development set.**)
 
 ## Train a model with new data
-1. run `python3 doc_ir_model.py` to create a document index and retrieval model
-2. run `python3 line_ir_model.py` to create a line index and retrieval model
-3. create `configs/config.json` and reflect your directory structure (you can refer to `submission_config.json`)
-4. `python3 pipeline.py --config configs/config.json --model [arbitrary name]**
+### Use a new/different wiki-pages data (This may take some time)
+1. remove index files in `data` directory
+2. run `python3 doc_ir_model.py` to create a document index and retrieval model
+3. run `python3 line_ir_model.py` to create a line index and retrieval model
+
+### Use the same wiki data 
+1. create new configuration file `configs/config.json` and reflect your directory structure
+2. run `python3 pipeline.py --config configs/config.json --model [arbitrary name]`
 
 ## Configuration files
 Configuration files can have a parent, which is specified by `parent_config` attribute.
