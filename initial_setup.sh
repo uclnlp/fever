@@ -8,8 +8,7 @@ pushd . > /dev/null
 # clone takuma-ynd/jack.git
 cd ${THIS_FILE_PATH}/../
 git clone https://github.com/takuma-ynd/jack.git
-cd jack
-
+# cd jack
 # This part can fail depending on the python environment. -> better to manually run this.
 # # if "python3" command is available, use that.
 # if command -v python3 &>/dev/null; then
@@ -18,6 +17,11 @@ cd jack
 #     python -m pip install -e .[tf]
 # fi
 # bash ./data/GloVe/download.sh
+popd > /dev/null
+
+pushd . > /dev/null
+cd ${THIS_FILE_PATH}/../
+git clone https://github.com/takuma-ynd/fever-baselines.git
 popd > /dev/null
 
 mkdir data
