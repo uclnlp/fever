@@ -66,6 +66,7 @@
     "predicted_evidence_file": {
       "__overwrite": "rerank reranked_evidence_file"
     },
+    "actual_file": "___root_dir___/fever/data/indexed_data/test.ver0727.p15.s30.jsonl",
     "test": {
       "predicted_evidence_file": {
         "__overwrite": "rerank test_reranked_evidence_file"
