@@ -42,7 +42,7 @@ if __name__ == "__main__":
     out_preds = list()
     for pred in predictions:
         if len(pred["rte_preds"]) != len(pred["predicted_evidence"]):
-            print("warning: pred['rte_preds'] != len(pred['predicted_evidence'])")
+            # print("warning: pred['rte_preds'] != len(pred['predicted_evidence'])")
             pred["rte_preds"] = pred["rte_preds"][:len(pred["predicted_evidence"])]
 
         # no reranking if num of rte preds are lower than 5
