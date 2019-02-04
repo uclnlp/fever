@@ -34,11 +34,17 @@ if __name__ == "__main__":
     predictions = []
     assert len(rte_predictions) == len(aggregated_labels) == len(predicted_evidences) == len(ids), "{}, {}, {}, {}".format(len(rte_predictions), len(aggregated_labels), len(predicted_evidences), len(ids))
     for idx, (id, ev, rte_labels, aggr_label) in enumerate(zip(ids, predicted_evidences, rte_predictions, aggregated_labels)):
+        # temporal fix (suspicious)
+        if len(rte_labels) == 1:
+            rte_labels = rte_labels[0]
         predictions.append({"id": id, "rte_preds": rte_labels, "predicted_label": aggr_label, "predicted_evidence": ev[:args.n_sentences]})
 
     out_preds = list()
     for pred in predictions:
-        assert len(pred["rte_preds"]) == len(pred["predicted_evidence"])
+        if len(pred["rte_preds"]) != len(pred["predicted_evidence"]):
+            print("warning: pred['rte_preds'] != len(pred['predicted_evidence'])")
+            pred["rte_preds"] = pred["rte_preds"][:len(pred["predicted_evidence"])]
+
         # no reranking if num of rte preds are lower than 5
         if len(pred["rte_preds"]) > 5 and pred["predicted_label"] != "NOT ENOUGH INFO":
             correct_ev_flags = (pred["predicted_label"] == np.array(pred["rte_preds"]))
