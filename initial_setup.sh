@@ -31,7 +31,7 @@ download_if_not_exists() {
     if [ ! -f $2 ]; then
         wget $1 -O $2
     else
-        echo "$2 already exists. skipping..."
+        echo "$2 already exists. skipping download..."
     fi
 }
 download_if_not_exists "https://s3-eu-west-1.amazonaws.com/fever.public/train.jsonl" "data/train.jsonl"
@@ -40,6 +40,9 @@ download_if_not_exists "https://s3-eu-west-1.amazonaws.com/fever.public/shared_t
 download_if_not_exists "https://s3-eu-west-1.amazonaws.com/fever.public/wiki-pages.zip" "/tmp/wiki-pages.zip"
 # download trained model
 download_if_not_exists "http://tti-coin.jp/data/yoneda/fever/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip" "/tmp/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip"
+
+download_if_not_exists "http://tti-coin.jp/data/yoneda/fever/data.zip" "/tmp/data.zip"
+unzip /tmp/data.zip
 
 if [ ! -d data/wiki-pages/wiki-pages ]; then
     mkdir data/wiki-pages
@@ -50,5 +53,6 @@ fi
 if [ ! -d results/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission ]; then
     unzip /tmp/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip -d results
 fi
+
 
 bash setup.sh
