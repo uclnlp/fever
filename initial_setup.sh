@@ -6,7 +6,7 @@ CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 pushd . > /dev/null
 # clone takuma-ynd/jack.git
-cd ${THIS_FILE_PATH}/../
+cd ${CURRENT_DIR}/../
 git clone https://github.com/takuma-ynd/jack.git
 # cd jack
 # This part can fail depending on the python environment. -> better to manually run this.
@@ -20,7 +20,7 @@ git clone https://github.com/takuma-ynd/jack.git
 popd > /dev/null
 
 pushd . > /dev/null
-cd ${THIS_FILE_PATH}/../
+cd ${CURRENT_DIR}/../
 git clone https://github.com/takuma-ynd/fever-baselines.git
 popd > /dev/null
 
