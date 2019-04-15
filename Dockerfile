@@ -3,8 +3,7 @@ FROM tensorflow/tensorflow:1.8.0-gpu-py3
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends --allow-unauthenticated \
+RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthenticated \
   zip \
   gzip \
   make \
@@ -35,7 +34,7 @@ RUN mkdir -p /hexaf/fever
 WORKDIR /hexaf/fever
 
 ADD initial_setup_fever2.sh /hexaf/fever/
-RUN chmod +x initial_setup_fever2.sh && initial_setup_fever2.sh
+RUN chmod +x /hexaf/fever/initial_setup_fever2.sh && /hexaf/fever/initial_setup_fever2.sh
 
 ADD predict.sh .
 
