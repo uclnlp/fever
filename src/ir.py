@@ -1,13 +1,7 @@
-from flask import Flask, jsonify, abort, request
 from line_ir import line_ir
 from doc_ir import best_titles
-from doc_ir_model import doc_ir_model
-from line_ir_model import line_ir_model
-from util import edict, pdict, normalize_title, load_stoplist
-from fever_io import load_doc_lines, titles_to_jsonl_num, load_split_trainset, load_paper_dataset
-import pickle
-import json
-import requests
+from fever_io import load_doc_lines
+
 
 def get_retrieval_method(dmodel, lmodel, edocs, t2jnum):
     def get_evidence(claim):
