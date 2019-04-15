@@ -9,7 +9,10 @@ from contextlib import contextmanager
 import subprocess
 from config_parser import parse
 from fever_io import read_jsonl, save_jsonl
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 root_dir = "**BASE_DIR**"
 @contextmanager

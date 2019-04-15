@@ -254,6 +254,7 @@ refutes = idx2label[1]
 nei = idx2label[2]
 
 if __name__ == "__main__":
+    ## NOTE: the size of first layer will be overwritten by 4 * n_sentences
     parser = argparse.ArgumentParser()
     parser.add_argument("--train", required=True)
     parser.add_argument("--dev", required=True)
