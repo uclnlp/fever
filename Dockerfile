@@ -34,15 +34,19 @@ RUN mkdir -pv /hexaf/fever
 RUN mkdir -pv /hexaf/fever/results
 WORKDIR /hexaf/fever
 
-ADD initial_setup_fever2.sh /hexaf/fever/
 ADD http://tti-coin.jp/data/yoneda/fever/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip /tmp/
 ADD http://tti-coin.jp/data/yoneda/fever/data.zip /tmp/
+ADD initial_setup_fever2.sh .
 RUN chmod u+x initial_setup_fever2.sh && /hexaf/fever/initial_setup_fever2.sh
+
+RUN unzip /tmp/data.zip -d .
+RUN unzip /tmp/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip -d /hexaf/fever/results
+
+ADD configs/submission_config.json configs/
+ADD configs/base_config.json configs/
+ADD pipeline.py .
 ADD setup.sh .
 RUN chmod u+x setup.sh && /hexaf/fever/setup.sh
-
-RUN unzip /tmp/data.zip -d /hexaf/fever/
-RUN unzip /tmp/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip -d /hexaf/fever/results
 
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('gazetteers'); nltk.download('names')"
 
