@@ -229,7 +229,7 @@ def load_fever_train(path=constants.fever_common + "/fever-data/train.jsonl", ho
                 break
     return data
 
-def load_paper_dataset(train=constants.fever_common + "/fever-data/train.jsonl", dev=constants.fever_common + "/fever-data/dev.jsonl")):
+def load_paper_dataset(train=constants.fever_common + "/fever-data/train.jsonl", dev=constants.fever_common + "/fever-data/dev.jsonl"):
     """Reads the Fever train/dev set used on the paper.
     """
     train_ds = load_fever_train(path=train, howmany=9999999999)
