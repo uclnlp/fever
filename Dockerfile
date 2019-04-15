@@ -35,6 +35,7 @@ WORKDIR /hexaf/fever
 
 ADD initial_setup_fever2.sh /hexaf/fever/
 RUN chmod +x /hexaf/fever/initial_setup_fever2.sh && /hexaf/fever/initial_setup_fever2.sh
+RUN python -c "import nltk; nltk.download('punkt'); nltk.download('gazetteers'); nltk.download('names')"
 
 ADD predict.sh .
 
