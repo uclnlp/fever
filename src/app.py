@@ -34,28 +34,6 @@ def convert_label(label, inverse=False):
         assert label in snli2fever
         return snli2fever[label]
 
-def reshape(preds_list, preds_length):
-    """reshape prediction instances
-    >> preds_list = [obj, obj, obj, obj, obj, obj]
-    >> preds_length = [3, 1, 2]
-    >> reshape(preds_list, preds_length)
-    [[obj, obj, obj], [obj], [obj, obj]]
-    """
-    reshaped = list()
-    pointer = 0
-    for i, length in enumerate(preds_length):
-        preds = preds_list[pointer: pointer + length]
-        pointer += length
-        reshaped.append(preds)
-    return reshaped
-
-
-def flatten(bumpy_2d_list):
-    flattened = list()
-    for list_ in bumpy_2d_list:
-        flattened.extend(list_)
-    return flattened
-
 
 def predict(reader, all_settings, batch_size):
     # pointer loops from 0 to less than (or equal to) len(all_settings) with step batch_size
@@ -93,7 +71,7 @@ class Net(nn.Module):
 
 
 net = Net(layers=[int(width) for width in [21,100,100]])
-net.load_state_dict(torch.load("aggregator.pt"))
+net.load_state_dict(torch.load(constants.index_dir + "/aggregator.pt"))
 
 label2idx = {"SUPPORTS": 0, "REFUTES": 1, "NOT ENOUGH INFO": 2, "DUMMY LABEL": 3}
 idx2label = {idx: label for label, idx in label2idx.items()}
@@ -103,16 +81,19 @@ nei = idx2label[2]
 
 
 def predict_single(predictor, retrieval_method, instance):
-    evidence = retrieval_method.get_sentences_for_claim(instance["claim"])
+    ir_result = retrieval_method(instance["claim"])
+    nli_result = predictor(ir_result)
+    predicted_label = nli_result["global_fc"]
 
-    test_instance = predictor._json_to_instance({"claim":instance["claim"], "predicted_sentences":evidence})
-    predicted = predictor.predict_instance(test_instance)
-
-    max_id = predicted["label_logits"].index(max(predicted["label_logits"]))
+    predicted_evidence = []
+    for i in range(5):
+        title = nli_result["evidences"][i]["title"]
+        linum = nli_result["evidences"][i]["linum"]
+        predicted_evidence.append((title, linum))
 
     return {
-        "predicted_label":predictor._model.vocab.get_token_from_index(max_id,namespace="labels"),
-        "predicted_evidence": evidence
+        "predicted_label":predicted_label,
+        "predicted_evidence": predicted_evidence
     }
 
 
@@ -152,7 +133,7 @@ def hexaf_fever():
     with open(constants.index_dir + "/line_ir_model.bin","rb") as rb:
         lmodel=pickle.load(rb)
 
-        retrieval_method = get_retrieval_method(dmodel, lmodel, edocs, t2jnum)
+    retrieval_method = get_retrieval_method(dmodel, lmodel, edocs, t2jnum)
 
     hexaf_reader = readers.reader_from_file(constants.results_dir + "/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission/reader", dropout=0.0)
 
@@ -162,10 +143,10 @@ def hexaf_fever():
 
 
     # The prediction function that is passed to the web server for FEVER2.0
-    def baseline_predict(instances):
+    def hexaf_predict(instances):
         predictions = []
         for instance in instances:
             predictions.append(predict_single(predictor, retrieval_method, instance))
         return predictions
 
-    return fever_web_api(baseline_predict)
+    return fever_web_api(hexaf_predict)

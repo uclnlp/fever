@@ -1,0 +1,6 @@
+TODO:
+ir.py
+  fix best parameter so that user can specify from a config file
+rte.py
+  make neural net param modifiable
+   

@@ -10,8 +10,7 @@ import json
 import requests
 
 def get_retrieval_method(dmodel, lmodel, edocs, t2jnum):
-    def get_evidence(data):
-        claim=data["claim"]
+    def get_evidence(claim):
         tscores=best_titles(claim,edocs,best=30,model=dmodel)
         docs={0:tscores}
         lines=load_doc_lines(docs,t2jnum)
@@ -20,11 +19,13 @@ def get_retrieval_method(dmodel, lmodel, edocs, t2jnum):
         for i, (title,lid,score) in enumerate(evidence[0]):
             print(title)
             evs.append({
-                    "id":i,
-                    "document":{"header":{"sourceItemOriginFeedName":title,
-                                            "sourceItemIdAtOrigin":"https://en.wikipedia.org/wiki/"+title}},
-                    "element":{"text":lines[title][lid]},
-                    "group_fact_check": "SUPPORTS"})
+                "id":i,
+                "title": title,
+                "linum": lid,
+                "document":{"header":{"sourceItemOriginFeedName":title,
+                                        "sourceItemIdAtOrigin":"https://en.wikipedia.org/wiki/"+title}},
+                "element":{"text":lines[title][lid]},
+                "group_fact_check": "SUPPORTS"})
 
         return {"claim":claim, "evidences":evs, "global_fc": "SUPPORTS"}
 
