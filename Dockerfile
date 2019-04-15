@@ -38,6 +38,9 @@ ADD initial_setup_fever2.sh /hexaf/fever/
 ADD http://tti-coin.jp/data/yoneda/fever/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip /tmp
 ADD http://tti-coin.jp/data/yoneda/fever/data.zip /tmp
 RUN chmod +x /hexaf/fever/initial_setup_fever2.sh && /hexaf/fever/initial_setup_fever2.sh
+ADD setup.sh
+RUN chmod u+x setup.sh && setup.sh
+
 RUN unzip /tmp/data.zip -d /hexaf/fever
 RUN unzip /tmp/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip -d /hexaf/fever/results
 

@@ -23,6 +23,3 @@ git clone https://github.com/takuma-ynd/fever-baselines.git
 cd fever-baselines
 pip install -r requirements.txt
 popd > /dev/null
-
-
-bash setup.sh
