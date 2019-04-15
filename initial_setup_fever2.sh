@@ -32,6 +32,6 @@ wget "http://tti-coin.jp/data/yoneda/fever/base+sampling2+evscores+rerank+train+
 unzip /tmp/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip -d /hexaf/fever/results
 
 wget "http://tti-coin.jp/data/yoneda/fever/data.zip" -O "/tmp/data.zip"
-unzip /tmp/data.zip -d /hexaf/fever
+unzip /tmp/data.zip -d /hexaf/fever/data
 
 bash setup.sh
