@@ -20,36 +20,28 @@ from line_ir_model import line_ir_model
 root_dir = "/hexaf"
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(os.path.basename(__file__))
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--infile", required=True)
+parser.add_argument("--outfile", required=True)
 args = parser.parse_args()
 
 # load input file
-logger.info("loading index files...")
+logger.info("Loading index files...")
 n_docs = 30
 n_sents = 15
 instances = load_fever_train(path=args.infile, howmany=9999999999)
+
+# ir
+logger.info("Retrieving evidences...")
 docs, evidence = get_evidence(instances, n_docs=30, n_sents=15)
 pred_ev= tofeverformat(instances, docs, evidence)
 save_jsonl(pred_ev, "/tmp/predicted_evidences.jsonl")
+pred_ev = read_jsonl("/tmp/predicted_evidences.jsonl")
 
-# this is not needed unless you train rte model
-# # convert to snli format
-prependlinum = False
-prependtitle = True
-use_ir_pred = False
-n_sentences = 5
-snli_format_instances = convert(
-    instances,
-    prependlinum=prependlinum,
-    prependtitle=prependtitle,
-    use_ir_prediction=use_ir_pred,
-    n_sentences=str(n_sentences))
-save_jsonl(snli_format_instances, "/tmp/converted_instances.jsonl")
-
-# # inference rte
+# inference rte
+logger.info("Performing RTE...")
 n_sentences = 15
 options = [
     "/tmp/predicted_evidences.jsonl", "/tmp/rte_predictions.jsonl",
@@ -62,8 +54,7 @@ __run_python(script, gpu=True, env={"PYTHONPATH": "."})
 os.chdir("../fever")
 
 # neural_aggregator
-# TODO: make sure that rte_pred contains "ev_scores" key. (ref. neural_aggregator.py l66)
-# TODO: training
+logger.info("Performing aggregation...")
 layers = [36, 100, 100]
 net = Net(layers=[int(width) for width in layers])
 net.load_state_dict(torch.load(os.path.join(constants.index_dir, "aggregator.pt")))
@@ -74,8 +65,8 @@ test_dataloader = DataLoader(
 aggregated_labels= predict(test_dataloader, net)
 
 # rerank
+logger.info("Running reranking...")
 pred_ev = read_jsonl("/tmp/predicted_evidences.jsonl") # tmp
-logger.info("running reranking")
 n_sentences = 15
 ev_ids = [ev["id"] for ev in pred_ev]
 pred_ev = [ev["predicted_sentences"] for ev in pred_ev]
@@ -122,4 +113,5 @@ for pred in predictions:
     out_dict = {"id": pred["id"], "predicted_sentences": out_ev}
     out_preds.append(out_dict)
 
-save_jsonl(out_preds, "/hexaf/fever/result.jsonl")
+# save result
+save_jsonl(out_preds, args.outfile)

@@ -14,7 +14,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-root_dir = "**BASE_DIR**"
+root_dir = "/home/hexaf"
 @contextmanager
 def environ(env):
     original_environ_dict = os.environ.copy()
@@ -265,6 +265,7 @@ if __name__ == '__main__':
     config["__variables"]["___model_name___"] = args.model
     model_dir = "results/{}".format(config["__variables"]["___model_name___"])
 
+    import ipdb; ipdb.set_trace()
     if not os.path.exists(model_dir):
         os.mkdir(model_dir)
     logger.info("model dir: %s", model_dir)
@@ -281,7 +282,7 @@ if __name__ == '__main__':
 
     config = parse(config)
     save_config(config, path=os.path.join(model_dir, "config.json"))
-
+    """
     # perform IR if file doesn't exist
     config_ir = config["ir"]
     logger.info("%s exists?: %s", config_ir["train_output_file"], os.path.exists(config_ir["train_output_file"]))
@@ -321,7 +322,7 @@ if __name__ == '__main__':
         inference_rte(config["inference_rte"])
     else:
         logger.info("skipping inference rte...")
-
+    """
     # aggregation if file not exists
     if not os.path.exists(config["aggregator"]["predicted_labels_file"]):
         neural_aggregator(config["aggregator"])
