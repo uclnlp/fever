@@ -34,6 +34,10 @@ RUN mkdir -pv /hexaf/fever
 RUN mkdir -pv /hexaf/fever/results
 WORKDIR /hexaf/fever
 
+ADD requirements.txt .
+RUN pip install -r requirements.txt
+
+
 ADD http://tti-coin.jp/data/yoneda/fever/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip /tmp/
 ADD http://tti-coin.jp/data/yoneda/fever/data.zip /tmp/
 ADD initial_setup_fever2.sh .
