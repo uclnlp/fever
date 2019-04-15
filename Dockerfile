@@ -30,12 +30,21 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-RUN mkdir -p /hexaf/fever
+RUN mkdir -pv /hexaf/fever
+RUN mkdir -pv /hexaf/fever/results
 WORKDIR /hexaf/fever
 
 ADD initial_setup_fever2.sh /hexaf/fever/
+ADD http://tti-coin.jp/data/yoneda/fever/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip /tmp
+ADD http://tti-coin.jp/data/yoneda/fever/data.zip /tmp
 RUN chmod +x /hexaf/fever/initial_setup_fever2.sh && /hexaf/fever/initial_setup_fever2.sh
+RUN unzip /tmp/data.zip -d /hexaf/fever
+RUN unzip /tmp/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission.zip -d /hexaf/fever/results
+
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('gazetteers'); nltk.download('names')"
+
+RUN mkdir -pv src
+ADD src src
 
 ADD predict.sh .
 
