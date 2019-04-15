@@ -10,6 +10,7 @@ from tqdm import tqdm
 from util import abs_path
 from fever_io import titles_to_jsonl_num, load_doclines, read_jsonl, save_jsonl, get_evidence_sentence_list
 from analyse import compare_evidences
+import constants
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -162,8 +163,8 @@ def convert(instances, prependlinum=False, prependtitle=False, use_ir_prediction
 
     print("loading wiki data...")
     t2jnum = titles_to_jsonl_num(
-        wikipedia_dir=abs_path("data/wiki-pages/wiki-pages/"),
-        doctitles=abs_path("data/doctitles"))
+        wikipedia_dir=constants.wiki_dir,
+        doctitles=constants.index_dir + "/doctitles")
     t2l2s = load_doclines(all_titles, t2jnum)
 
     converted_instances = list()

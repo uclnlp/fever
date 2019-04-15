@@ -12,6 +12,8 @@ from fever_io import load_doc_lines, titles_to_jsonl_num, load_split_trainset, l
 import pickle
 from tqdm import tqdm
 from random import random, shuffle
+import constants
+
 
 class line_ir_model:
     def __init__(self,line_features=line_features):
@@ -119,7 +121,7 @@ def select_lines(docs,t2jnum,train):
                     selected[cid][yn]=ls[0]
                 sofar[l]+=1 
             tots[l]-=1
-    with open("data/line_ir_lines","w") as w:
+    with open(constants.index_dir + "/line_ir_lines","w") as w:
         for cid in selected:
             for yn in selected[cid]:
                 [t,i,l,s]=selected[cid][yn]
@@ -128,7 +130,7 @@ def select_lines(docs,t2jnum,train):
         print(l,sofar[l])
     return selected
 
-def load_selected(fname="data/line_ir_lines"):
+def load_selected(fname=(constants.index_dir + "/line_ir_lines")):
     selected=dict()
     with open(fname) as f:
         for line in tqdm(f):
@@ -157,13 +159,13 @@ if __name__ == "__main__":
 
     train, dev = load_paper_dataset()
     # train, dev = load_split_trainset(9999)
-    with open("data/edocs.bin","rb") as rb:
+    with open(constants.index_dir + "/edocs.bin","rb") as rb:
         edocs=pickle.load(rb)
-    with open("data/doc_ir_model.bin","rb") as rb:
+    with open(constants.index_dir + "/doc_ir_model.bin","rb") as rb:
         dmodel=pickle.load(rb)
     t2jnum=titles_to_jsonl_num()
     try:
-        with open("data/line_ir_model.bin","rb") as rb:
+        with open(constants.index_dir + "/line_ir_model.bin","rb") as rb:
             model=pickle.load(rb)
     except:
         try:
@@ -174,7 +176,7 @@ if __name__ == "__main__":
         model=line_ir_model()
         X,y=model.process_train(selected,train)
         model.fit(X,y)
-        with open("data/line_ir_model.bin","wb") as wb:
+        with open(constants.index_dir + "/line_ir_model.bin","wb") as wb:
             pickle.dump(model,wb)
     docs=doc_ir(dev,edocs,model=dmodel)
     lines=load_doc_lines(docs,t2jnum)

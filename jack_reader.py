@@ -5,6 +5,7 @@ from fever_io import load_doclines, read_jsonl, save_jsonl, get_evidence_sentenc
 from tqdm import tqdm
 from jack import readers
 from jack.core import QASetting
+import constants
 
 # make everything deterministic
 import random
@@ -31,8 +32,8 @@ def read_ir_result(path, n_sentences=5, prependlinum=False, prependtitle=False, 
     print("short_evidences: {} / {}".format(short_evidences_counter, len(instances)))
 
     t2jnum = titles_to_jsonl_num(
-        wikipedia_dir=abs_path("data/wiki-pages/wiki-pages/"),
-        doctitles=abs_path("data/doctitles"))
+        wikipedia_dir=constants.wiki_dir,
+        doctitles=abs_path(constants.index_dir + "/doctitles"))
     titles = list()
 
     # make list of titles

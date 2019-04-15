@@ -5,6 +5,7 @@ import os
 import sys
 from util import abs_path
 from tqdm import tqdm
+import constants
 
 def save_jsonl(dictionaries, path, print_message=True, skip_if_exists=False):
     """save jsonl file from list of dictionaries
@@ -28,7 +29,7 @@ def read_jsonl(path):
 
     return out
 
-def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki-pages/"):
+def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir=constants.wiki_dir):
     """Returns a dictionary from titles to line numbers to line text.
     Args
     docs: {cid: [(title, score),  ...], ...}
@@ -49,7 +50,7 @@ def load_doc_lines(docs=dict(),t2jnum=dict(),wikipedia_dir="data/wiki-pages/wiki
             jnums[jnum].add(point)
     for jnum in tqdm(jnums):
         points=sorted(list(jnums[jnum]))
-        fname=wikipedia_dir+"wiki-"+jnum+".jsonl"
+        fname=wikipedia_dir+"/wiki-"+jnum+".jsonl"
         with open(fname, "r") as f:
             for point in points:
                 f.seek(point,0)
@@ -78,9 +79,9 @@ def load_doclines(titles, t2jnum, filtering=True):
         print("mismatch: {} / {}".format(len(titles) - len(filtered_titles), len(titles)))
         titles = filtered_titles
 
-    return load_doc_lines({"dummy_id" : [(title, "dummy_linum") for title in titles]}, t2jnum, wikipedia_dir=abs_path("data/wiki-pages/wiki-pages/"))
+    return load_doc_lines({"dummy_id" : [(title, "dummy_linum") for title in titles]}, t2jnum, wikipedia_dir=constants.wiki_dir)
 
-def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="data/doctitles"):
+def titles_to_jsonl_num(wikipedia_dir=constants.wiki_dir, doctitles=constants.index_dir + "/doctitles"):
     """
     Returns a dictionary lookup from document titles to jsonl filenumbers and pointers.
     Saves the lookup in data/doctitles to speed up subsequent passes.
@@ -100,7 +101,7 @@ def titles_to_jsonl_num(wikipedia_dir="data/wiki-pages/wiki-pages/", doctitles="
         with open(doctitles,"w") as w:
             for i in tqdm(range(1,110)):
                 jnum="{:03d}".format(i)
-                fname=wikipedia_dir+"wiki-"+jnum+".jsonl"
+                fname=wikipedia_dir+"/wiki-"+jnum+".jsonl"
                 with open(fname) as f:
                     point=f.tell()
                     line=f.readline()
@@ -148,7 +149,7 @@ def get_evidence_sentence_list(evidences, t2l2s, prependlinum=False, prependtitl
     return [ (maybe_prepend(process_title(title), linum) + " " + t2l2s[title][linum]).strip() for title, linum in zip(titles, linums)]
 
 
-def load_wikipedia(wikipedia_dir="data/wiki-pages/wiki-pages/", howmany=99999):
+def load_wikipedia(wikipedia_dir=constants.wiki_dir, howmany=99999):
     """
     Returns a list with in total 5,416,537 wikipedia article texts as elements.
     If one doesn't want to load all articles, one can use "howmany" to specify howmany files should be
@@ -157,7 +158,7 @@ def load_wikipedia(wikipedia_dir="data/wiki-pages/wiki-pages/", howmany=99999):
     all_texts = []
     print("loading wikipedia...")
     for filename in tqdm(sorted(os.listdir(wikipedia_dir))[:howmany]):
-        with open(wikipedia_dir+filename, 'r') as openfile:
+        with open(wikipedia_dir+ "/" + filename, 'r') as openfile:
             some_texts = [json.loads(line)['text'] for line in openfile.readlines()]
         all_texts.extend(some_texts)
     print("Loaded", len(all_texts), "articles. Size (MB):", round(sys.getsizeof(all_texts)/1024/1024, 3))
@@ -215,7 +216,7 @@ def load_split_trainset(dev_size:int):
     return train_set, preliminary_dev_set
 
 
-def load_fever_train(path="data/train.jsonl", howmany=999999):
+def load_fever_train(path=constants.fever_common + "/fever-data/train.jsonl", howmany=999999):
     """
     Reads the Fever Training set, returns list of examples.
     howmany: how many examples to load. Useful for debugging.
@@ -228,7 +229,7 @@ def load_fever_train(path="data/train.jsonl", howmany=999999):
                 break
     return data
 
-def load_paper_dataset(train=abs_path("data/train.jsonl"), dev=abs_path("data/dev.jsonl")):
+def load_paper_dataset(train=constants.fever_common + "/fever-data/train.jsonl", dev=constants.fever_common + "/fever-data/dev.jsonl")):
     """Reads the Fever train/dev set used on the paper.
     """
     train_ds = load_fever_train(path=train, howmany=9999999999)

@@ -5,6 +5,7 @@ from collections import Counter
 from nltk import word_tokenize, sent_tokenize
 import pickle
 from tqdm import tqdm
+import constants
 
 stop=load_stoplist()
 
@@ -139,13 +140,14 @@ def line_ir(data=list(),docs=dict(),lines=dict(),best=5,model=None):
 
 
 if __name__ == "__main__":
+    # TODO: fix these paths
     t2jnum=titles_to_jsonl_num()
     try:
-        with open("data/edocs.bin","rb") as rb:
+        with open(constants.index_dir + "/edocs.bin","rb") as rb:
             edocs=pickle.load(rb)
     except:
         edocs=title_edict(t2jnum)
-        with open("data/edocs.bin","wb") as wb:
+        with open(constants.index_dir + "/edocs.bin","wb") as wb:
             pickle.dump(edocs,wb)
     train, dev = load_split_trainset(9999)
     docs=doc_ir(dev,edocs)

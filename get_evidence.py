@@ -8,16 +8,17 @@ from util import edict, pdict, normalize_title, load_stoplist
 from fever_io import load_doc_lines, titles_to_jsonl_num, load_split_trainset, load_paper_dataset
 import pickle
 import json
+import constants
 
 
 
 def get_evidence(data=dict(), n_docs=5, n_sents=5):
-    with open("data/edocs.bin","rb") as rb:
+    with open(constants.index_dir + "/edocs.bin","rb") as rb:
         edocs=pickle.load(rb)
-    with open("data/doc_ir_model.bin","rb") as rb:
+    with open(constants.index_dir + "/doc_ir_model.bin","rb") as rb:
         dmodel=pickle.load(rb)
     t2jnum=titles_to_jsonl_num()
-    with open("data/line_ir_model.bin","rb") as rb:
+    with open(constants.index_dir + "/line_ir_model.bin","rb") as rb:
         lmodel=pickle.load(rb)
     docs=doc_ir(data,edocs,model=dmodel,best=n_docs)
     lines=load_doc_lines(docs,t2jnum)

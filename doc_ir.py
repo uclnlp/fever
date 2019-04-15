@@ -5,6 +5,7 @@ from collections import Counter
 from fever_io import titles_to_jsonl_num, load_split_trainset
 import pickle
 from tqdm import tqdm
+import constants
 import numpy as np
 
 
@@ -160,13 +161,14 @@ def doc_ir(data=list(),edocs=edict(),best=5,model=None):
 
 
 if __name__ == "__main__":
+    # TODO: fix these paths
     try:
-        with open("data/edocs.bin","rb") as rb:
+        with open(constants.index_dir + "/edocs.bin","rb") as rb:
             edocs=pickle.load(rb)
     except:
         t2jnum=titles_to_jsonl_num()
         edocs=title_edict(t2jnum)
-        with open("data/edocs.bin","wb") as wb:
+        with open(constants.index_dir + "/edocs.bin","wb") as wb:
             pickle.dump(edocs,wb)
     train, dev = load_split_trainset(9999)
     docs=doc_ir(dev,edocs)

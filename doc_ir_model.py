@@ -11,6 +11,8 @@ from fever_io import titles_to_jsonl_num, load_split_trainset, load_paper_datase
 import pickle
 from tqdm import tqdm
 from random import random, shuffle
+import constants
+
 
 
 class doc_ir_model:
@@ -73,14 +75,14 @@ def select_docs(train):
     tots={"SUPPORTS": 0, "REFUTES": 0}
     sofar={"SUPPORTS": 0, "REFUTES": 0}
     try:
-        with open("data/edocs.bin","rb") as rb:
-            if os.path.getsize("data/edocs.bin") < 100:
+        with open(constants.index_dir + "/edocs.bin","rb") as rb:
+            if os.path.getsize(constants.index_dir + "edocs.bin") < 100:
                 raise RuntimeError("Size of edocs.bin is too small. It may be an empty file.")
             edocs=pickle.load(rb)
     except:
         t2jnum=titles_to_jsonl_num()
         edocs=title_edict(t2jnum)
-        with open("data/edocs.bin","wb") as wb:
+        with open(constants.index_dir + "/edocs.bin","wb") as wb:
             pickle.dump(edocs,wb)
     examples=Counter()
     id2titles=dict()
@@ -146,7 +148,7 @@ def select_docs(train):
                     break
         if yn==1:
             tots[l]-=1
-    with open("data/doc_ir_docs","w") as w:
+    with open(constants.index_dir + "doc_ir_docs","w") as w:
         for cid in selected:
             for yn in selected[cid]:
                 [t,p,s]=selected[cid][yn]
@@ -156,7 +158,7 @@ def select_docs(train):
     return selected
 
 
-def load_selected(fname="data/doc_ir_docs"):
+def load_selected(fname=(constants.index_dir + "/doc_ir_docs")):
     selected=dict()
     with open(fname) as f:
         for line in tqdm(f):
@@ -180,7 +182,7 @@ if __name__ == "__main__":
     train, dev = load_paper_dataset()
     # train, dev = load_split_trainset(9999)
     try:
-        with open("data/doc_ir_model.bin","rb") as rb:
+        with open(constants.index_dir + "/doc_ir_model.bin","rb") as rb:
             model=pickle.load(rb)
     except:
         try:
@@ -190,17 +192,17 @@ if __name__ == "__main__":
         model=doc_ir_model()
         X,y=model.process_train(selected,train)
         model.fit(X,y)
-        with open("data/doc_ir_model.bin","wb") as wb:
-            if os.path.getsize("data/edocs.bin") < 100:
+        with open(constants.index_dir + "/doc_ir_model.bin","wb") as wb:
+            if os.path.getsize(constants.index_dir + "/edocs.bin") < 100:
                 raise RuntimeError("Size of edocs.bin is too small. It may be an empty file.")
             pickle.dump(model,wb)
     try:
-        with open("data/edocs.bin","rb") as rb:
+        with open(constants.index_dir + "/edocs.bin","rb") as rb:
             edocs=pickle.load(rb)
     except:
         t2jnum=titles_to_jsonl_num()
         edocs=title_edict(t2jnum)
-        with open("data/edocs.bin","wb") as wb:
+        with open(constants.index_dir + "/edocs.bin","wb") as wb:
             pickle.dump(edocs,wb)
     print(len(model.f2v))
     docs=doc_ir(dev,edocs,best=args.best,model=model)
