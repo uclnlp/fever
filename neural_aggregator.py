@@ -231,7 +231,7 @@ def simple_test(dev_dataloader):
     # print("heuristic:", heuristic_hit / len(dev_dataloader.dataset.instances))
 
 
-def predict(test_dataloader):
+def predict(test_dataloader, net):
     results = list()
     with torch.no_grad():
         for i, (labels, input) in enumerate(test_dataloader):
@@ -273,6 +273,8 @@ if __name__ == "__main__":
         help=
         "<required> specify each width of layers (currently, should be 3 layers)"
     )
+    parser.add_argument("--save")
+    parser.add_argument("--load")
     args = parser.parse_args()
 
     # data: prepend_title_linum
@@ -298,48 +300,59 @@ if __name__ == "__main__":
 
         net = Net(layers=[int(width) for width in args.layers])
         print("----Neural Aggregator Architecture----")
-
         print(net)
+        if args.load is not None:
+            print('loading model from {}'.format(args.load))
+            net.load_state_dict(torch.load(args.load))
+            net.eval()
 
-        class_weights = [1.0, 1.0, 1.0]
-        if 1:   # properly set class weights
-            label2freq = Counter((instance["label"] for instance in train_set.instances))
-            class_weights = [0, 0, 0]
-            total = sum(label2freq.values())
-            for label in label2freq:
-                class_weights[ label2idx[label] ] = 1.0/(label2freq[label])*total
-            print(label2freq)
-            print("Class Weights:", class_weights)
+        else:
+            # training
 
-        criterion = nn.CrossEntropyLoss(weight=torch.tensor(class_weights))
-        #criterion = nn.CrossEntropyLoss()
-        #optimizer = optim.Adam(net.parameters(), weight_decay=args.l2/2.0)
-        optimizer = optim.Adam(net.parameters())
-        dev_results_throughout_training = []
-        for epoch in range(args.epochs):  # loop over the dataset multiple times
-            print("epoch:", epoch)
-            running_loss = 0.0
+            class_weights = [1.0, 1.0, 1.0]
+            if 1:   # properly set class weights
+                label2freq = Counter((instance["label"] for instance in train_set.instances))
+                class_weights = [0, 0, 0]
+                total = sum(label2freq.values())
+                for label in label2freq:
+                    class_weights[ label2idx[label] ] = 1.0/(label2freq[label])*total
+                print(label2freq)
+                print("Class Weights:", class_weights)
 
-            for i, (labels, inputs) in enumerate(train_dataloader):
-                # zero the parameter gradients
-                optimizer.zero_grad()
+            criterion = nn.CrossEntropyLoss(weight=torch.tensor(class_weights))
+            #criterion = nn.CrossEntropyLoss()
+            #optimizer = optim.Adam(net.parameters(), weight_decay=args.l2/2.0)
+            optimizer = optim.Adam(net.parameters())
+            dev_results_throughout_training = []
+            for epoch in range(args.epochs):  # loop over the dataset multiple times
+                print("epoch:", epoch)
+                running_loss = 0.0
 
-                # forward + backward + optimize
-                outputs = net(inputs.float())
-                loss = criterion(outputs, labels)
-                loss.backward()
-                optimizer.step()
+                for i, (labels, inputs) in enumerate(train_dataloader):
+                    # zero the parameter gradients
+                    optimizer.zero_grad()
 
-                # print statistics
-                running_loss += loss.item()
-                if i % 1000 == 999:  # print every 1000 mini-batches
-                    print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1,
-                                                    running_loss / 1000))
-                    running_loss = 0.0
-            # monitor dev loss throughout training
-            dev_results_throughout_training.append(simple_test(dev_dataloader))
+                    # forward + backward + optimize
+                    outputs = net(inputs.float())
+                    loss = criterion(outputs, labels)
+                    loss.backward()
+                    optimizer.step()
 
-        print('Finished Training')
+                    # print statistics
+                    running_loss += loss.item()
+                    if i % 1000 == 999:  # print every 1000 mini-batches
+                        print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1,
+                                                        running_loss / 1000))
+                        running_loss = 0.0
+                # monitor dev loss throughout training
+                dev_results_throughout_training.append(simple_test(dev_dataloader))
+
+            print('Finished Training')
+
+            # save if specified
+            if args.save is not None:
+                print('saving model at {}'.format(args.save))
+                torch.save(net.state_dict(), args.save)
 
         print("dev set:")
         performance = simple_test(dev_dataloader)
@@ -350,7 +363,7 @@ if __name__ == "__main__":
         print(v)
 
 
-    dev_results = predict(dev_dataloader)
-    test_results = predict(test_dataloader)
+    dev_results = predict(dev_dataloader, net)
+    test_results = predict(test_dataloader, net)
     save_jsonl(dev_results, args.predicted_labels)
     save_jsonl(test_results, args.test_predicted_labels)
