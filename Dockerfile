@@ -64,4 +64,4 @@ ENV FLASK_APP app:hexaf_fever
 
 #ENTRYPOINT ["/bin/bash","-c"]
 # CMD ["waitress-serve", "--host=0.0.0.0", "--port=5000", "--call", "app:hexaf_fever"]
-CMD ["python" "waitress_san.py"]
+CMD ["python" "src/waitress_san.py"]
