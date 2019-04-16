@@ -91,7 +91,7 @@ def get_predictor(reader, aggregator_path):
     def get_predictions(data):
         claim=data["claim"]
         evidence_list=[ev["element"]["text"] for ev in data["evidences"]]
-        claim_pred=score(claim, evidence_list)
+        claim_pred=score(reader, claim, evidence_list)
         for i, (ev,labs) in enumerate(zip(claim_pred["scores"],claim_pred["predicted_labels"])):
             maxscore=0
             maxidx=-1

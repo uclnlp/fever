@@ -21,10 +21,6 @@ from fever_io import titles_to_jsonl_num
 from doc_ir_model import doc_ir_model
 from line_ir_model import line_ir_model
 
-os.chdir(constants.jack_dir)
-hexaf_reader = readers.reader_from_file(constants.results_dir + "/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission/reader", dropout=0.0)
-os.chdir(constants.main_dir)
-
 
 def convert_label(label, inverse=False):
     fever2snli = {
