@@ -12,7 +12,6 @@ git clone https://github.com/takuma-ynd/jack.git
 # install requirements and Glove data
 cd jack
 python -m pip install -e .[tf]
-# temporary disabled
 bash ./data/GloVe/download.sh
 
 popd > /dev/null
