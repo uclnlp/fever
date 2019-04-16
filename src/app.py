@@ -112,10 +112,6 @@ def hexaf_fever():
         },
     })
 
-    logger.info("My sample FEVER application")
-    config = json.load(open(os.getenv("CONFIG_PATH","configs/predict_docker.json")))
-
-
     # load fever data
     logger.info("Load FEVER Document database")
     with open(constants.index_dir + "/edocs.bin","rb") as rb:
@@ -127,8 +123,9 @@ def hexaf_fever():
         lmodel=pickle.load(rb)
 
     retrieval_method = get_retrieval_method(dmodel, lmodel, edocs, t2jnum)
-
+    os.chdir(constants.jack_dir)
     hexaf_reader = readers.reader_from_file(constants.results_dir + "/base+sampling2+evscores+rerank+train+dev+test-shared_test.ver0727_newaggr_submission/reader", dropout=0.0)
+    os.chdir(constants.fever_dir)
 
     aggregator_path = constants.index_dir + "/aggregator.pt"
     predictor = get_predictor(hexaf_reader, aggregator_path)
