@@ -13,7 +13,7 @@ git clone https://github.com/takuma-ynd/jack.git
 cd jack
 python -m pip install -e .[tf]
 # temporary disabled
-# bash ./data/GloVe/download.sh
+bash ./data/GloVe/download.sh
 
 popd > /dev/null
 
