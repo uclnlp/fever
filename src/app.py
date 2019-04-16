@@ -45,16 +45,6 @@ def predict(reader, all_settings, batch_size):
         preds_list.extend(reader(batch_settings))
     return preds_list
 
-def score(claim, evidence_list):
-    settings = [QASetting(question=claim, support=[evidence]) for evidence in evidence_list]
-    preds_list = predict(hexaf_reader, settings, 32)
-    pred_labels_list = [[pred.text for pred in preds_instance] for preds_instance in preds_list]
-    scores = [[float(pred.score) for pred in preds_instance] for preds_instance in preds_list]
-    dic = {
-        "scores": scores,
-        "predicted_labels": [[convert_label(pred_label, inverse=True) for pred_label in pred_labels] for pred_labels in pred_labels_list]
-        }
-    return dic
 
 class Net(nn.Module):
     def __init__(self, layers=[15, 10, 5]):
@@ -88,7 +78,8 @@ def predict_single(predictor, retrieval_method, instance):
     predicted_label = nli_result["global_fc"]
 
     predicted_evidence = []
-    for i in range(5):
+    n_evidences = min(10, len(nli_result["evidences"]))
+    for i in range(n_evidences):
         title = nli_result["evidences"][i]["title"]
         linum = nli_result["evidences"][i]["linum"]
         predicted_evidence.append((title, linum))
